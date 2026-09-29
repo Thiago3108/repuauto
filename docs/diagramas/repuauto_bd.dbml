@@ -1,0 +1,211 @@
+// RepuAuto - Modelo de base de datos, versión 2 (PostgreSQL)
+// UDS: Santiago Martínez, Jhon Sotelo, Jairo Cardozo, David Muñoz
+// Pegar en https://dbdiagram.io para ver el diagrama y exportarlo.
+
+Project RepuAuto {
+  database_type: 'PostgreSQL'
+  Note: '''
+  Versión 2 del modelo, con las decisiones D1 a D6 aprobadas por el equipo.
+  Convención: identificadores en minúscula con guion bajo (snake_case), sin tildes ni ñ.
+  Dinero en pesos colombianos: numeric(12,2).
+  '''
+}
+
+// ---------- Cuentas (US-01) ----------
+
+Table rol {
+  id_rol integer [pk, increment]
+  nombre varchar(30) [not null, unique, note: 'cliente, vendedor, administrador']
+  Note: 'Se carga con el script de datos iniciales. Es tabla y no ENUM para poder cambiar valores sin migraciones manuales.'
+}
+
+Table usuario {
+  id_usuario integer [pk, increment]
+  correo varchar(120) [not null, unique]
+  contrasena_hash varchar(255) [not null, note: 'Nunca la contraseña en texto plano: solo el hash']
+  nombre varchar(100) [not null, note: 'Nombre para mostrar en la aplicación']
+  id_rol integer [not null, ref: > rol.id_rol]
+  activo boolean [not null, default: true, note: 'Se desactiva en vez de borrarse: sus ventas siguen apuntando a él']
+  creado_en timestamp [not null, default: `now()`]
+  Note: 'Cuenta para iniciar sesión (los tres roles). El primer administrador lo crea el script de datos iniciales, el administrador crea a los vendedores y el cliente se registra solo.'
+}
+
+// ---------- Clientes (US-02) ----------
+
+Table cliente {
+  id_cliente integer [pk, increment]
+  cedula varchar(20) [not null, unique]
+  nombres varchar(60) [not null]
+  apellidos varchar(60) [not null]
+  telefono varchar(20)
+  id_usuario integer [unique, ref: - usuario.id_usuario, note: 'Cuenta enlazada. NULL = cliente de mostrador sin cuenta']
+  creado_en timestamp [not null, default: `now()`]
+  Note: 'La persona, separada de su cuenta. El vendedor enlaza la cuenta verificando la cédula en persona, para que nadie vea el historial de otro solo con conocer su cédula.'
+}
+
+// ---------- Vehículos (US-03) ----------
+
+Table marca_vehiculo {
+  id_marca_vehiculo integer [pk, increment]
+  nombre varchar(60) [not null, unique, note: 'Ej.: Toyota, Chevrolet']
+}
+
+Table vehiculo {
+  id_vehiculo integer [pk, increment]
+  id_marca_vehiculo integer [not null, ref: > marca_vehiculo.id_marca_vehiculo]
+  linea varchar(60) [not null, note: 'Ej.: Corolla']
+  referencia varchar(60) [note: 'Versión o motor, opcional. Ej.: XEi 1.8']
+  anio integer [not null, note: 'Año del vehículo (en la licencia de tránsito aparece como "modelo")']
+}
+
+Table repuesto_vehiculo {
+  id_repuesto integer [not null]
+  id_vehiculo integer [not null]
+  indexes {
+    (id_repuesto, id_vehiculo) [pk]
+  }
+  Note: 'Compatibilidad: qué repuestos le sirven a qué vehículo. Alimenta el filtro por vehículo del catálogo (US-05).'
+}
+
+Ref: repuesto_vehiculo.id_repuesto > repuesto.id_repuesto [delete: cascade]
+Ref: repuesto_vehiculo.id_vehiculo > vehiculo.id_vehiculo [delete: cascade]
+
+// ---------- Repuestos e inventario (US-04 y US-05) ----------
+
+Table categoria {
+  id_categoria integer [pk, increment]
+  nombre varchar(60) [not null, unique, note: 'Ej.: Frenos, Filtros, Suspensión']
+}
+
+Table marca_repuesto {
+  id_marca_repuesto integer [pk, increment]
+  nombre varchar(60) [not null, unique, note: 'Ej.: Bosch, NGK']
+  Note: 'Separada de marca_vehiculo para no mezclar fabricantes de repuestos con marcas de carros.'
+}
+
+Table repuesto {
+  id_repuesto integer [pk, increment]
+  codigo varchar(30) [not null, unique, note: 'Referencia del fabricante o código interno; sirve para buscarlo en mostrador']
+  nombre varchar(100) [not null]
+  descripcion text
+  precio_venta numeric(12,2) [not null]
+  stock_actual integer [not null, default: 0]
+  stock_minimo integer [not null, default: 0, note: 'Por debajo de este valor se genera la alerta de stock bajo']
+  id_categoria integer [not null, ref: > categoria.id_categoria]
+  id_marca_repuesto integer [not null, ref: > marca_repuesto.id_marca_repuesto]
+  activo boolean [not null, default: true, note: 'Se desactiva en vez de borrarse: tiene ventas asociadas']
+  checks {
+    `precio_venta >= 0` [name: 'chk_repuesto_precio']
+    `stock_actual >= 0` [name: 'chk_repuesto_stock']
+    `stock_minimo >= 0` [name: 'chk_repuesto_stock_minimo']
+  }
+}
+
+// ---------- Ventas (US-06, US-07 y US-08) ----------
+
+Table estado_venta {
+  id_estado_venta integer [pk, increment]
+  nombre varchar(30) [not null, unique, note: 'Pendiente, Completada, Cancelada']
+  Note: 'El stock se descuenta al registrar la venta (el repuesto queda apartado) y se devuelve si la venta se cancela.'
+}
+
+Table venta {
+  id_venta integer [pk, increment]
+  fecha timestamp [not null, default: `now()`]
+  id_cliente integer [not null, ref: > cliente.id_cliente]
+  id_vendedor integer [not null, ref: > usuario.id_usuario, note: 'Usuario (vendedor o administrador) que registró la venta']
+  id_estado_venta integer [not null, ref: > estado_venta.id_estado_venta]
+  metodo_pago varchar(30) [not null]
+  total numeric(12,2) [not null, note: 'Suma de los detalles; se guarda para agilizar los reportes']
+  checks {
+    `metodo_pago in ('Efectivo', 'Tarjeta', 'Transferencia')` [name: 'chk_venta_metodo_pago']
+    `total >= 0` [name: 'chk_venta_total']
+  }
+}
+
+Table detalle_venta {
+  id_detalle_venta integer [pk, increment]
+  id_venta integer [not null, ref: > venta.id_venta]
+  id_repuesto integer [not null, ref: > repuesto.id_repuesto]
+  cantidad integer [not null]
+  precio_unitario numeric(12,2) [not null, note: 'Precio al momento de la venta, copiado de repuesto.precio_venta, para que el histórico no cambie si sube el precio']
+  indexes {
+    (id_venta, id_repuesto) [unique, note: 'Un repuesto aparece una sola vez por venta; si llevan más, sube la cantidad']
+  }
+  checks {
+    `cantidad > 0` [name: 'chk_detalle_venta_cantidad']
+    `precio_unitario >= 0` [name: 'chk_detalle_venta_precio']
+  }
+}
+
+// ---------- Compras a proveedores (D2, sprint 3) ----------
+
+Table proveedor {
+  id_proveedor integer [pk, increment]
+  nit varchar(20) [not null, unique]
+  nombre varchar(100) [not null]
+  telefono varchar(20)
+  correo varchar(120)
+}
+
+Table compra {
+  id_compra integer [pk, increment]
+  fecha timestamp [not null, default: `now()`]
+  id_proveedor integer [not null, ref: > proveedor.id_proveedor]
+  id_usuario integer [not null, ref: > usuario.id_usuario, note: 'Administrador que registró la compra']
+  total numeric(12,2) [not null]
+  checks {
+    `total >= 0` [name: 'chk_compra_total']
+  }
+  Note: 'Versión mínima (D2): registrar una compra suma las cantidades al stock.'
+}
+
+Table detalle_compra {
+  id_detalle_compra integer [pk, increment]
+  id_compra integer [not null, ref: > compra.id_compra]
+  id_repuesto integer [not null, ref: > repuesto.id_repuesto]
+  cantidad integer [not null]
+  costo_unitario numeric(12,2) [not null]
+  indexes {
+    (id_compra, id_repuesto) [unique]
+  }
+  checks {
+    `cantidad > 0` [name: 'chk_detalle_compra_cantidad']
+    `costo_unitario >= 0` [name: 'chk_detalle_compra_costo']
+  }
+}
+
+// ---------- Grupos = módulos del repositorio ----------
+
+TableGroup cuentas {
+  rol
+  usuario
+}
+
+TableGroup clientes {
+  cliente
+}
+
+TableGroup vehiculos {
+  marca_vehiculo
+  vehiculo
+  repuesto_vehiculo
+}
+
+TableGroup repuestos {
+  categoria
+  marca_repuesto
+  repuesto
+}
+
+TableGroup ventas {
+  estado_venta
+  venta
+  detalle_venta
+}
+
+TableGroup compras {
+  proveedor
+  compra
+  detalle_compra
+}

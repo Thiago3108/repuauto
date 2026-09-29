@@ -1,0 +1,88 @@
+@startuml casos_de_uso
+' RepuAuto - Diagrama de casos de uso general (versión 2)
+' Actores según la matriz de roles aprobada (D3).
+' Los códigos US-xx enlazan cada caso de uso con su historia del backlog.
+
+skinparam dpi 150
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 12
+skinparam ArrowColor #3C4A5C
+skinparam actor {
+  BorderColor #2F5D8A
+  BackgroundColor #FFFFFF
+}
+skinparam usecase {
+  BackgroundColor #F2F6FB
+  BorderColor #2F5D8A
+}
+skinparam rectangle {
+  BorderColor #2F5D8A
+  FontStyle bold
+}
+skinparam note {
+  BackgroundColor #FFF8E1
+  BorderColor #C9A227
+}
+
+left to right direction
+
+title Diagrama de casos de uso general - RepuAuto
+
+actor "//Usuario//" as Usuario
+actor Cliente
+actor Vendedor
+actor Administrador
+
+Usuario <|-- Cliente
+Usuario <|-- Vendedor
+Vendedor <|-- Administrador
+
+rectangle "Sistema RepuAuto" {
+  usecase "Iniciar sesión\n<size:10>US-01</size>" as UC_Login
+  usecase "Consultar catálogo\n<size:10>US-05</size>" as UC_Catalogo
+  usecase "Filtrar por vehículo\n<size:10>US-05</size>" as UC_Filtro
+
+  usecase "Registrarse\n<size:10>US-01</size>" as UC_Registro
+  usecase "Consultar estado e\nhistorial de compras\n<size:10>US-08</size>" as UC_Historial
+
+  usecase "Gestionar clientes\n<size:10>US-02</size>" as UC_Clientes
+  usecase "Registrar venta\n<size:10>US-06</size>" as UC_Venta
+  usecase "Verificar stock\n<size:10>US-06</size>" as UC_VerificarStock
+  usecase "Completar o\ncancelar venta\n<size:10>US-06</size>" as UC_EstadoVenta
+  usecase "Consultar stock\ny alertas\n<size:10>US-04</size>" as UC_Stock
+
+  usecase "Gestionar repuestos\ny ajustar stock\n<size:10>US-04</size>" as UC_Repuestos
+  usecase "Gestionar vehículos\ny compatibilidades\n<size:10>US-03</size>" as UC_Vehiculos
+  usecase "Generar reportes\n<size:10>US-07</size>" as UC_Reportes
+  usecase "Crear cuentas\nde vendedor\n<size:10>US-01</size>" as UC_Cuentas
+  usecase "Registrar compras\na proveedores\n<size:10>US-09</size>" as UC_Compras
+}
+
+' Asociaciones (líneas simples, sin flecha)
+Usuario -- UC_Login
+Usuario -- UC_Catalogo
+UC_Catalogo <.. UC_Filtro : <<extend>>
+
+Cliente -- UC_Registro
+Cliente -- UC_Historial
+
+Vendedor -- UC_Clientes
+Vendedor -- UC_Venta
+Vendedor -- UC_EstadoVenta
+Vendedor -- UC_Stock
+UC_Venta ..> UC_VerificarStock : <<include>>
+
+Administrador -- UC_Repuestos
+Administrador -- UC_Vehiculos
+Administrador -- UC_Reportes
+Administrador -- UC_Cuentas
+Administrador -- UC_Compras
+
+note bottom of Administrador
+  Hereda todos los casos
+  de uso del vendedor.
+end note
+
+footer Los códigos US-xx corresponden a las historias de usuario del backlog.
+@enduml

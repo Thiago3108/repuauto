@@ -1,0 +1,73 @@
+@startwbs vistas_usuario
+' RepuAuto - Vistas de usuario (versión 2)
+' Agrupadas según la matriz de roles aprobada (D3). Los códigos UI-xx se usan en la
+' columna Dependencia de las historias de usuario para trazar qué historia usa qué pantalla.
+
+skinparam dpi 150
+<style>
+wbsDiagram {
+  FontName Arial
+  FontSize 12
+  LineColor #3C4A5C
+  node {
+    BackgroundColor #F2F6FB
+    LineColor #2F5D8A
+    Padding 8
+    RoundCorner 12
+  }
+  :depth(0) {
+    BackgroundColor #2F5D8A
+    FontColor #FFFFFF
+    FontStyle bold
+  }
+  :depth(1) {
+    BackgroundColor #DCE6F2
+    FontStyle bold
+  }
+}
+</style>
+
+title Vistas de usuario - RepuAuto
+
+* RepuAuto
+** Sin sesión
+***:UI-01 Iniciar sesión
+<size:10>US-01</size>;
+***:UI-02 Registro de cliente
+<size:10>US-01</size>;
+** Todos los roles
+***:UI-03 Inicio con accesos
+según el rol
+<size:10>US-01</size>;
+***:UI-04 Catálogo con filtro
+por vehículo
+<size:10>US-05</size>;
+** Cliente
+***:UI-05 Mis compras:
+estado e historial
+<size:10>US-08</size>;
+** Vendedor y administrador
+***:UI-06 Registro de venta
+<size:10>US-06</size>;
+***:UI-07 Ventas registradas:
+completar o cancelar
+<size:10>US-06</size>;
+***:UI-08 Gestión de clientes
+<size:10>US-02</size>;
+***:UI-09 Stock y alertas
+<size:10>US-04</size>;
+** Solo administrador
+***:UI-10 Gestión de repuestos
+y ajuste de stock
+<size:10>US-04</size>;
+***:UI-11 Gestión de vehículos
+y compatibilidades
+<size:10>US-03</size>;
+***:UI-12 Reportes: ventas,
+inventario y clientes
+<size:10>US-07</size>;
+***:UI-13 Cuentas de vendedor
+<size:10>US-01</size>;
+***:UI-14 Proveedores y compras
+<size:10>US-09</size>;
+@endwbs

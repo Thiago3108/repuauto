@@ -1,0 +1,69 @@
+@startuml actividades_registrar_venta
+' RepuAuto - Diagrama de actividades: Registrar venta (US-06), versión 2
+' Corrige el ciclo sin salida del flujo "sin stock" e incluye al cliente de mostrador (D3)
+' y los estados de la venta (D4).
+
+skinparam dpi 150
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 12
+skinparam ArrowColor #3C4A5C
+skinparam activity {
+  BackgroundColor #F2F6FB
+  BorderColor #2F5D8A
+  DiamondBackgroundColor #FFFFFF
+  DiamondBorderColor #2F5D8A
+}
+skinparam swimlane {
+  BorderColor #2F5D8A
+  TitleFontStyle bold
+}
+skinparam note {
+  BackgroundColor #FFF8E1
+  BorderColor #C9A227
+}
+
+title Diagrama de actividades: Registrar venta (US-06)
+
+|Cliente|
+start
+:Solicitar repuesto;
+|Vendedor|
+:Identificar al cliente por cédula;
+if (¿Está registrado?) then (no)
+  :Registrar cliente de mostrador;
+else (sí)
+endif
+repeat
+  :Buscar repuesto
+  (código, nombre o vehículo);
+  |Sistema|
+  :Mostrar opciones compatibles
+  con precio y stock;
+  |Vendedor|
+  if (¿El cliente acepta
+  alguna opción?) then (no)
+    |Cliente|
+    :Retirarse sin comprar;
+    stop
+  else (sí)
+    |Vendedor|
+    :Registrar venta
+    (repuestos, cantidades
+    y método de pago);
+  endif
+  |Sistema|
+backward :Informar que no hay
+stock suficiente;
+repeat while (¿Hay stock suficiente?) is (no) not (sí)
+:Guardar venta y descontar stock
+en una sola transacción;
+note right
+  Queda **Completada** si el cliente pagó
+  y recibió el repuesto; si no, **Pendiente**.
+  Si luego se cancela, el stock se devuelve.
+end note
+|Cliente|
+:Recibir confirmación;
+stop
+@enduml
