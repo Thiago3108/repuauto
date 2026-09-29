@@ -13,3 +13,5 @@ instance/
 .idea/
 Thumbs.db
 .DS_Store
+# R
+.Rhistory
