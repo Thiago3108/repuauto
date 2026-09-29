@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+
+{% block titulo %}{{ modulo }} · RepuAuto{% endblock %}
+
+{% block content %}
+<h1 class="h3">{{ modulo }}</h1>
+<div class="alert alert-secondary mt-3">
+  Este módulo se construye en <strong>{{ historia }}</strong>. Vistas: {{ vistas }}.
+</div>
+{% endblock %}

@@ -1,0 +1,59 @@
+# Integración continua: en cada pull request y en cada cambio a main corre las
+# verificaciones. Si algo falla, el pull request no se puede fusionar.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  pruebas:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        # Igualen la versión mayor con la que usa el grupo.
+        image: postgres:18
+        env:
+          POSTGRES_USER: repuauto
+          POSTGRES_PASSWORD: repuauto
+          POSTGRES_DB: repuauto
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      SECRET_KEY: clave-de-ci
+      DATABASE_URL: postgresql+psycopg://repuauto:repuauto@localhost:5432/repuauto
+      TEST_DATABASE_URL: postgresql+psycopg://repuauto:repuauto@localhost:5432/repuauto_test
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Instalar dependencias
+        run: pip install -r requirements.txt
+
+      - name: Crear la base de pruebas
+        run: PGPASSWORD=repuauto psql -h localhost -U repuauto -d repuauto -c "CREATE DATABASE repuauto_test"
+
+      - name: Una sola cabeza de migraciones
+        run: |
+          cabezas=$(flask db heads | grep -c "(head)" || true)
+          echo "Cabezas de migración: $cabezas"
+          test "$cabezas" -le 1
+
+      - name: Las migraciones se aplican
+        run: flask db upgrade
+
+      - name: Pruebas
+        run: pytest -v
