@@ -1,4 +1,7 @@
-"""Pruebas del esqueleto: la app arranca, cada módulo responde y hay base de datos."""
+"""Pruebas del esqueleto: la app arranca, cada módulo responde y hay base de datos.
+
+El administrador ve todos los módulos, por eso las pruebas entran con esa cuenta.
+"""
 import pytest
 from sqlalchemy import text
 
@@ -8,14 +11,16 @@ from app.menu import MENU
 MODULOS = ["auth", "clientes", "vehiculos", "repuestos", "catalogo", "ventas", "reportes", "compras"]
 
 
-def test_inicio_responde(client):
+def test_inicio_responde(client, crear_cuenta, iniciar_sesion):
+    iniciar_sesion(crear_cuenta("administrador"))
     respuesta = client.get("/")
     assert respuesta.status_code == 200
     assert "RepuAuto" in respuesta.get_data(as_text=True)
 
 
 @pytest.mark.parametrize("modulo", MODULOS)
-def test_cada_modulo_responde(client, modulo):
+def test_cada_modulo_responde(client, crear_cuenta, iniciar_sesion, modulo):
+    iniciar_sesion(crear_cuenta("administrador"))
     assert client.get(f"/{modulo}/").status_code == 200
 
 

@@ -1,8 +1,9 @@
 """Menú lateral de RepuAuto, según la matriz de roles aprobada (decisión D3).
 
 Cada entrada dice a qué vista lleva, qué historia la construye y qué roles la ven.
-Por ahora el menú muestra todo: el filtrado por rol lo activa US-01 (control de acceso
-por rol) usando el campo "roles". US-08 agregará "Mis compras" para el cliente.
+Cada usuario ve solo las entradas de su rol (menu_para). Ocultar una opción no protege
+la vista: cada módulo la protege con @rol_requerido (app/auth/decoradores.py).
+US-08 agregará "Mis compras" para el cliente.
 """
 
 TODOS = ("cliente", "vendedor", "administrador")
@@ -19,3 +20,10 @@ MENU = [
     {"texto": "Proveedores y compras", "endpoint": "compras.index", "historia": "US-09", "roles": ADMIN},
     {"texto": "Cuentas y acceso", "endpoint": "auth.index", "historia": "US-01", "roles": ADMIN},
 ]
+
+
+def menu_para(usuario):
+    """Las entradas del menú que puede ver el usuario, según su rol."""
+    if not usuario.is_authenticated:
+        return []
+    return [item for item in MENU if usuario.tiene_rol(*item["roles"])]
