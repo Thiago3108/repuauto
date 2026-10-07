@@ -6,9 +6,10 @@ Es el "controlador principal" del patrón MVC: recibe la petición y la reparte 
 los blueprints de cada módulo.
 """
 from flask import Flask, render_template
+from flask_login import current_user
 
-from app.extensions import csrf, db, migrate
-from app.menu import MENU
+from app.extensions import csrf, db, login_manager, migrate
+from app.menu import menu_para
 from config import Config
 
 VARIABLES_REQUERIDAS = {
@@ -25,6 +26,7 @@ def create_app(config_class=Config):
     db.init_app(app)
     migrate.init_app(app, db)
     csrf.init_app(app)
+    login_manager.init_app(app)
 
     # Importa los modelos para que Flask-Migrate los vea al generar migraciones.
     from app import models  # noqa: F401
@@ -51,7 +53,11 @@ def create_app(config_class=Config):
 
     @app.context_processor
     def menu_lateral():
-        return {"menu": MENU}
+        return {"menu": menu_para(current_user)}
+
+    @app.errorhandler(403)
+    def sin_permiso(error):
+        return render_template("errores/403.html"), 403
 
     @app.get("/")
     def inicio():

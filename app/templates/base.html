@@ -10,12 +10,23 @@
   <nav class="navbar navbar-dark bg-primary">
     <div class="container-fluid">
       <a class="navbar-brand fw-bold" href="{{ url_for('inicio') }}">RepuAuto</a>
+      {% if current_user.is_authenticated %}
+      <div class="d-flex align-items-center gap-3">
+        <span class="navbar-text small">{{ current_user.nombre }} · {{ current_user.rol.nombre|capitalize }}</span>
+        <form method="post" action="{{ url_for('auth.logout') }}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <button type="submit" class="btn btn-outline-light btn-sm">Cerrar sesión</button>
+        </form>
+      </div>
+      {% else %}
       <span class="navbar-text small">Tu vehículo en buenas manos</span>
+      {% endif %}
     </div>
   </nav>
 
   <div class="container-fluid">
     <div class="row">
+      {% if current_user.is_authenticated %}
       <aside class="col-md-3 col-lg-2 bg-white border-end min-vh-100 p-3">
         <nav class="nav nav-pills flex-column gap-1">
           <a class="nav-link {% if request.endpoint == 'inicio' %}active{% endif %}"
@@ -26,8 +37,9 @@
           {% endfor %}
         </nav>
       </aside>
+      {% endif %}
 
-      <main class="col-md-9 col-lg-10 p-4">
+      <main class="{{ 'col-md-9 col-lg-10' if current_user.is_authenticated else 'col-12' }} p-4">
         {% with mensajes = get_flashed_messages(with_categories=true) %}
           {% for categoria, mensaje in mensajes %}
           <div class="alert alert-{{ 'info' if categoria == 'message' else categoria }}">{{ mensaje }}</div>

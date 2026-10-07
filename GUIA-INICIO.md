@@ -179,7 +179,11 @@ El `.env` guarda tus claves. **Nunca se sube al repositorio** porque está en `.
    SECRET_KEY=la-clave-que-generaste
    DATABASE_URL=postgresql+psycopg://repuauto:TU_CLAVE@localhost:5432/repuauto
    TEST_DATABASE_URL=postgresql+psycopg://repuauto:TU_CLAVE@localhost:5432/repuauto_test
+   ADMIN_CORREO=admin@repuauto.com
+   ADMIN_CLAVE=una-clave-tuya-123
    ```
+
+   `ADMIN_CORREO` y `ADMIN_CLAVE` son la cuenta del primer administrador, la que usas para entrar a la app. La clave debe tener **más de 8 caracteres, al menos un número y un carácter especial**.
 
 Si falta alguna variable, la app no arranca y el error dice cuál es: `Faltan variables en tu .env: ...`.
 
@@ -198,6 +202,8 @@ flask run
 | `flask db upgrade` | Crea las tablas o las actualiza según las migraciones de `migrations/versions/` |
 | `flask seed` | Carga los datos iniciales: roles, estados de venta, categorías, marcas y el primer administrador. Se puede correr varias veces sin duplicar datos |
 | `flask run` | Arranca la app en http://127.0.0.1:5000. Se detiene con `Ctrl+C` |
+
+Al abrir la app aparece **Iniciar sesión**: entra con el `ADMIN_CORREO` y la `ADMIN_CLAVE` de tu `.env`. El administrador ve todos los módulos. `flask seed` crea esa cuenta solo si todavía no existe: si cambias la clave en el `.env` después, no se actualiza.
 
 Mientras no haya tablas, `flask seed` dice `Todavía no hay datos iniciales definidos.`. Eso es normal.
 

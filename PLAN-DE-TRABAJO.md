@@ -194,7 +194,28 @@ Las operaciones que tocan el stock (**US-06 T3 y T4** y **US-09 T3**) se hacen e
 
 ### Menú y roles
 
-El menú lateral está en `app/menu.py`, con los roles que ven cada opción, según la decisión D3. Si agregas una vista al menú, agrégala ahí. US-01 T3 activa el filtrado por rol.
+El menú lateral está en `app/menu.py`, con los roles que ven cada opción, según la decisión D3. Si agregas una vista al menú, agrégala ahí. Cada usuario ve solo las opciones de su rol.
+
+- **Toda la app pide iniciar sesión.** No tienes que hacer nada para eso: quien no ha entrado va a la pantalla de login.
+- **Ocultar una opción del menú no protege la vista.** Cada ruta se protege con `@rol_requerido`, con los mismos roles del menú:
+
+  ```python
+  from app.auth.decoradores import rol_requerido
+
+  @bp.get("/")
+  @rol_requerido("vendedor", "administrador")
+  def index():
+      ...
+  ```
+
+  Si el usuario no tiene el rol, ve la página "No tienes permiso" (error 403). El usuario que inició sesión está en `current_user` (`from flask_login import current_user`), por ejemplo para guardar quién registró una venta.
+- **En las pruebas**, las fixtures `crear_cuenta` e `iniciar_sesion` de `tests/conftest.py` crean una cuenta del rol que necesites y entran con ella:
+
+  ```python
+  def test_el_vendedor_ve_los_clientes(client, crear_cuenta, iniciar_sesion):
+      iniciar_sesion(crear_cuenta("vendedor"))
+      assert client.get("/clientes/").status_code == 200
+  ```
 
 ### Pruebas
 
