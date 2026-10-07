@@ -8,6 +8,7 @@ duplicar nada: primero revisan si el dato ya existe.
 import click
 
 from app.extensions import db
+from app.models import Rol
 
 SEMILLAS = []
 
@@ -16,6 +17,14 @@ def semilla(funcion):
     """Registra una función de datos iniciales para que flask seed la ejecute."""
     SEMILLAS.append(funcion)
     return funcion
+
+
+@semilla
+def roles():
+    """Los tres roles de la matriz de acceso (decisión D3)."""
+    for nombre in ("cliente", "vendedor", "administrador"):
+        if not db.session.scalar(db.select(Rol).filter_by(nombre=nombre)):
+            db.session.add(Rol(nombre=nombre))
 
 
 @click.command("seed")
