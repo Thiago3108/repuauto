@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% from "macros.html" import campo %}
+
+{% block titulo %}Crear cuenta · RepuAuto{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-10 col-lg-7">
+    <div class="card shadow-sm mt-4">
+      <div class="card-body p-4">
+        <h1 class="h4 mb-1">Crear cuenta</h1>
+        <p class="text-muted small mb-3">Regístrate para consultar el estado de tus compras.</p>
+        <form method="post" novalidate>
+          {{ form.hidden_tag() }}
+          <div class="row">
+            <div class="col-sm-6">{{ campo(form.nombres, autocompletar="given-name") }}</div>
+            <div class="col-sm-6">{{ campo(form.apellidos, autocompletar="family-name") }}</div>
+            <div class="col-sm-6">{{ campo(form.cedula, autocompletar="off") }}</div>
+            <div class="col-sm-6">{{ campo(form.telefono, "tel", "tel") }}</div>
+            <div class="col-12">{{ campo(form.correo, "email", "email") }}</div>
+            <div class="col-sm-6">{{ campo(form.clave, "password", "new-password") }}</div>
+            <div class="col-sm-6">{{ campo(form.confirmar, "password", "new-password") }}</div>
+          </div>
+          <p class="form-text mt-0">La contraseña debe tener más de 8 caracteres, al menos un número y un carácter especial.</p>
+          {{ form.enviar(class="btn btn-primary w-100") }}
+        </form>
+        <p class="text-center small mt-3 mb-0">
+          ¿Ya tienes cuenta? <a href="{{ url_for('auth.login') }}">Inicia sesión</a>
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,12 @@
+{# Piezas de plantilla para reutilizar en cualquier módulo.
+   Uso: {% from "macros.html" import campo %} y luego {{ campo(form.nombre) }} #}
+
+{% macro campo(field, tipo="text", autocompletar=None) %}
+<div class="mb-3">
+  {{ field.label(class="form-label") }}
+  {{ field(class="form-control" + (" is-invalid" if field.errors else ""), type=tipo, autocomplete=autocompletar) }}
+  {% for error in field.errors %}
+  <div class="invalid-feedback">{{ error }}</div>
+  {% endfor %}
+</div>
+{% endmacro %}

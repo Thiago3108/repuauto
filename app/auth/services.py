@@ -5,10 +5,20 @@ Las rutas llaman a estas funciones y las plantillas nunca tocan la base de datos
 """
 import re
 
+from sqlalchemy.exc import IntegrityError
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from app.extensions import db
-from app.models import Rol, Usuario
+from app.models import Cliente, Rol, Usuario
+
+
+class RegistroRechazado(Exception):
+    """El registro no se puede hacer. campo dice qué campo del formulario lo causó."""
+
+    def __init__(self, campo, mensaje):
+        super().__init__(mensaje)
+        self.campo = campo
+        self.mensaje = mensaje
 
 
 def normalizar_correo(correo):
@@ -61,3 +71,38 @@ def crear_usuario(correo, clave, nombre, rol):
     )
     db.session.add(usuario)
     return usuario
+
+
+def registrar_cliente(nombres, apellidos, cedula, correo, clave, telefono=None):
+    """Registro de cliente (US-01 T2). Guarda la cuenta y el cliente en una sola transacción.
+
+    - Si la cédula es nueva, crea el cliente y lo enlaza a la cuenta.
+    - Si la cédula ya es de un cliente de mostrador (sin cuenta), crea la cuenta sin
+      enlazar: un vendedor la enlaza después verificando la cédula en persona (US-02 T4),
+      para que nadie vea el historial de otro solo con conocer su cédula.
+    - Si la cédula ya tiene cuenta o el correo ya está registrado, no guarda nada.
+
+    Devuelve (usuario, enlazada). Lanza RegistroRechazado si no se puede registrar.
+    """
+    if buscar_por_correo(correo) is not None:
+        raise RegistroRechazado("correo", "Ya existe una cuenta con este correo.")
+
+    cliente = db.session.scalar(db.select(Cliente).filter_by(cedula=cedula))
+    if cliente is not None and cliente.id_usuario is not None:
+        raise RegistroRechazado("cedula", "Ya existe una cuenta con esta cédula. Inicia sesión.")
+
+    usuario = crear_usuario(correo, clave, f"{nombres} {apellidos}"[:100], "cliente")
+    enlazada = cliente is None
+    if enlazada:
+        db.session.add(Cliente(
+            cedula=cedula, nombres=nombres, apellidos=apellidos,
+            telefono=telefono or None, usuario=usuario,
+        ))
+
+    try:
+        db.session.commit()
+    except IntegrityError:
+        # Otra persona se registró con el mismo correo o cédula al mismo tiempo.
+        db.session.rollback()
+        raise RegistroRechazado("correo", "Ya existe una cuenta con este correo o esta cédula.")
+    return usuario, enlazada

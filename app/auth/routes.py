@@ -8,11 +8,11 @@ from flask_login import current_user, login_user, logout_user
 
 from app.auth import bp, services
 from app.auth.decoradores import rol_requerido
-from app.auth.forms import LoginForm
+from app.auth.forms import LoginForm, RegistroForm
 from app.extensions import login_manager
 
 # Vistas que se abren sin iniciar sesión. Todas las demás lo exigen.
-VISTAS_PUBLICAS = {"auth.login", "static"}
+VISTAS_PUBLICAS = {"auth.login", "auth.registro", "static"}
 
 
 @login_manager.user_loader
@@ -46,6 +46,39 @@ def login():
             return redirect(_destino_seguro(request.args.get("next")))
 
     return render_template("auth/login.html", form=form)
+
+
+@bp.route("/registro", methods=["GET", "POST"])
+def registro():
+    """UI-02 Registro de cliente."""
+    if current_user.is_authenticated:
+        return redirect(url_for("inicio"))
+
+    form = RegistroForm()
+    if form.validate_on_submit():
+        try:
+            usuario, enlazada = services.registrar_cliente(
+                nombres=form.nombres.data,
+                apellidos=form.apellidos.data,
+                cedula=form.cedula.data,
+                correo=form.correo.data,
+                clave=form.clave.data,
+                telefono=form.telefono.data,
+            )
+        except services.RegistroRechazado as rechazo:
+            getattr(form, rechazo.campo).errors.append(rechazo.mensaje)
+        else:
+            login_user(usuario)
+            flash("¡Bienvenido! Tu cuenta quedó creada.", "success")
+            if not enlazada:
+                flash(
+                    "Ya eras cliente de la tienda. Un vendedor enlazará tu cuenta cuando "
+                    "verifique tu cédula en persona; mientras tanto no verás tus compras anteriores.",
+                    "warning",
+                )
+            return redirect(url_for("inicio"))
+
+    return render_template("auth/registro.html", form=form)
 
 
 @bp.post("/logout")
