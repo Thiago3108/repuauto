@@ -45,6 +45,7 @@ class Usuario(UserMixin, db.Model):
     creado_en: Mapped[datetime] = mapped_column(server_default=func.now())
 
     rol: Mapped[Rol] = relationship(back_populates="usuarios")
+    cliente: Mapped["Cliente | None"] = relationship(back_populates="usuario")
 
     def get_id(self):
         """Lo que Flask-Login guarda en la cookie de sesión."""

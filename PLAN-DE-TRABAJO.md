@@ -62,7 +62,7 @@ Mientras la tabla de otro no entra a `main`, puedes avanzar en lo que no la nece
 graph LR
     U1T1["US-01 T1<br/>tablas usuario y rol<br/>(Santiago)"] --> U2T1["US-02 T1<br/>tabla cliente<br/>(Jhon)"]
     U4T1["US-04 T1<br/>tablas de repuestos<br/>(Jairo)"] --> U3T1["US-03 T1<br/>tablas de vehículos<br/>(David)"]
-    U1T1 --> U4T1
+    U2T1 --> U4T1
     U2T1 --> U3T1
     U1T2["US-01 T2<br/>registro de cliente"] --> U2T4["US-02 T4<br/>enlazar cuenta"]
     U2T1 --> U1T2
@@ -73,7 +73,7 @@ graph LR
 
 | Tarea | Espera a | Por qué |
 |---|---|---|
-| US-04 T1 (tablas de repuestos) | US-01 T1 | No usa sus tablas, pero las migraciones entran de una en una ([orden](#orden-de-las-migraciones)) |
+| US-04 T1 (tablas de repuestos) | US-02 T1 | No usa sus tablas, pero las migraciones entran de una en una ([orden](#orden-de-las-migraciones)) |
 | US-02 T1 (tabla `cliente`) | US-01 T1 | `cliente.id_usuario` apunta a `usuario` |
 | US-03 T1 (tablas de vehículos) | US-04 T1 | `repuesto_vehiculo` apunta a `repuesto` |
 | US-01 T2 (registro de cliente) | US-02 T1 | Al registrarse se crea o se busca el `cliente` por cédula |
@@ -81,7 +81,7 @@ graph LR
 | US-03 T3 (compatibilidades) | US-03 T1 y US-04 T1 | Asocia vehículos con repuestos |
 | Vistas limitadas por rol (UI-09 para vendedor, UI-11 solo administrador, etc.) | US-01 T3 | El control de acceso por rol es de Santiago. Hasta que entre, las vistas quedan abiertas y cada dueño las protege después |
 
-**Santiago empieza por US-01 T1 y T3**, porque las demás historias dependen de ellas. **Jairo empieza por US-04 T1**, en cuanto entre US-01 T1.
+**Santiago empieza por US-01 T1 y T3**, porque las demás historias dependen de ellas. **Jairo empieza por US-04 T1**, en cuanto entre US-02 T1.
 
 ### Sprint 2
 
@@ -107,8 +107,8 @@ Cada migración se une a `main` **antes** de generar la siguiente, porque las ta
 | # | Sprint | Archivo del modelo | Tablas | Tarea | Quién |
 |---|---|---|---|---|---|
 | 1 | 1 | `app/models/usuario.py` | `rol`, `usuario` | US-01 T1 | Santiago |
-| 2 | 1 | `app/models/repuesto.py` | `categoria`, `marca_repuesto`, `repuesto` | US-04 T1 | Jairo |
-| 3 | 1 | `app/models/cliente.py` | `cliente` | US-02 T1 | Jhon |
+| 2 | 1 | `app/models/cliente.py` | `cliente` | US-02 T1 | Jhon (la hizo Santiago) |
+| 3 | 1 | `app/models/repuesto.py` | `categoria`, `marca_repuesto`, `repuesto` | US-04 T1 | Jairo |
 | 4 | 1 | `app/models/vehiculo.py` | `marca_vehiculo`, `vehiculo`, `repuesto_vehiculo` | US-03 T1 | David |
 | 5 | 2 | `app/models/venta.py` | `estado_venta`, `venta`, `detalle_venta` | US-06 T1 | Jhon |
 | 6 | 3 | `app/models/compra.py` | `proveedor`, `compra`, `detalle_compra` | US-09 T1 | Jairo |
