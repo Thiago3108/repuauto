@@ -117,12 +117,12 @@ Los sprints duran 4 semanas cada uno (sprint 1: semanas 1 a 4, sprint 2: semanas
 - [x] Diagramas: casos de uso, vistas por usuario, actividades y base de datos
 - [x] Esqueleto de la app: fábrica, blueprints, migraciones, pruebas y CI
 - [x] Guías del equipo: inicio, git, plan, Trello y evidencias
-- [ ] Protección de `main` en GitHub ([guía de git](GUIA-GIT.md#9-proteger-main-santiago-una-sola-vez))
-- [ ] Tablero de Trello con las tarjetas del sprint 1
+- [x] Protección de `main` en GitHub ([guía de git](GUIA-GIT.md#9-proteger-main-santiago-una-sola-vez))
+- [x] Tablero de Trello con las tarjetas del sprint 1
 
 ### Sprint 1 — Cuentas, clientes, vehículos y repuestos · `v0.1-sprint1`
 
-- [ ] US-01 — Registro e inicio de sesión de usuarios (Santiago)
+- [x] US-01 — Registro e inicio de sesión de usuarios (Santiago)
 - [ ] US-02 — Gestionar clientes (Jhon)
 - [ ] US-03 — Gestionar vehículos (David)
 - [ ] US-04 — Gestionar repuestos y stock (Jairo)

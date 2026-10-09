@@ -3,12 +3,12 @@
 Las rutas reciben la petición, llaman a services.py y eligen la plantilla.
 No consultan la base de datos directamente: eso es trabajo de services.py.
 """
-from flask import flash, redirect, render_template, request, url_for
+from flask import abort, flash, redirect, render_template, request, url_for
 from flask_login import current_user, login_user, logout_user
 
 from app.auth import bp, services
 from app.auth.decoradores import rol_requerido
-from app.auth.forms import LoginForm, RegistroForm
+from app.auth.forms import LoginForm, RegistroForm, VendedorForm
 from app.extensions import login_manager
 
 # Vistas que se abren sin iniciar sesión. Todas las demás lo exigen.
@@ -88,15 +88,35 @@ def logout():
     return redirect(url_for("auth.login"))
 
 
-@bp.get("/")
+@bp.route("/", methods=["GET", "POST"])
 @rol_requerido("administrador")
 def index():
-    return render_template(
-        "en_construccion.html",
-        modulo="Cuentas y acceso",
-        historia="US-01",
-        vistas="UI-13 (cuentas de vendedor)",
-    )
+    """UI-13 Cuentas de vendedor: crear cuentas y activarlas o desactivarlas."""
+    form = VendedorForm()
+    if form.validate_on_submit():
+        try:
+            vendedor = services.crear_vendedor(form.nombre.data, form.correo.data, form.clave.data)
+        except services.RegistroRechazado as rechazo:
+            getattr(form, rechazo.campo).errors.append(rechazo.mensaje)
+        else:
+            flash(f"Se creó la cuenta de {vendedor.nombre}. Ya puede iniciar sesión con {vendedor.correo}.", "success")
+            return redirect(url_for("auth.index"))
+
+    return render_template("auth/vendedores.html", form=form, vendedores=services.listar_vendedores())
+
+
+@bp.post("/vendedores/<int:id_usuario>/estado")
+@rol_requerido("administrador")
+def cambiar_estado(id_usuario):
+    activar = request.form.get("activo") == "1"
+    vendedor = services.cambiar_estado_vendedor(id_usuario, activar)
+    if vendedor is None:
+        abort(404)
+    if activar:
+        flash(f"Se reactivó la cuenta de {vendedor.nombre}.", "success")
+    else:
+        flash(f"Se desactivó la cuenta de {vendedor.nombre}. Ya no puede iniciar sesión.", "info")
+    return redirect(url_for("auth.index"))
 
 
 def _destino_seguro(siguiente):

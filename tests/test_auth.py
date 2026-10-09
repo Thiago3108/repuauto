@@ -340,3 +340,108 @@ def test_con_sesion_iniciada_el_registro_lleva_al_inicio(client, crear_cuenta, i
     iniciar_sesion(crear_cuenta("vendedor"))
 
     assert client.get("/auth/registro").headers["Location"] == "/"
+
+
+# ---------- Cuentas de vendedor (UI-13) ----------
+
+
+def datos_vendedor(**cambios):
+    datos = {
+        "nombre": "Pedro Pérez",
+        "correo": "pedro@repuauto.com",
+        "clave": "clave-segura-1",
+        "confirmar": "clave-segura-1",
+    }
+    datos.update(cambios)
+    return datos
+
+
+@pytest.fixture()
+def como_administrador(crear_cuenta, iniciar_sesion):
+    iniciar_sesion(crear_cuenta("administrador"))
+
+
+def test_el_administrador_crea_un_vendedor(client, como_administrador):
+    respuesta = client.post("/auth/", data=datos_vendedor(correo=" Pedro@RepuAuto.com "), follow_redirects=True)
+
+    pagina = respuesta.get_data(as_text=True)
+    assert "Se creó la cuenta de Pedro Pérez" in pagina
+    assert "pedro@repuauto.com" in pagina
+    vendedor = db.session.scalar(db.select(Usuario).filter_by(correo="pedro@repuauto.com"))
+    assert vendedor.rol.nombre == "vendedor"
+    assert vendedor.activo is True
+    assert vendedor.contrasena_hash != "clave-segura-1"
+
+
+def test_el_vendedor_nuevo_puede_iniciar_sesion(client, como_administrador):
+    client.post("/auth/", data=datos_vendedor())
+    client.post("/auth/logout")
+
+    respuesta = client.post("/auth/login", data={"correo": "pedro@repuauto.com", "clave": "clave-segura-1"})
+
+    assert respuesta.status_code == 302
+    assert "Pedro Pérez · Vendedor" in client.get("/").get_data(as_text=True)
+
+
+def test_no_se_crea_un_vendedor_con_un_correo_repetido(client, crear_cuenta, como_administrador):
+    crear_cuenta("cliente", correo="pedro@repuauto.com")
+
+    respuesta = client.post("/auth/", data=datos_vendedor())
+
+    assert "Ya existe una cuenta con este correo." in respuesta.get_data(as_text=True)
+    assert db.session.scalars(db.select(Usuario).join(Usuario.rol).filter(Rol.nombre == "vendedor")).all() == []
+
+
+@pytest.mark.parametrize("cambio, mensaje", [
+    ({"nombre": "Pedro 2"}, "Usa solo letras y espacios."),
+    ({"correo": "pedro.com"}, "Escribe un correo válido"),
+    ({"clave": "debil", "confirmar": "debil"}, "más de 8 caracteres"),
+    ({"confirmar": "otra-clave-1"}, "Las contraseñas no coinciden."),
+])
+def test_validaciones_de_la_cuenta_de_vendedor(client, como_administrador, cambio, mensaje):
+    respuesta = client.post("/auth/", data=datos_vendedor(**cambio))
+
+    assert mensaje in respuesta.get_data(as_text=True)
+    assert db.session.scalar(db.select(Usuario).filter_by(correo="pedro@repuauto.com")) is None
+
+
+def test_desactivar_y_reactivar_un_vendedor(client, crear_cuenta, como_administrador):
+    vendedor = crear_cuenta("vendedor")
+
+    client.post(f"/auth/vendedores/{vendedor.id_usuario}/estado", data={"activo": "0"})
+    db.session.refresh(vendedor)
+    assert vendedor.activo is False
+
+    client.post(f"/auth/vendedores/{vendedor.id_usuario}/estado", data={"activo": "1"})
+    db.session.refresh(vendedor)
+    assert vendedor.activo is True
+
+
+def test_un_vendedor_desactivado_no_inicia_sesion(client, crear_cuenta, como_administrador):
+    vendedor = crear_cuenta("vendedor")
+    client.post(f"/auth/vendedores/{vendedor.id_usuario}/estado", data={"activo": "0"})
+    client.post("/auth/logout")
+
+    respuesta = client.post("/auth/login", data={"correo": vendedor.correo, "clave": "clave-segura-1"})
+
+    assert "Correo o contraseña incorrectos." in respuesta.get_data(as_text=True)
+
+
+def test_solo_se_desactivan_cuentas_de_vendedor(client, crear_cuenta, como_administrador):
+    cliente = crear_cuenta("cliente")
+
+    respuesta = client.post(f"/auth/vendedores/{cliente.id_usuario}/estado", data={"activo": "0"})
+
+    assert respuesta.status_code == 404
+    db.session.refresh(cliente)
+    assert cliente.activo is True
+
+
+@pytest.mark.parametrize("rol", ["cliente", "vendedor"])
+def test_solo_el_administrador_crea_o_desactiva_vendedores(client, crear_cuenta, iniciar_sesion, rol):
+    otro = crear_cuenta("vendedor", correo="otro@repuauto.com")
+    iniciar_sesion(crear_cuenta(rol))
+
+    assert client.post("/auth/", data=datos_vendedor()).status_code == 403
+    assert client.post(f"/auth/vendedores/{otro.id_usuario}/estado", data={"activo": "0"}).status_code == 403
+    assert db.session.scalar(db.select(Usuario).filter_by(correo="pedro@repuauto.com")) is None

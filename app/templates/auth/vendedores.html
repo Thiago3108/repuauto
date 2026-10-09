@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% from "macros.html" import campo %}
+
+{% block titulo %}Cuentas de vendedor · RepuAuto{% endblock %}
+
+{% block content %}
+<h1 class="h3 mb-1">Cuentas de vendedor</h1>
+<p class="text-muted">Crea las cuentas del personal de ventas. Una cuenta desactivada no puede iniciar sesión, pero sus ventas se conservan.</p>
+
+<div class="row g-4">
+  <div class="col-lg-4">
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <h2 class="h5 mb-3">Nueva cuenta</h2>
+        <form method="post" novalidate>
+          {{ form.hidden_tag() }}
+          {{ campo(form.nombre, autocompletar="off") }}
+          {{ campo(form.correo, "email", "off") }}
+          {{ campo(form.clave, "password", "new-password") }}
+          {{ campo(form.confirmar, "password", "new-password") }}
+          <p class="form-text mt-0">Más de 8 caracteres, al menos un número y un carácter especial. Entrégasela al vendedor en persona.</p>
+          {{ form.enviar(class="btn btn-primary w-100") }}
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-8">
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <h2 class="h5 mb-3">Vendedores ({{ vendedores|length }})</h2>
+        {% if vendedores %}
+        <div class="table-responsive">
+          <table class="table align-middle mb-0">
+            <thead>
+              <tr>
+                <th>Nombre</th>
+                <th>Correo</th>
+                <th>Creada</th>
+                <th>Estado</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for vendedor in vendedores %}
+              <tr class="{{ '' if vendedor.activo else 'text-muted' }}">
+                <td>{{ vendedor.nombre }}</td>
+                <td>{{ vendedor.correo }}</td>
+                <td>{{ vendedor.creado_en.strftime("%d/%m/%Y") }}</td>
+                <td>
+                  {% if vendedor.activo %}
+                  <span class="badge text-bg-success">Activa</span>
+                  {% else %}
+                  <span class="badge text-bg-secondary">Desactivada</span>
+                  {% endif %}
+                </td>
+                <td class="text-end">
+                  <form method="post" action="{{ url_for('auth.cambiar_estado', id_usuario=vendedor.id_usuario) }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    {% if vendedor.activo %}
+                    <input type="hidden" name="activo" value="0">
+                    <button type="submit" class="btn btn-outline-danger btn-sm"
+                            onclick="return confirm('¿Desactivar la cuenta de {{ vendedor.nombre }}? No podrá iniciar sesión.')">Desactivar</button>
+                    {% else %}
+                    <input type="hidden" name="activo" value="1">
+                    <button type="submit" class="btn btn-outline-success btn-sm">Reactivar</button>
+                    {% endif %}
+                  </form>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% else %}
+        <p class="text-muted mb-0">Todavía no hay cuentas de vendedor. Crea la primera con el formulario.</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
