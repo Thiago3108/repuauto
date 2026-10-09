@@ -227,7 +227,14 @@ El menú lateral está en `app/menu.py`, con los roles que ven cada opción, seg
 
 - Código, variables, funciones, rutas y mensajes, en **español**. Los nombres, en `snake_case`, y las clases, en `PascalCase`.
 - Un *docstring* corto al inicio de cada archivo que diga qué hace. Ver los que ya existen en `app/`.
-- Formularios con Flask-WTF: la protección CSRF ya está activada.
+- Formularios con Flask-WTF: la protección CSRF ya está activada. Cada módulo pone los suyos en `app/<módulo>/forms.py` (ejemplo: `app/auth/forms.py`).
+- En las plantillas, dibuja cada campo con el macro `campo`, que muestra la etiqueta, el estilo de Bootstrap y los errores:
+
+  ```html
+  {% from "macros.html" import campo %}
+  {{ campo(form.cedula) }}
+  {{ campo(form.correo, "email") }}
+  ```
 
 ## Definición de terminado
 

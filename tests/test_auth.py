@@ -8,7 +8,7 @@ from app.auth.decoradores import rol_requerido
 from app.auth.services import contrasena_segura
 from app.cli import primer_administrador, roles
 from app.extensions import db
-from app.models import Rol, Usuario
+from app.models import Cliente, Rol, Usuario
 
 
 def crear_usuario(correo="ana@correo.com", rol="cliente"):
@@ -227,3 +227,116 @@ def test_rol_requerido_protege_la_vista_de_otro_modulo(app, crear_cuenta):
     client.post("/auth/logout")
     client.post("/auth/login", data={"correo": crear_cuenta("vendedor").correo, "clave": "clave-segura-1"})
     assert client.get("/solo-personal").status_code == 200
+
+
+# ---------- Registro de cliente (UI-02) ----------
+
+
+@pytest.fixture()
+def con_roles(app):
+    roles()
+    db.session.commit()
+
+
+def datos_registro(**cambios):
+    datos = {
+        "nombres": "Ana María",
+        "apellidos": "Rueda Gómez",
+        "cedula": "1098765432",
+        "telefono": "3001234567",
+        "correo": "ana@correo.com",
+        "clave": "clave-segura-1",
+        "confirmar": "clave-segura-1",
+    }
+    datos.update(cambios)
+    return datos
+
+
+def test_el_registro_se_abre_sin_sesion(client):
+    assert client.get("/auth/registro").status_code == 200
+
+
+def test_registro_crea_la_cuenta_y_el_cliente_enlazados(client, con_roles):
+    respuesta = client.post("/auth/registro", data=datos_registro(correo=" Ana@Correo.com "))
+
+    assert respuesta.status_code == 302
+    usuario = db.session.scalar(db.select(Usuario))
+    assert usuario.correo == "ana@correo.com"
+    assert usuario.rol.nombre == "cliente"
+    assert usuario.nombre == "Ana María Rueda Gómez"
+    assert usuario.contrasena_hash != "clave-segura-1"
+    assert usuario.cliente.cedula == "1098765432"
+    assert usuario.cliente.telefono == "3001234567"
+    # Queda con la sesión iniciada.
+    assert "Hola, Ana María" in client.get("/").get_data(as_text=True)
+
+
+def test_registro_limpia_los_espacios(client, con_roles):
+    client.post("/auth/registro", data=datos_registro(nombres="  Ana   María ", cedula=" 1098765432 "))
+
+    cliente = db.session.scalar(db.select(Cliente))
+    assert cliente.nombres == "Ana María"
+    assert cliente.cedula == "1098765432"
+
+
+def test_el_telefono_es_opcional(client, con_roles):
+    client.post("/auth/registro", data=datos_registro(telefono=""))
+
+    assert db.session.scalar(db.select(Cliente)).telefono is None
+
+
+def test_cliente_de_mostrador_crea_la_cuenta_sin_enlazar(client, con_roles):
+    db.session.add(Cliente(cedula="1098765432", nombres="Ana", apellidos="Rueda"))
+    db.session.commit()
+
+    respuesta = client.post("/auth/registro", data=datos_registro(), follow_redirects=True)
+
+    assert "Un vendedor enlazará tu cuenta" in respuesta.get_data(as_text=True)
+    cliente = db.session.scalar(db.select(Cliente))
+    assert cliente.id_usuario is None
+    assert db.session.scalar(db.select(Usuario).filter_by(correo="ana@correo.com")) is not None
+    assert len(db.session.scalars(db.select(Cliente)).all()) == 1
+
+
+def test_no_se_repite_el_correo(client, con_roles, crear_cuenta):
+    crear_cuenta("cliente", correo="ana@correo.com")
+
+    respuesta = client.post("/auth/registro", data=datos_registro())
+
+    assert "Ya existe una cuenta con este correo." in respuesta.get_data(as_text=True)
+    assert db.session.scalar(db.select(Cliente)) is None
+
+
+def test_una_cedula_con_cuenta_no_se_registra_otra_vez(client, con_roles):
+    client.post("/auth/registro", data=datos_registro())
+    client.post("/auth/logout")
+
+    respuesta = client.post("/auth/registro", data=datos_registro(correo="otra@correo.com"))
+
+    assert "Ya existe una cuenta con esta cédula." in respuesta.get_data(as_text=True)
+    assert len(db.session.scalars(db.select(Usuario)).all()) == 1
+
+
+@pytest.mark.parametrize("cambio, mensaje", [
+    ({"nombres": "Ana2"}, "Usa solo letras y espacios."),
+    ({"apellidos": "Rueda-Gómez"}, "Usa solo letras y espacios."),
+    ({"cedula": "10.987.654"}, "Usa solo números"),
+    ({"telefono": "300 123 abc"}, "Usa solo números"),
+    ({"correo": "ana-sin-arroba.com"}, "Escribe un correo válido"),
+    ({"clave": "corta-1", "confirmar": "corta-1"}, "más de 8 caracteres"),
+    ({"clave": "sin-numeros", "confirmar": "sin-numeros"}, "más de 8 caracteres"),
+    ({"confirmar": "otra-clave-1"}, "Las contraseñas no coinciden."),
+    ({"nombres": ""}, "Escribe tus nombres."),
+])
+def test_validaciones_del_registro(client, con_roles, cambio, mensaje):
+    respuesta = client.post("/auth/registro", data=datos_registro(**cambio))
+
+    assert respuesta.status_code == 200
+    assert mensaje in respuesta.get_data(as_text=True)
+    assert db.session.scalar(db.select(Usuario)) is None
+
+
+def test_con_sesion_iniciada_el_registro_lleva_al_inicio(client, crear_cuenta, iniciar_sesion):
+    iniciar_sesion(crear_cuenta("vendedor"))
+
+    assert client.get("/auth/registro").headers["Location"] == "/"
