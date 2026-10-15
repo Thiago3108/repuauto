@@ -227,7 +227,7 @@ El menú lateral está en `app/menu.py`, con los roles que ven cada opción, seg
 
 - Código, variables, funciones, rutas y mensajes, en **español**. Los nombres, en `snake_case`, y las clases, en `PascalCase`.
 - Un *docstring* corto al inicio de cada archivo que diga qué hace. Ver los que ya existen en `app/`.
-- Formularios con Flask-WTF: la protección CSRF ya está activada. Cada módulo pone los suyos en `app/<módulo>/forms.py` (ejemplo: `app/auth/forms.py`).
+- Formularios con Flask-WTF: la protección CSRF ya está activada. Cada módulo pone los suyos en `app/<módulo>/forms.py` (ejemplo: `app/clientes/forms.py`). Las reglas de formato que se repiten (solo letras, solo números, correo y el filtro `limpiar` que quita espacios de más) están en `app/validadores.py`: impórtalas de ahí en vez de copiarlas.
 - En las plantillas, dibuja cada campo con el macro `campo`, que muestra la etiqueta, el estilo de Bootstrap y los errores:
 
   ```html
@@ -246,7 +246,7 @@ Una tarea está terminada cuando cumple todo esto:
 - [ ] Si trae migración: fue revisada a mano, su `downgrade` funciona y no hay dos cabezas (`flask db heads`)
 - [ ] Si trae datos de catálogo: están en `flask seed` y se puede correr dos veces
 - [ ] Si cambió una historia, una vista o una tabla: la matriz de trazabilidad está actualizada
-- [ ] El PR fue revisado y aprobado por otro integrante, el CI está en verde y se unió con **Squash and merge**
+- [ ] El PR fue revisado y aprobado por otro integrante (por ahora no se exige: ver la [guía de git](GUIA-GIT.md#5-terminar-la-tarea-el-pull-request)), el CI está en verde y se unió con **Squash and merge**
 - [ ] La tarjeta está en **Hecho** y sus puntos están en el Excel, en la semana en que terminó
 - [ ] Si la tarea cerró una historia: su casilla está marcada en el [README](README.md#estado)
 
