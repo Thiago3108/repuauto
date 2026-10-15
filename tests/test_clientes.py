@@ -1,9 +1,9 @@
-"""Pruebas de US-02: tabla cliente, CRUD y búsqueda de clientes (UI-08)."""
+"""Pruebas de US-02: tabla cliente, CRUD, búsqueda y enlace de cuentas (UI-08)."""
 import pytest
 from sqlalchemy.exc import IntegrityError
 
 from app.extensions import db
-from app.models import Cliente
+from app.models import Cliente, Usuario
 
 
 def crear_cliente(cedula="1098765432", nombres="Ana María", apellidos="Rueda Gómez", **datos):
@@ -271,3 +271,130 @@ def test_la_busqueda_se_conserva_al_cambiar_de_pagina(client, como_vendedor):
     assert "pagina=2&amp;q=carlos" in primera or "q=carlos&amp;pagina=2" in primera
     assert "Apellido 24" in segunda
     assert "Distinto" not in segunda
+
+
+# ---------- Enlazar la cuenta de un cliente (US-02 T4) ----------
+
+
+def enlazar(client, cliente, cuenta, verificado=True):
+    datos = {"id_usuario": cuenta.id_usuario}
+    if verificado:
+        datos["verificado"] = "y"
+    return client.post(f"/clientes/{cliente.id_cliente}/enlazar", data=datos, follow_redirects=True)
+
+
+def test_buscar_la_cuenta_por_correo(client, crear_cuenta, como_vendedor):
+    crear_cuenta("cliente", correo="ana.rueda@correo.com")
+    crear_cuenta("cliente", correo="pedro@correo.com")
+    cliente = crear_cliente()
+
+    pagina = client.get(f"/clientes/{cliente.id_cliente}/enlazar?correo=ANA").get_data(as_text=True)
+
+    assert "ana.rueda@correo.com" in pagina
+    assert "pedro@correo.com" not in pagina
+
+
+def test_solo_aparecen_cuentas_de_cliente_activas_y_sin_enlazar(client, crear_cuenta, como_vendedor):
+    crear_cuenta("cliente", correo="libre@correo.com")
+    crear_cuenta("cliente", correo="inactiva@correo.com", activo=False)
+    crear_cuenta("vendedor", correo="vendedor2@correo.com")
+    crear_cliente(cedula="111", usuario=crear_cuenta("cliente", correo="enlazada@correo.com"))
+    cliente = crear_cliente(cedula="222")
+
+    pagina = client.get(f"/clientes/{cliente.id_cliente}/enlazar?correo=correo.com").get_data(as_text=True)
+
+    assert "libre@correo.com" in pagina
+    for correo in ("inactiva@correo.com", "vendedor2@correo.com", "enlazada@correo.com"):
+        assert correo not in pagina
+
+
+def test_enlazar_una_cuenta_verificando_la_cedula(client, crear_cuenta, como_vendedor):
+    cuenta = crear_cuenta("cliente", correo="ana@correo.com")
+    cliente = crear_cliente()
+
+    respuesta = enlazar(client, cliente, cuenta)
+
+    assert "Se enlazó la cuenta ana@correo.com con Ana María Rueda Gómez." in respuesta.get_data(as_text=True)
+    db.session.refresh(cliente)
+    assert cliente.usuario is cuenta
+
+
+def test_sin_confirmar_la_verificacion_no_se_enlaza(client, crear_cuenta, como_vendedor):
+    cuenta = crear_cuenta("cliente")
+    cliente = crear_cliente()
+
+    respuesta = enlazar(client, cliente, cuenta, verificado=False)
+
+    assert "Confirma que verificaste la cédula en persona." in respuesta.get_data(as_text=True)
+    db.session.refresh(cliente)
+    assert cliente.usuario is None
+
+
+def test_una_cuenta_se_enlaza_a_un_solo_cliente_desde_la_vista(client, crear_cuenta, como_vendedor):
+    cuenta = crear_cuenta("cliente")
+    primero = crear_cliente(cedula="111", nombres="Primero")
+    segundo = crear_cliente(cedula="222")
+    enlazar(client, primero, cuenta)
+
+    respuesta = enlazar(client, segundo, cuenta)
+
+    assert "Esa cuenta ya está enlazada con Primero Rueda Gómez." in respuesta.get_data(as_text=True)
+    db.session.refresh(segundo)
+    assert segundo.usuario is None
+
+
+def test_no_se_enlaza_una_cuenta_que_no_es_de_cliente(client, crear_cuenta, como_vendedor):
+    vendedor = crear_cuenta("vendedor", correo="otro.vendedor@correo.com")
+    cliente = crear_cliente()
+
+    respuesta = enlazar(client, cliente, vendedor)
+
+    assert "no es una cuenta de cliente activa" in respuesta.get_data(as_text=True)
+    db.session.refresh(cliente)
+    assert cliente.usuario is None
+
+
+def test_un_cliente_con_cuenta_no_se_vuelve_a_enlazar(client, crear_cuenta, como_vendedor):
+    cliente = crear_cliente(usuario=crear_cuenta("cliente", correo="ana@correo.com"))
+
+    respuesta = client.get(f"/clientes/{cliente.id_cliente}/enlazar")
+
+    assert respuesta.headers["Location"] == f"/clientes/{cliente.id_cliente}"
+
+
+def test_el_cliente_enlazado_ve_su_cuenta_y_puede_quitarse_el_enlace(client, crear_cuenta, como_vendedor):
+    cuenta = crear_cuenta("cliente", correo="ana@correo.com")
+    cliente = crear_cliente(usuario=cuenta)
+
+    pagina = client.post(f"/clientes/{cliente.id_cliente}/quitar-enlace", follow_redirects=True).get_data(as_text=True)
+
+    assert "Se quitó el enlace con la cuenta ana@correo.com." in pagina
+    db.session.refresh(cliente)
+    assert cliente.usuario is None
+    assert db.session.get(Usuario, cuenta.id_usuario) is not None
+
+
+def test_el_registro_de_un_cliente_de_mostrador_se_puede_enlazar_despues(client, crear_cuenta, iniciar_sesion):
+    """Flujo completo: cliente de mostrador → se registra (sin enlazar) → el vendedor lo enlaza."""
+    cliente = crear_cliente(cedula="1098765432")
+    vendedor = crear_cuenta("vendedor")
+    client.post("/auth/registro", data={
+        "nombres": "Ana María", "apellidos": "Rueda Gómez", "cedula": "1098765432", "telefono": "",
+        "correo": "ana@correo.com", "clave": "clave-segura-1", "confirmar": "clave-segura-1",
+    })
+    client.post("/auth/logout")
+    iniciar_sesion(vendedor)
+    cuenta = db.session.scalar(db.select(Usuario).filter_by(correo="ana@correo.com"))
+
+    enlazar(client, cliente, cuenta)
+
+    db.session.refresh(cliente)
+    assert cliente.usuario.correo == "ana@correo.com"
+
+
+@pytest.mark.parametrize("rol, codigo", [("cliente", 403), ("vendedor", 200), ("administrador", 200)])
+def test_solo_el_personal_enlaza_cuentas(client, crear_cuenta, iniciar_sesion, rol, codigo):
+    iniciar_sesion(crear_cuenta(rol))
+    cliente = crear_cliente()
+
+    assert client.get(f"/clientes/{cliente.id_cliente}/enlazar").status_code == codigo

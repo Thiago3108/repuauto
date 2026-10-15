@@ -42,10 +42,16 @@
         <h2 class="h5 mb-3">Cuenta en la app</h2>
         {% if cliente.usuario %}
         <p class="mb-1"><span class="badge text-bg-success">Enlazada</span></p>
-        <p class="mb-0">Correo: <strong>{{ cliente.usuario.correo }}</strong></p>
+        <p>Correo: <strong>{{ cliente.usuario.correo }}</strong></p>
+        <form method="post" action="{{ url_for('clientes.quitar_enlace', id_cliente=cliente.id_cliente) }}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <button type="submit" class="btn btn-outline-danger btn-sm"
+                  onclick="return confirm('¿Quitar el enlace? La cuenta no se borra, pero dejará de ver las compras de este cliente.')">Quitar enlace</button>
+        </form>
         {% else %}
         <p class="mb-1"><span class="badge text-bg-secondary">Sin cuenta</span></p>
-        <p class="text-muted mb-0">Es un cliente de mostrador. Si se registra en la app, su cuenta se enlaza verificando su cédula en persona.</p>
+        <p class="text-muted">Es un cliente de mostrador. Si ya se registró en la app, enlaza su cuenta verificando su cédula en persona.</p>
+        <a class="btn btn-outline-primary btn-sm" href="{{ url_for('clientes.enlazar', id_cliente=cliente.id_cliente) }}">Enlazar cuenta</a>
         {% endif %}
       </div>
     </div>
