@@ -3,6 +3,7 @@
 Aquí van las reglas del negocio: validar, consultar y guardar usando los modelos.
 Las rutas llaman a estas funciones y las plantillas nunca tocan la base de datos.
 """
+from sqlalchemy import and_, func, or_
 from sqlalchemy.exc import IntegrityError
 
 from app.extensions import db
@@ -19,10 +20,38 @@ class CedulaRepetida(Exception):
         self.existente = existente
 
 
-def listar_clientes(pagina=1):
-    """Clientes ordenados por apellidos y nombres, de a CLIENTES_POR_PAGINA por página."""
-    consulta = db.select(Cliente).order_by(Cliente.apellidos, Cliente.nombres, Cliente.id_cliente)
+CON_TILDE = "áéíóúüñÁÉÍÓÚÜÑ"
+SIN_TILDE = "aeiouunAEIOUUN"
+
+
+def listar_clientes(pagina=1, busqueda=None):
+    """Clientes ordenados por apellidos y nombres, de a CLIENTES_POR_PAGINA por página.
+
+    Con busqueda (US-02 T3) deja solo los que coinciden, aunque sea en parte, por cédula,
+    nombres, apellidos o teléfono. Cada palabra tiene que aparecer en alguno de esos
+    campos, así "ana rueda" encuentra a Ana María Rueda. No distingue mayúsculas ni tildes.
+    """
+    consulta = db.select(Cliente)
+    palabras = (busqueda or "").split()
+    if palabras:
+        campos = [Cliente.cedula, Cliente.nombres, Cliente.apellidos, Cliente.telefono]
+        consulta = consulta.filter(and_(*(
+            or_(*(_sin_tildes(campo).ilike(_patron(palabra), escape="\\") for campo in campos))
+            for palabra in palabras
+        )))
+    consulta = consulta.order_by(Cliente.apellidos, Cliente.nombres, Cliente.id_cliente)
     return db.paginate(consulta, page=pagina, per_page=CLIENTES_POR_PAGINA, error_out=False)
+
+
+def _sin_tildes(columna):
+    return func.translate(columna, CON_TILDE, SIN_TILDE)
+
+
+def _patron(palabra):
+    """'%palabra%' sin tildes, escapando % y _ para que se busquen como texto."""
+    palabra = palabra.translate(str.maketrans(CON_TILDE, SIN_TILDE))
+    palabra = palabra.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
+    return f"%{palabra}%"
 
 
 def obtener_cliente(id_cliente):

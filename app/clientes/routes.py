@@ -15,9 +15,14 @@ PERSONAL = ("vendedor", "administrador")
 @bp.get("/")
 @rol_requerido(*PERSONAL)
 def index():
-    """UI-08 Gestión de clientes: la lista."""
+    """UI-08 Gestión de clientes: la lista, con búsqueda por nombre, cédula o teléfono."""
     pagina = request.args.get("pagina", 1, type=int)
-    return render_template("clientes/lista.html", clientes=services.listar_clientes(pagina))
+    busqueda = request.args.get("q", "").strip()
+    return render_template(
+        "clientes/lista.html",
+        clientes=services.listar_clientes(pagina, busqueda),
+        busqueda=busqueda,
+    )
 
 
 @bp.route("/nuevo", methods=["GET", "POST"])
