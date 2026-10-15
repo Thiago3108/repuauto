@@ -13,7 +13,7 @@ from app.models import Cliente, Rol, Usuario
 
 
 class RegistroRechazado(Exception):
-    """El registro no se puede hacer. campo dice qué campo del formulario lo causó."""
+    """No se puede crear la cuenta. campo dice qué campo del formulario lo causó."""
 
     def __init__(self, campo, mensaje):
         super().__init__(mensaje)
@@ -106,3 +106,39 @@ def registrar_cliente(nombres, apellidos, cedula, correo, clave, telefono=None):
         db.session.rollback()
         raise RegistroRechazado("correo", "Ya existe una cuenta con este correo o esta cédula.")
     return usuario, enlazada
+
+
+def listar_vendedores():
+    """Cuentas de vendedor para UI-13: primero las activas, luego por nombre."""
+    return db.session.scalars(
+        db.select(Usuario)
+        .join(Usuario.rol)
+        .filter(Rol.nombre == "vendedor")
+        .order_by(Usuario.activo.desc(), Usuario.nombre)
+    ).all()
+
+
+def crear_vendedor(nombre, correo, clave):
+    """El administrador crea una cuenta de vendedor (US-01 T4). Lanza RegistroRechazado si el correo ya existe."""
+    if buscar_por_correo(correo) is not None:
+        raise RegistroRechazado("correo", "Ya existe una cuenta con este correo.")
+    usuario = crear_usuario(correo, clave, nombre, "vendedor")
+    try:
+        db.session.commit()
+    except IntegrityError:
+        db.session.rollback()
+        raise RegistroRechazado("correo", "Ya existe una cuenta con este correo.")
+    return usuario
+
+
+def cambiar_estado_vendedor(id_usuario, activo):
+    """Activa o desactiva una cuenta de vendedor. No se borran: sus ventas siguen apuntando a ella.
+
+    Devuelve el vendedor, o None si no existe o no es vendedor.
+    """
+    usuario = db.session.get(Usuario, id_usuario)
+    if usuario is None or not usuario.tiene_rol("vendedor"):
+        return None
+    usuario.activo = activo
+    db.session.commit()
+    return usuario

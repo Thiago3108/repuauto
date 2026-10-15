@@ -64,3 +64,30 @@ class RegistroForm(FlaskForm):
             raise ValidationError(
                 "Debe tener más de 8 caracteres, al menos un número y un carácter especial."
             )
+
+
+class VendedorForm(FlaskForm):
+    """UI-13: el administrador crea la cuenta de un vendedor."""
+
+    nombre = StringField("Nombre completo", filters=[limpiar], validators=[
+        DataRequired("Escribe el nombre del vendedor."),
+        Length(max=100),
+        Regexp(SOLO_LETRAS, message="Usa solo letras y espacios."),
+    ])
+    correo = StringField("Correo", filters=[limpiar], validators=[
+        DataRequired("Escribe el correo."),
+        Length(max=120),
+        Regexp(CORREO, message="Escribe un correo válido, por ejemplo nombre@correo.com."),
+    ])
+    clave = PasswordField("Contraseña inicial", validators=[DataRequired("Escribe una contraseña.")])
+    confirmar = PasswordField("Repite la contraseña", validators=[
+        DataRequired("Repite la contraseña."),
+        EqualTo("clave", message="Las contraseñas no coinciden."),
+    ])
+    enviar = SubmitField("Crear cuenta de vendedor")
+
+    def validate_clave(self, campo):
+        if not contrasena_segura(campo.data):
+            raise ValidationError(
+                "Debe tener más de 8 caracteres, al menos un número y un carácter especial."
+            )
