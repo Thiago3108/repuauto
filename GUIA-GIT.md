@@ -165,6 +165,8 @@ git push
 
 **Cuando esté aprobado y el CI en verde:**
 
+> **Por ahora no se exige aprobación** (desde el 15 de octubre de 2026, mientras el equipo está incompleto). Basta con que el CI esté en verde para unir. Igual pídele a un compañero que lo mire cuando pueda. Cuando se vuelva a exigir, se avisa en el grupo y se quita esta nota.
+
 1. **Squash and merge → Confirm squash and merge.** Revisa que el mensaje sea el título del PR.
 2. GitHub borra la rama en GitHub. En tu computador, bórrala así:
 
@@ -349,6 +351,8 @@ El repositorio es público, así que estas reglas funcionan en el plan gratuito 
 5. **Create**.
 
 A partir de ese momento, nadie puede subir directo a `main`, ni siquiera el dueño. Todo entra por un PR con el CI en verde y la aprobación de un compañero.
+
+**Para dejar de exigir la aprobación por un tiempo** (o volver a exigirla): abre el ruleset `proteger-main` y cambia **Required approvals** a `0` (o a `1`). No desmarques **Require a pull request before merging** ni el check `pruebas`.
 
 La regla de **up to date** es la que protege las migraciones. Si entró otra migración a `main` después de tu último push, GitHub te obliga a actualizar la rama antes de unir, y el CI vuelve a revisar que haya una sola cabeza.
 

@@ -4,16 +4,7 @@ from wtforms import PasswordField, StringField, SubmitField
 from wtforms.validators import DataRequired, EqualTo, Length, Optional, Regexp, ValidationError
 
 from app.auth.services import contrasena_segura
-
-SOLO_LETRAS = r"^[A-Za-zÁÉÍÓÚÜÑáéíóúüñ ]+$"
-SOLO_NUMEROS = r"^[0-9]+$"
-# Revisión sencilla del formato: algo@algo.algo, sin espacios.
-CORREO = r"^[^@\s]+@[^@\s]+\.[^@\s]+$"
-
-
-def limpiar(valor):
-    """Quita los espacios de los extremos y deja uno solo entre palabras."""
-    return " ".join(valor.split()) if valor else valor
+from app.validadores import CORREO, SOLO_LETRAS, SOLO_NUMEROS, limpiar
 
 
 class LoginForm(FlaskForm):

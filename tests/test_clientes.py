@@ -1,4 +1,4 @@
-"""Pruebas de US-02: tabla cliente."""
+"""Pruebas de US-02: tabla cliente y CRUD de clientes (UI-08)."""
 import pytest
 from sqlalchemy.exc import IntegrityError
 
@@ -6,8 +6,8 @@ from app.extensions import db
 from app.models import Cliente
 
 
-def crear_cliente(cedula="1098765432", **datos):
-    cliente = Cliente(cedula=cedula, nombres="Ana María", apellidos="Rueda Gómez", **datos)
+def crear_cliente(cedula="1098765432", nombres="Ana María", apellidos="Rueda Gómez", **datos):
+    cliente = Cliente(cedula=cedula, nombres=nombres, apellidos=apellidos, **datos)
     db.session.add(cliente)
     db.session.commit()
     return cliente
@@ -44,3 +44,156 @@ def test_una_cuenta_se_enlaza_a_un_solo_cliente(app, crear_cuenta):
 
     with pytest.raises(IntegrityError):
         crear_cliente(cedula="222", id_usuario=cuenta.id_usuario)
+
+
+# ---------- CRUD de clientes (UI-08) ----------
+
+
+@pytest.fixture()
+def como_vendedor(crear_cuenta, iniciar_sesion):
+    iniciar_sesion(crear_cuenta("vendedor"))
+
+
+def datos_cliente(**cambios):
+    datos = {"cedula": "1098765432", "nombres": "Ana María", "apellidos": "Rueda Gómez", "telefono": "3001234567"}
+    datos.update(cambios)
+    return datos
+
+
+def test_la_lista_sin_clientes(client, como_vendedor):
+    pagina = client.get("/clientes/").get_data(as_text=True)
+
+    assert "Todavía no hay clientes" in pagina
+
+
+def test_la_lista_muestra_los_clientes_ordenados_por_apellido(client, como_vendedor):
+    crear_cliente(cedula="1", nombres="Zoe", apellidos="Zapata")
+    crear_cliente(cedula="2", nombres="Ana", apellidos="Álvarez")
+
+    pagina = client.get("/clientes/").get_data(as_text=True)
+
+    assert "2 clientes registrados" in pagina
+    assert pagina.index("Álvarez") < pagina.index("Zapata")
+
+
+def test_la_lista_se_divide_en_paginas(client, como_vendedor):
+    for numero in range(25):
+        db.session.add(Cliente(cedula=str(1000 + numero), nombres="Cliente", apellidos=f"Apellido {numero:02d}"))
+    db.session.commit()
+
+    primera = client.get("/clientes/").get_data(as_text=True)
+    segunda = client.get("/clientes/?pagina=2").get_data(as_text=True)
+
+    assert "Apellido 00" in primera and "Apellido 24" not in primera
+    assert "Apellido 24" in segunda
+
+
+def test_crear_un_cliente_de_mostrador(client, como_vendedor):
+    respuesta = client.post("/clientes/nuevo", data=datos_cliente(nombres="  Ana   María "), follow_redirects=True)
+
+    assert "Se registró a Ana María Rueda Gómez." in respuesta.get_data(as_text=True)
+    cliente = db.session.scalar(db.select(Cliente))
+    assert cliente.nombres == "Ana María"
+    assert cliente.usuario is None
+
+
+def test_el_telefono_es_opcional(client, como_vendedor):
+    client.post("/clientes/nuevo", data=datos_cliente(telefono=""))
+
+    assert db.session.scalar(db.select(Cliente)).telefono is None
+
+
+def test_si_la_cedula_ya_existe_se_muestra_ese_cliente(client, como_vendedor):
+    existente = crear_cliente(cedula="1098765432")
+
+    respuesta = client.post("/clientes/nuevo", data=datos_cliente(nombres="Otro"))
+
+    assert respuesta.headers["Location"] == f"/clientes/{existente.id_cliente}"
+    pagina = client.get(respuesta.headers["Location"]).get_data(as_text=True)
+    assert "Ya existe un cliente con la cédula 1098765432" in pagina
+    assert len(db.session.scalars(db.select(Cliente)).all()) == 1
+
+
+@pytest.mark.parametrize("cambio, mensaje", [
+    ({"cedula": ""}, "Escribe la cédula."),
+    ({"cedula": "10.987.654"}, "Usa solo números"),
+    ({"nombres": "Ana2"}, "Usa solo letras y espacios."),
+    ({"apellidos": ""}, "Escribe los apellidos."),
+    ({"telefono": "300-123"}, "Usa solo números"),
+])
+def test_validaciones_del_cliente(client, como_vendedor, cambio, mensaje):
+    respuesta = client.post("/clientes/nuevo", data=datos_cliente(**cambio))
+
+    assert respuesta.status_code == 200
+    assert mensaje in respuesta.get_data(as_text=True)
+    assert db.session.scalar(db.select(Cliente)) is None
+
+
+def test_el_detalle_muestra_los_datos_y_la_cuenta(client, crear_cuenta, como_vendedor):
+    cuenta = crear_cuenta("cliente", correo="ana@correo.com")
+    cliente = crear_cliente(usuario=cuenta, telefono="3001234567")
+
+    pagina = client.get(f"/clientes/{cliente.id_cliente}").get_data(as_text=True)
+
+    assert "Ana María Rueda Gómez" in pagina
+    assert "3001234567" in pagina
+    assert "ana@correo.com" in pagina
+
+
+def test_un_cliente_que_no_existe_da_404(client, como_vendedor):
+    assert client.get("/clientes/999").status_code == 404
+    assert client.get("/clientes/999/editar").status_code == 404
+
+
+def test_editar_un_cliente(client, como_vendedor):
+    cliente = crear_cliente()
+
+    respuesta = client.post(
+        f"/clientes/{cliente.id_cliente}/editar",
+        data=datos_cliente(apellidos="Rueda Pérez", telefono=""),
+        follow_redirects=True,
+    )
+
+    assert "Se guardaron los cambios." in respuesta.get_data(as_text=True)
+    db.session.refresh(cliente)
+    assert cliente.apellidos == "Rueda Pérez"
+    assert cliente.telefono is None
+
+
+def test_el_formulario_de_edicion_trae_los_datos_actuales(client, como_vendedor):
+    cliente = crear_cliente()
+
+    pagina = client.get(f"/clientes/{cliente.id_cliente}/editar").get_data(as_text=True)
+
+    assert 'value="1098765432"' in pagina
+    assert 'value="Ana María"' in pagina
+
+
+def test_al_editar_no_se_puede_usar_la_cedula_de_otro(client, como_vendedor):
+    crear_cliente(cedula="111")
+    segundo = crear_cliente(cedula="222")
+
+    respuesta = client.post(f"/clientes/{segundo.id_cliente}/editar", data=datos_cliente(cedula="111"))
+
+    assert "Esta cédula ya es de Ana María Rueda Gómez." in respuesta.get_data(as_text=True)
+    db.session.refresh(segundo)
+    assert segundo.cedula == "222"
+
+
+def test_al_editar_se_puede_dejar_la_misma_cedula(client, como_vendedor):
+    cliente = crear_cliente(cedula="111")
+
+    respuesta = client.post(f"/clientes/{cliente.id_cliente}/editar", data=datos_cliente(cedula="111"))
+
+    assert respuesta.status_code == 302
+
+
+@pytest.mark.parametrize("rol, codigo", [("cliente", 403), ("vendedor", 200), ("administrador", 200)])
+def test_solo_el_personal_gestiona_clientes(client, crear_cuenta, iniciar_sesion, rol, codigo):
+    iniciar_sesion(crear_cuenta(rol))
+    cliente = crear_cliente()
+
+    assert client.get("/clientes/").status_code == codigo
+    assert client.get("/clientes/nuevo").status_code == codigo
+    assert client.get(f"/clientes/{cliente.id_cliente}").status_code == codigo
+    assert client.get(f"/clientes/{cliente.id_cliente}/editar").status_code == codigo
