@@ -123,7 +123,7 @@ Los sprints duran 4 semanas cada uno (sprint 1: semanas 1 a 4, sprint 2: semanas
 ### Sprint 1 — Cuentas, clientes, vehículos y repuestos · `v0.1-sprint1`
 
 - [x] US-01 — Registro e inicio de sesión de usuarios (Santiago)
-- [ ] US-02 — Gestionar clientes (Jhon)
+- [x] US-02 — Gestionar clientes (Jhon)
 - [ ] US-03 — Gestionar vehículos (David)
 - [ ] US-04 — Gestionar repuestos y stock (Jairo)
 

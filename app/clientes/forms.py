@@ -1,6 +1,6 @@
 """Formularios del módulo Gestión de clientes (US-02)."""
 from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField
+from wtforms import BooleanField, HiddenField, StringField, SubmitField
 from wtforms.validators import DataRequired, Length, Optional, Regexp
 
 from app.validadores import SOLO_LETRAS, SOLO_NUMEROS, limpiar
@@ -30,3 +30,14 @@ class ClienteForm(FlaskForm):
         Regexp(SOLO_NUMEROS, message="Usa solo números, sin espacios."),
     ])
     enviar = SubmitField("Guardar")
+
+
+class EnlazarCuentaForm(FlaskForm):
+    """US-02 T4: el vendedor confirma que verificó la cédula antes de enlazar."""
+
+    id_usuario = HiddenField(validators=[DataRequired("Elige la cuenta que vas a enlazar.")])
+    verificado = BooleanField(
+        "Verifiqué en persona que la cédula del cliente coincide",
+        validators=[DataRequired("Confirma que verificaste la cédula en persona.")],
+    )
+    enviar = SubmitField("Enlazar esta cuenta")

@@ -7,7 +7,7 @@ from flask import abort, flash, redirect, render_template, request, url_for
 
 from app.auth.decoradores import rol_requerido
 from app.clientes import bp, services
-from app.clientes.forms import ClienteForm
+from app.clientes.forms import ClienteForm, EnlazarCuentaForm
 
 PERSONAL = ("vendedor", "administrador")
 
@@ -67,6 +67,46 @@ def editar(id_cliente):
             return redirect(url_for("clientes.detalle", id_cliente=cliente.id_cliente))
 
     return render_template("clientes/formulario.html", form=form, cliente=cliente)
+
+
+@bp.route("/<int:id_cliente>/enlazar", methods=["GET", "POST"])
+@rol_requerido(*PERSONAL)
+def enlazar(id_cliente):
+    """US-02 T4: enlazar la cuenta de un cliente que verificó su cédula en persona."""
+    cliente = _cliente_o_404(id_cliente)
+    if cliente.usuario is not None:
+        flash("Este cliente ya tiene una cuenta enlazada.", "info")
+        return redirect(url_for("clientes.detalle", id_cliente=cliente.id_cliente))
+
+    correo = request.args.get("correo", "").strip()
+    form = EnlazarCuentaForm()
+    if form.validate_on_submit():
+        try:
+            usuario = services.enlazar_cuenta(cliente, int(form.id_usuario.data))
+        except (ValueError, services.EnlaceRechazado) as error:
+            mensaje = str(error) if isinstance(error, services.EnlaceRechazado) else "Elige una cuenta de la lista."
+            flash(mensaje, "danger")
+        else:
+            flash(f"Se enlazó la cuenta {usuario.correo} con {cliente.nombre_completo}.", "success")
+            return redirect(url_for("clientes.detalle", id_cliente=cliente.id_cliente))
+
+    return render_template(
+        "clientes/enlazar.html",
+        cliente=cliente,
+        correo=correo,
+        cuentas=services.cuentas_sin_enlazar(correo),
+        form=form,
+    )
+
+
+@bp.post("/<int:id_cliente>/quitar-enlace")
+@rol_requerido(*PERSONAL)
+def quitar_enlace(id_cliente):
+    cliente = _cliente_o_404(id_cliente)
+    usuario = services.quitar_enlace(cliente)
+    if usuario is not None:
+        flash(f"Se quitó el enlace con la cuenta {usuario.correo}. La cuenta sigue existiendo.", "info")
+    return redirect(url_for("clientes.detalle", id_cliente=cliente.id_cliente))
 
 
 def _cliente_o_404(id_cliente):
