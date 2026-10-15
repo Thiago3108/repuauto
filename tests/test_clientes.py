@@ -1,4 +1,4 @@
-"""Pruebas de US-02: tabla cliente y CRUD de clientes (UI-08)."""
+"""Pruebas de US-02: tabla cliente, CRUD y búsqueda de clientes (UI-08)."""
 import pytest
 from sqlalchemy.exc import IntegrityError
 
@@ -197,3 +197,77 @@ def test_solo_el_personal_gestiona_clientes(client, crear_cuenta, iniciar_sesion
     assert client.get("/clientes/nuevo").status_code == codigo
     assert client.get(f"/clientes/{cliente.id_cliente}").status_code == codigo
     assert client.get(f"/clientes/{cliente.id_cliente}/editar").status_code == codigo
+
+
+# ---------- Búsqueda de clientes (US-02 T3) ----------
+
+
+@pytest.fixture()
+def tres_clientes(app):
+    crear_cliente(cedula="1098765432", nombres="Ana María", apellidos="Rueda Gómez", telefono="3001234567")
+    crear_cliente(cedula="91234567", nombres="Pedro", apellidos="Pérez Ruiz", telefono="3159876543")
+    crear_cliente(cedula="63111222", nombres="Lucía", apellidos="Ñañez", telefono=None)
+
+
+def nombres_en(pagina):
+    return [nombre for nombre in ("Ana María", "Pedro", "Lucía") if nombre in pagina]
+
+
+@pytest.mark.parametrize("busqueda, esperados", [
+    ("1098765432", ["Ana María"]),     # cédula completa
+    ("9123", ["Pedro"]),               # parte de la cédula
+    ("rue", ["Ana María"]),            # parte del apellido
+    ("PEDRO", ["Pedro"]),              # sin importar mayúsculas
+    ("gomez", ["Ana María"]),          # sin importar tildes
+    ("nanez", ["Lucía"]),              # ñ sin tilde
+    ("315987", ["Pedro"]),             # parte del teléfono
+    ("ana rueda", ["Ana María"]),      # varias palabras, en campos distintos
+    ("r", ["Ana María", "Pedro"]),     # coinciden varios
+    ("ana pérez", []),                 # cada palabra tiene que aparecer
+    ("zzz", []),
+])
+def test_buscar_clientes(client, como_vendedor, tres_clientes, busqueda, esperados):
+    pagina = client.get("/clientes/", query_string={"q": busqueda}).get_data(as_text=True)
+
+    assert nombres_en(pagina) == esperados
+
+
+def test_la_busqueda_dice_cuantos_resultados_hay(client, como_vendedor, tres_clientes):
+    pagina = client.get("/clientes/?q=r").get_data(as_text=True)
+
+    assert "2 resultados para «r»" in pagina
+    assert 'value="r"' in pagina
+
+
+def test_sin_resultados_ofrece_registrar_al_cliente(client, como_vendedor, tres_clientes):
+    pagina = client.get("/clientes/?q=zzz").get_data(as_text=True)
+
+    assert "No hay clientes que coincidan con «zzz»" in pagina
+    assert "/clientes/nuevo" in pagina
+
+
+def test_una_busqueda_vacia_muestra_todos(client, como_vendedor, tres_clientes):
+    pagina = client.get("/clientes/?q=+++").get_data(as_text=True)
+
+    assert nombres_en(pagina) == ["Ana María", "Pedro", "Lucía"]
+
+
+@pytest.mark.parametrize("busqueda", ["%", "_", "\\"])
+def test_los_simbolos_se_buscan_como_texto(client, como_vendedor, tres_clientes, busqueda):
+    pagina = client.get("/clientes/", query_string={"q": busqueda}).get_data(as_text=True)
+
+    assert nombres_en(pagina) == []
+
+
+def test_la_busqueda_se_conserva_al_cambiar_de_pagina(client, como_vendedor):
+    for numero in range(25):
+        db.session.add(Cliente(cedula=str(5000 + numero), nombres="Carlos", apellidos=f"Apellido {numero:02d}"))
+    db.session.add(Cliente(cedula="777", nombres="Otro", apellidos="Distinto"))
+    db.session.commit()
+
+    primera = client.get("/clientes/?q=carlos").get_data(as_text=True)
+    segunda = client.get("/clientes/?q=carlos&pagina=2").get_data(as_text=True)
+
+    assert "pagina=2&amp;q=carlos" in primera or "q=carlos&amp;pagina=2" in primera
+    assert "Apellido 24" in segunda
+    assert "Distinto" not in segunda
