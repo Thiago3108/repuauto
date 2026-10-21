@@ -330,6 +330,15 @@ Cada ficha resume lo que hay que construir. Los criterios de aceptación complet
 | T3 · Ajustar stock y alertas de stock bajo | 5 | 2 | `feature/US-04-stock` |
 | T4 · Vistas "Stock y alertas" (UI-09) y "Gestión de repuestos" (UI-10) y pruebas | 5 | 2 | con T2 y T3 |
 
+**Avance de implementación (Jairo):**
+
+- **T1 — Tablas de repuestos:** migración y modelos implementados.
+- **T2 — CRUD de repuestos:** servicios, formularios y vistas de gestión implementados.
+- **T3 — Stock y alertas:** ajustes de stock, validaciones y consulta de stock bajo implementados.
+- **T4 — Vistas y pruebas:** vistas de gestión y stock desarrolladas; pruebas automatizadas aprobadas localmente.
+
+**Pendiente:** revisar la migración y el orden de integración con el equipo, subir los cambios mediante Pull Request y verificar las pruebas en CI. La historia se considera terminada cuando cumpla los criterios de aceptación y quede integrada según el flujo del equipo.
+
 **Claves:**
 
 - El código es único, el precio no puede ser negativo y el stock nunca queda por debajo de cero.
