@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% from "macros.html" import campo %}
+
+{% block titulo %}Iniciar sesión · RepuAuto{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-sm-10 col-md-6 col-lg-4">
+    <div class="card shadow-sm mt-4">
+      <div class="card-body p-4">
+        <h1 class="h4 mb-3">Iniciar sesión</h1>
+        <form method="post" novalidate>
+          {{ form.hidden_tag() }}
+          {{ campo(form.correo, "email", "username") }}
+          {{ campo(form.clave, "password", "current-password") }}
+          {{ form.enviar(class="btn btn-primary w-100") }}
+        </form>
+        <p class="text-center small mt-3 mb-0">
+          ¿No tienes cuenta? <a href="{{ url_for('auth.registro') }}">Regístrate</a>
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
