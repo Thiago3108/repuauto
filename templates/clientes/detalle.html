@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+
+{% block titulo %}{{ cliente.nombre_completo }} · RepuAuto{% endblock %}
+
+{% block content %}
+<nav aria-label="Ruta">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="{{ url_for('clientes.index') }}">Clientes</a></li>
+    <li class="breadcrumb-item active" aria-current="page">{{ cliente.nombre_completo }}</li>
+  </ol>
+</nav>
+
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+  <h1 class="h3 mb-0">{{ cliente.nombre_completo }}</h1>
+  <a class="btn btn-primary" href="{{ url_for('clientes.editar', id_cliente=cliente.id_cliente) }}">Editar</a>
+</div>
+
+<div class="row g-4">
+  <div class="col-lg-6">
+    <div class="card shadow-sm h-100">
+      <div class="card-body">
+        <h2 class="h5 mb-3">Datos</h2>
+        <dl class="row mb-0">
+          <dt class="col-sm-4">Cédula</dt>
+          <dd class="col-sm-8">{{ cliente.cedula }}</dd>
+          <dt class="col-sm-4">Nombres</dt>
+          <dd class="col-sm-8">{{ cliente.nombres }}</dd>
+          <dt class="col-sm-4">Apellidos</dt>
+          <dd class="col-sm-8">{{ cliente.apellidos }}</dd>
+          <dt class="col-sm-4">Teléfono</dt>
+          <dd class="col-sm-8">{{ cliente.telefono or "—" }}</dd>
+          <dt class="col-sm-4">Registrado</dt>
+          <dd class="col-sm-8 mb-0">{{ cliente.creado_en.strftime("%d/%m/%Y") }}</dd>
+        </dl>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-6">
+    <div class="card shadow-sm h-100">
+      <div class="card-body">
+        <h2 class="h5 mb-3">Cuenta en la app</h2>
+        {% if cliente.usuario %}
+        <p class="mb-1"><span class="badge text-bg-success">Enlazada</span></p>
+        <p>Correo: <strong>{{ cliente.usuario.correo }}</strong></p>
+        <form method="post" action="{{ url_for('clientes.quitar_enlace', id_cliente=cliente.id_cliente) }}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <button type="submit" class="btn btn-outline-danger btn-sm"
+                  onclick="return confirm('¿Quitar el enlace? La cuenta no se borra, pero dejará de ver las compras de este cliente.')">Quitar enlace</button>
+        </form>
+        {% else %}
+        <p class="mb-1"><span class="badge text-bg-secondary">Sin cuenta</span></p>
+        <p class="text-muted">Es un cliente de mostrador. Si ya se registró en la app, enlaza su cuenta verificando su cédula en persona.</p>
+        <a class="btn btn-outline-primary btn-sm" href="{{ url_for('clientes.enlazar', id_cliente=cliente.id_cliente) }}">Enlazar cuenta</a>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
