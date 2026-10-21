@@ -14,3 +14,4 @@ Orden de creación en el sprint 1 (cada migración se fusiona antes de generar l
 """
 from app.models.usuario import Rol, Usuario  # noqa: F401
 from app.models.cliente import Cliente  # noqa: F401
+from app.models.repuesto import Categoria, MarcaRepuesto, Repuesto  # noqa: F401
