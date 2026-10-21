@@ -11,7 +11,7 @@ import click
 
 from app.auth import services as cuentas
 from app.extensions import db
-from app.models import Rol
+from app.models import Categoria, MarcaRepuesto, Rol
 
 SEMILLAS = []
 
@@ -29,6 +29,41 @@ def roles():
         if not db.session.scalar(db.select(Rol).filter_by(nombre=nombre)):
             db.session.add(Rol(nombre=nombre))
 
+@semilla
+def categorias_repuesto():
+    """Crea categorías iniciales sin duplicar las existentes."""
+    nombres = (
+        "Motor",
+        "Frenos",
+        "Suspensión",
+        "Sistema eléctrico",
+        "Filtros",
+    )
+
+    for nombre in nombres:
+        existe = db.session.scalar(
+            db.select(Categoria.id_categoria).filter_by(nombre=nombre)
+        )
+        if existe is None:
+            db.session.add(Categoria(nombre=nombre))
+
+@semilla
+def marcas_repuesto():
+    """Crea marcas iniciales sin duplicar las existentes."""
+    nombres = (
+        "Bosch",
+        "Denso",
+        "NGK",
+        "Gates",
+        "Genérica",
+    )
+
+    for nombre in nombres:
+        existe = db.session.scalar(
+            db.select(MarcaRepuesto.id_marca_repuesto).filter_by(nombre=nombre)
+        )
+        if existe is None:
+            db.session.add(MarcaRepuesto(nombre=nombre))
 
 @semilla
 def primer_administrador():
