@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block titulo %}Ventas · RepuAuto{% endblock %}
+
+{% block content %}
+{% set colores = {"Completada": "success", "Pendiente": "warning", "Cancelada": "secondary"} %}
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+  <h1 class="h3 mb-0">Ventas</h1>
+  <a class="btn btn-primary" href="{{ url_for('ventas.nueva') }}">Registrar venta</a>
+</div>
+
+{% if ventas %}
+<div class="card shadow-sm">
+  <div class="table-responsive">
+    <table class="table table-hover align-middle mb-0">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Fecha</th>
+          <th>Cliente</th>
+          <th>Vendedor</th>
+          <th>Pago</th>
+          <th class="text-end">Total</th>
+          <th>Estado</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for venta in ventas %}
+        <tr>
+          <td>{{ venta.id_venta }}</td>
+          <td>{{ venta.fecha.strftime("%d/%m/%Y %H:%M") }}</td>
+          <td>{{ venta.cliente.nombre_completo }}</td>
+          <td>{{ venta.vendedor.nombre }}</td>
+          <td>{{ venta.metodo_pago }}</td>
+          <td class="text-end">${{ "{:,.2f}".format(venta.total) }}</td>
+          <td><span class="badge text-bg-{{ colores.get(venta.estado.nombre, 'secondary') }}">{{ venta.estado.nombre }}</span></td>
+          <td class="text-end">
+            <a class="btn btn-outline-secondary btn-sm" href="{{ url_for('ventas.detalle', id_venta=venta.id_venta) }}">Ver</a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% else %}
+<div class="alert alert-info">Todavía no hay ventas registradas.</div>
+{% endif %}
+{% endblock %}

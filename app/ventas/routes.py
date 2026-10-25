@@ -3,16 +3,64 @@
 Las rutas reciben la petición, llaman a services.py y eligen la plantilla.
 No consultan la base de datos directamente: eso es trabajo de services.py.
 """
-from flask import render_template
+from flask import abort, flash, redirect, render_template, request, url_for
+from flask_login import current_user
 
-from app.ventas import bp
+from app.auth.decoradores import rol_requerido
+from app.ventas import bp, services
+from app.ventas.forms import VentaForm
+
+PERSONAL = ("vendedor", "administrador")
 
 
 @bp.get("/")
+@rol_requerido(*PERSONAL)
 def index():
+    """Las ventas más recientes. US-06 T4 agrega completar y cancelar (UI-07)."""
+    return render_template("ventas/lista.html", ventas=services.listar_ventas())
+
+
+@bp.route("/nueva", methods=["GET", "POST"])
+@rol_requerido(*PERSONAL)
+def nueva():
+    """UI-06 Registro de venta."""
+    form = VentaForm()
+    if request.method == "GET" and request.args.get("cedula"):
+        form.cedula.data = request.args["cedula"]
+    repuestos = services.repuestos_para_vender()
+    form.poner_repuestos(repuestos)
+
+    sin_cliente = False
+    if form.validate_on_submit():
+        cliente = services.buscar_cliente(form.cedula.data)
+        if cliente is None:
+            sin_cliente = True
+            form.cedula.errors.append("No hay un cliente con esta cédula. Regístralo primero.")
+        else:
+            try:
+                venta = services.registrar_venta(
+                    cliente, current_user._get_current_object(), form.lineas_elegidas(),
+                    form.metodo_pago.data, completada=form.estado.data == "Completada",
+                )
+            except services.VentaRechazada as rechazo:
+                flash(rechazo.mensaje, "danger")
+            else:
+                flash(f"Se registró la venta #{venta.id_venta} por ${venta.total:,.2f}.", "success")
+                return redirect(url_for("ventas.detalle", id_venta=venta.id_venta))
+
     return render_template(
-        "en_construccion.html",
-        modulo="Ventas",
-        historia="US-06 y US-08",
-        vistas="UI-05, UI-06 y UI-07",
+        "ventas/nueva.html",
+        form=form,
+        precios={r.id_repuesto: float(r.precio_venta) for r in repuestos},
+        sin_cliente=sin_cliente,
     )
+
+
+@bp.get("/<int:id_venta>")
+@rol_requerido(*PERSONAL)
+def detalle(id_venta):
+    """Confirmación y detalle de una venta."""
+    venta = services.obtener_venta(id_venta)
+    if venta is None:
+        abort(404)
+    return render_template("ventas/detalle.html", venta=venta)

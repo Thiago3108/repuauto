@@ -1,0 +1,139 @@
+{% extends "base.html" %}
+{% from "macros.html" import campo %}
+
+{% block titulo %}Registrar venta · RepuAuto{% endblock %}
+
+{% block content %}
+<nav aria-label="Ruta">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="{{ url_for('ventas.index') }}">Ventas</a></li>
+    <li class="breadcrumb-item active" aria-current="page">Registrar venta</li>
+  </ol>
+</nav>
+
+<div class="row">
+  <div class="col-xl-9">
+    <div class="card shadow-sm">
+      <div class="card-body p-4">
+        <h1 class="h4 mb-3">Registrar venta</h1>
+        <form method="post" novalidate>
+          {{ form.hidden_tag() }}
+
+          <div class="row">
+            <div class="col-sm-6">{{ campo(form.cedula, autocompletar="off") }}</div>
+          </div>
+          {% if sin_cliente %}
+          <div class="alert alert-warning">
+            ¿Es un cliente de mostrador nuevo?
+            <a class="alert-link" href="{{ url_for('clientes.nuevo') }}" target="_blank">Regístralo aquí</a>
+            y vuelve a registrar la venta.
+          </div>
+          {% endif %}
+
+          <h2 class="h6 mt-2">Repuestos</h2>
+          {% for error in form.lineas.errors if error is string %}
+          <div class="text-danger small mb-2">{{ error }}</div>
+          {% endfor %}
+          <div id="lineas">
+            {% for linea in form.lineas %}
+            <div class="row g-2 align-items-start mb-2 linea">
+              <div class="col-md-8">
+                {{ linea.id_repuesto(class="form-select" + (" is-invalid" if linea.id_repuesto.errors else ""), **{"aria-label": "Repuesto"}) }}
+                {% for error in linea.id_repuesto.errors %}<div class="invalid-feedback">{{ error }}</div>{% endfor %}
+              </div>
+              <div class="col-6 col-md-2">
+                {{ linea.cantidad(class="form-control" + (" is-invalid" if linea.cantidad.errors else ""), type="number", min="1", placeholder="Cantidad", **{"aria-label": "Cantidad"}) }}
+                {% for error in linea.cantidad.errors %}<div class="invalid-feedback">{{ error }}</div>{% endfor %}
+              </div>
+              <div class="col-6 col-md-2">
+                <button type="button" class="btn btn-outline-danger w-100 quitar">Quitar</button>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+          <button type="button" class="btn btn-outline-primary btn-sm mb-3" id="agregar">Agregar otro repuesto</button>
+
+          <div class="row">
+            <div class="col-sm-6">
+              <div class="mb-3">
+                {{ form.metodo_pago.label(class="form-label") }}
+                {{ form.metodo_pago(class="form-select" + (" is-invalid" if form.metodo_pago.errors else "")) }}
+                {% for error in form.metodo_pago.errors %}<div class="invalid-feedback">{{ error }}</div>{% endfor %}
+              </div>
+            </div>
+            <div class="col-sm-6">
+              <div class="mb-3">
+                <span class="form-label d-block">{{ form.estado.label.text }}</span>
+                {% for opcion in form.estado %}
+                <div class="form-check">
+                  {{ opcion(class="form-check-input") }}
+                  {{ opcion.label(class="form-check-label") }}
+                </div>
+                {% endfor %}
+              </div>
+            </div>
+          </div>
+
+          <p class="fs-5">Total estimado: <strong id="total">$0.00</strong></p>
+          <p class="text-muted small">El precio de cada repuesto se toma de su precio actual. Si algún repuesto no tiene stock suficiente, la venta no se guarda.</p>
+
+          <div class="d-flex gap-2">
+            {{ form.enviar(class="btn btn-primary") }}
+            <a class="btn btn-outline-secondary" href="{{ url_for('ventas.index') }}">Cancelar</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  // Agrega y quita líneas de repuesto, y calcula el total estimado.
+  // El total que vale es el que calcula el servidor al guardar.
+  const precios = {{ precios|tojson }};
+  const lineas = document.getElementById("lineas");
+  const formato = new Intl.NumberFormat("en-US", {minimumFractionDigits: 2, maximumFractionDigits: 2});
+
+  function calcularTotal() {
+    let total = 0;
+    lineas.querySelectorAll(".linea").forEach((linea) => {
+      const precio = precios[linea.querySelector("select").value] || 0;
+      const cantidad = parseInt(linea.querySelector("input").value, 10) || 0;
+      total += precio * Math.max(cantidad, 0);
+    });
+    document.getElementById("total").textContent = "$" + formato.format(total);
+  }
+
+  document.getElementById("agregar").addEventListener("click", () => {
+    const filas = lineas.querySelectorAll(".linea");
+    const siguiente = Math.max(...[...filas].map((f) => parseInt(f.querySelector("select").name.split("-")[1], 10))) + 1;
+    const nueva = filas[filas.length - 1].cloneNode(true);
+    nueva.querySelectorAll("select, input").forEach((campo) => {
+      campo.name = campo.name.replace(/^lineas-\d+-/, `lineas-${siguiente}-`);
+      campo.id = campo.name;
+      campo.value = campo.tagName === "SELECT" ? "0" : "";
+      campo.classList.remove("is-invalid");
+    });
+    nueva.querySelectorAll(".invalid-feedback").forEach((error) => error.remove());
+    lineas.appendChild(nueva);
+  });
+
+  lineas.addEventListener("click", (evento) => {
+    if (!evento.target.classList.contains("quitar")) return;
+    const filas = lineas.querySelectorAll(".linea");
+    if (filas.length > 1) {
+      evento.target.closest(".linea").remove();
+    } else {
+      filas[0].querySelector("select").value = "0";
+      filas[0].querySelector("input").value = "";
+    }
+    calcularTotal();
+  });
+
+  lineas.addEventListener("input", calcularTotal);
+  lineas.addEventListener("change", calcularTotal);
+  calcularTotal();
+</script>
+{% endblock %}
