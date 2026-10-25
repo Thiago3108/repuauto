@@ -11,7 +11,8 @@ import click
 
 from app.auth import services as cuentas
 from app.extensions import db
-from app.models import Categoria, MarcaRepuesto, Rol
+from app.models import Categoria, EstadoVenta, MarcaRepuesto, Rol
+from app.models.venta import ESTADOS_DE_VENTA
 
 SEMILLAS = []
 
@@ -64,6 +65,14 @@ def marcas_repuesto():
         )
         if existe is None:
             db.session.add(MarcaRepuesto(nombre=nombre))
+
+@semilla
+def estados_venta():
+    """Los estados de una venta (US-06): Pendiente, Completada y Cancelada."""
+    for nombre in ESTADOS_DE_VENTA:
+        if not db.session.scalar(db.select(EstadoVenta).filter_by(nombre=nombre)):
+            db.session.add(EstadoVenta(nombre=nombre))
+
 
 @semilla
 def primer_administrador():

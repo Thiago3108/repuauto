@@ -109,8 +109,8 @@ Cada migración se une a `main` **antes** de generar la siguiente, porque las ta
 | 1 | 1 | `app/models/usuario.py` | `rol`, `usuario` | US-01 T1 | Santiago |
 | 2 | 1 | `app/models/cliente.py` | `cliente` | US-02 T1 | Jhon (la hizo Santiago) |
 | 3 | 1 | `app/models/repuesto.py` | `categoria`, `marca_repuesto`, `repuesto` | US-04 T1 | Jairo |
-| 4 | 1 | `app/models/vehiculo.py` | `marca_vehiculo`, `vehiculo`, `repuesto_vehiculo` | US-03 T1 | David |
-| 5 | 2 | `app/models/venta.py` | `estado_venta`, `venta`, `detalle_venta` | US-06 T1 | Jhon |
+| 4 | 2 | `app/models/venta.py` | `estado_venta`, `venta`, `detalle_venta` | US-06 T1 | Jhon (la hizo Santiago) |
+| 5 | 1 | `app/models/vehiculo.py` | `marca_vehiculo`, `vehiculo`, `repuesto_vehiculo` | US-03 T1 | David |
 | 6 | 3 | `app/models/compra.py` | `proveedor`, `compra`, `detalle_compra` | US-09 T1 | Jairo |
 
 **Para crear o cambiar tablas:**
