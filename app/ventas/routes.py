@@ -7,6 +7,7 @@ from flask import abort, flash, redirect, render_template, request, url_for
 from flask_login import current_user
 
 from app.auth.decoradores import rol_requerido
+from app.models.venta import ESTADOS_DE_VENTA
 from app.ventas import bp, services
 from app.ventas.forms import VentaForm
 
@@ -16,8 +17,13 @@ PERSONAL = ("vendedor", "administrador")
 @bp.get("/")
 @rol_requerido(*PERSONAL)
 def index():
-    """Las ventas más recientes. US-06 T4 agrega completar y cancelar (UI-07)."""
-    return render_template("ventas/lista.html", ventas=services.listar_ventas())
+    """UI-07 Ventas registradas, con filtro por estado, para completarlas o cancelarlas."""
+    estado = request.args.get("estado", "")
+    if estado not in ESTADOS_DE_VENTA:
+        estado = ""
+    return render_template(
+        "ventas/lista.html", ventas=services.listar_ventas(estado), estado=estado, estados=ESTADOS_DE_VENTA,
+    )
 
 
 @bp.route("/nueva", methods=["GET", "POST"])
@@ -64,3 +70,31 @@ def detalle(id_venta):
     if venta is None:
         abort(404)
     return render_template("ventas/detalle.html", venta=venta)
+
+
+@bp.post("/<int:id_venta>/completar")
+@rol_requerido(*PERSONAL)
+def completar(id_venta):
+    return _cambiar_estado(id_venta, services.completar_venta, "Se completó la venta #{}.")
+
+
+@bp.post("/<int:id_venta>/cancelar")
+@rol_requerido(*PERSONAL)
+def cancelar(id_venta):
+    return _cambiar_estado(id_venta, services.cancelar_venta, "Se canceló la venta #{} y se devolvió el stock.")
+
+
+def _cambiar_estado(id_venta, cambio, mensaje):
+    try:
+        venta = cambio(id_venta)
+    except services.VentaRechazada as rechazo:
+        flash(rechazo.mensaje, "warning")
+    else:
+        if venta is None:
+            abort(404)
+        flash(mensaje.format(venta.id_venta), "success")
+    # Solo se vuelve a una página de ventas, para que nadie use el formulario para redirigir a otro sitio.
+    volver = request.form.get("volver", "")
+    if not volver.startswith("/ventas/"):
+        volver = url_for("ventas.detalle", id_venta=id_venta)
+    return redirect(volver)

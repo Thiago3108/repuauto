@@ -37,10 +37,13 @@ def obtener_venta(id_venta):
     return db.session.get(Venta, id_venta)
 
 
-def listar_ventas(limite=50):
-    """Las ventas más recientes primero."""
+def listar_ventas(estado=None, limite=50):
+    """Las ventas más recientes primero. Con estado, solo las de ese estado (UI-07)."""
+    consulta = db.select(Venta)
+    if estado:
+        consulta = consulta.join(Venta.estado).filter(EstadoVenta.nombre == estado)
     return db.session.scalars(
-        db.select(Venta).order_by(Venta.fecha.desc(), Venta.id_venta.desc()).limit(limite)
+        consulta.order_by(Venta.fecha.desc(), Venta.id_venta.desc()).limit(limite)
     ).all()
 
 
@@ -119,3 +122,59 @@ def registrar_venta(cliente, vendedor, lineas, metodo_pago, completada=True):
         db.session.rollback()
         raise VentaRechazada("No se pudo guardar la venta. Revisa los datos e inténtalo de nuevo.")
     return venta
+
+
+def completar_venta(id_venta):
+    """Una venta Pendiente pasa a Completada: el cliente pagó y se llevó el repuesto (US-06 T4).
+
+    El stock no cambia, porque ya se descontó al registrar la venta.
+    Devuelve la venta, o None si no existe. Lanza VentaRechazada si no está Pendiente.
+    """
+    venta = _venta_bloqueada(id_venta)
+    if venta is None:
+        return None
+    if venta.estado.nombre != "Pendiente":
+        db.session.rollback()
+        raise VentaRechazada(f"Solo se completan las ventas pendientes. Esta está {venta.estado.nombre}.")
+    venta.estado = _estado("Completada")
+    db.session.commit()
+    return venta
+
+
+def cancelar_venta(id_venta):
+    """Cancela una venta Pendiente o Completada y devuelve el stock (US-06 T4).
+
+    Todo va en una sola transacción. La venta y sus repuestos se bloquean
+    (SELECT ... FOR UPDATE), para que dos personas cancelando a la vez no devuelvan el
+    stock dos veces. La venta no se borra: queda Cancelada y fuera de los reportes.
+
+    Devuelve la venta, o None si no existe. Lanza VentaRechazada si ya estaba cancelada.
+    """
+    venta = _venta_bloqueada(id_venta)
+    if venta is None:
+        return None
+    if venta.estado.nombre == "Cancelada":
+        db.session.rollback()
+        raise VentaRechazada("Esta venta ya estaba cancelada.")
+
+    cantidades = {detalle.id_repuesto: detalle.cantidad for detalle in venta.detalles}
+    repuestos = db.session.scalars(
+        db.select(Repuesto)
+        .filter(Repuesto.id_repuesto.in_(cantidades))
+        .order_by(Repuesto.id_repuesto)
+        .with_for_update()
+    )
+    for repuesto in repuestos:
+        repuesto.stock_actual += cantidades[repuesto.id_repuesto]
+    venta.estado = _estado("Cancelada")
+    db.session.commit()
+    return venta
+
+
+def _venta_bloqueada(id_venta):
+    """La venta leída de nuevo de la base y bloqueada hasta el commit o el rollback."""
+    return db.session.get(Venta, id_venta, with_for_update=True, populate_existing=True)
+
+
+def _estado(nombre):
+    return db.session.scalar(db.select(EstadoVenta).filter_by(nombre=nombre))
