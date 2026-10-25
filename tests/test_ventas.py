@@ -265,3 +265,101 @@ def test_un_cliente_no_puede_registrar_ventas(client, crear_cuenta, iniciar_sesi
     iniciar_sesion(crear_cuenta("cliente"))
 
     assert client.get("/ventas/nueva").status_code == 403
+
+
+# ---------- Completar o cancelar ventas (US-06 T4, UI-07) ----------
+
+
+def stock(repuesto):
+    return db.session.get(Repuesto, repuesto.id_repuesto).stock_actual
+
+
+def test_completar_una_venta_pendiente_no_cambia_el_stock(base_venta):
+    venta = registrar(base_venta, [(base_venta["filtro"].id_repuesto, 2)], completada=False)
+
+    services.completar_venta(venta.id_venta)
+
+    assert venta.estado.nombre == "Completada"
+    assert stock(base_venta["filtro"]) == 8
+
+
+def test_solo_se_completan_las_ventas_pendientes(base_venta):
+    venta = registrar(base_venta, [(base_venta["filtro"].id_repuesto, 1)])
+
+    with pytest.raises(services.VentaRechazada, match="Solo se completan las ventas pendientes"):
+        services.completar_venta(venta.id_venta)
+
+
+@pytest.mark.parametrize("completada", [False, True])
+def test_cancelar_una_venta_devuelve_el_stock(base_venta, completada):
+    filtro, pastillas = base_venta["filtro"], base_venta["pastillas"]
+    venta = registrar(base_venta, [(filtro.id_repuesto, 2), (pastillas.id_repuesto, 5)], completada=completada)
+
+    services.cancelar_venta(venta.id_venta)
+
+    assert venta.estado.nombre == "Cancelada"
+    assert (stock(filtro), stock(pastillas)) == (10, 5)
+    assert len(venta.detalles) == 2
+
+
+def test_una_venta_cancelada_no_devuelve_el_stock_dos_veces(base_venta):
+    venta = registrar(base_venta, [(base_venta["filtro"].id_repuesto, 3)])
+    services.cancelar_venta(venta.id_venta)
+
+    with pytest.raises(services.VentaRechazada, match="ya estaba cancelada"):
+        services.cancelar_venta(venta.id_venta)
+    with pytest.raises(services.VentaRechazada):
+        services.completar_venta(venta.id_venta)
+    assert stock(base_venta["filtro"]) == 10
+
+
+def test_cambiar_el_estado_de_una_venta_que_no_existe(app):
+    assert services.completar_venta(9999) is None
+    assert services.cancelar_venta(9999) is None
+
+
+def test_la_lista_filtra_por_estado(client, base_venta, iniciar_sesion):
+    pendiente = registrar(base_venta, [(base_venta["filtro"].id_repuesto, 1)], completada=False)
+    completada = registrar(base_venta, [(base_venta["pastillas"].id_repuesto, 1)])
+    iniciar_sesion(base_venta["vendedor"])
+
+    html = client.get("/ventas/?estado=Pendiente").get_data(as_text=True)
+
+    assert f'href="/ventas/{pendiente.id_venta}"' in html
+    assert f'href="/ventas/{completada.id_venta}"' not in html
+    assert "No hay ventas canceladas." in client.get("/ventas/?estado=Cancelada").get_data(as_text=True)
+
+
+def test_completar_y_cancelar_desde_la_pantalla(client, base_venta, iniciar_sesion):
+    venta = registrar(base_venta, [(base_venta["filtro"].id_repuesto, 4)], completada=False)
+    iniciar_sesion(base_venta["vendedor"])
+
+    respuesta = client.post(f"/ventas/{venta.id_venta}/completar", data={"volver": "/ventas/?estado=Pendiente"})
+    assert respuesta.headers["Location"] == "/ventas/?estado=Pendiente"
+
+    respuesta = client.post(f"/ventas/{venta.id_venta}/cancelar", follow_redirects=True)
+    html = respuesta.get_data(as_text=True)
+    assert f"Se canceló la venta #{venta.id_venta} y se devolvió el stock." in html
+    assert stock(base_venta["filtro"]) == 10
+
+    respuesta = client.post(f"/ventas/{venta.id_venta}/cancelar", follow_redirects=True)
+    assert "Esta venta ya estaba cancelada." in respuesta.get_data(as_text=True)
+    assert stock(base_venta["filtro"]) == 10
+
+
+def test_no_redirige_fuera_de_ventas(client, base_venta, iniciar_sesion):
+    venta = registrar(base_venta, [(base_venta["filtro"].id_repuesto, 1)], completada=False)
+    iniciar_sesion(base_venta["vendedor"])
+
+    respuesta = client.post(f"/ventas/{venta.id_venta}/completar", data={"volver": "https://otro-sitio.com"})
+
+    assert respuesta.headers["Location"] == f"/ventas/{venta.id_venta}"
+
+
+def test_cambiar_el_estado_pide_ser_del_personal(client, base_venta, crear_cuenta, iniciar_sesion):
+    venta = registrar(base_venta, [(base_venta["filtro"].id_repuesto, 1)], completada=False)
+    iniciar_sesion(crear_cuenta("cliente"))
+
+    assert client.post(f"/ventas/{venta.id_venta}/cancelar").status_code == 403
+    assert client.post("/ventas/9999/completar").status_code == 403
+    assert stock(base_venta["filtro"]) == 9

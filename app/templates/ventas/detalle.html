@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% from "ventas/_acciones.html" import acciones %}
 
 {% block titulo %}Venta #{{ venta.id_venta }} · RepuAuto{% endblock %}
 
@@ -16,7 +17,10 @@
     Venta #{{ venta.id_venta }}
     <span class="badge text-bg-{{ colores.get(venta.estado.nombre, 'secondary') }} fs-6 align-middle">{{ venta.estado.nombre }}</span>
   </h1>
-  <a class="btn btn-primary" href="{{ url_for('ventas.nueva') }}">Registrar otra venta</a>
+  <div class="d-flex gap-2">
+    {{ acciones(venta, request.path, "") }}
+    <a class="btn btn-primary" href="{{ url_for('ventas.nueva') }}">Registrar otra venta</a>
+  </div>
 </div>
 
 <div class="row g-4">

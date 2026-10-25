@@ -1,13 +1,25 @@
 {% extends "base.html" %}
+{% from "ventas/_acciones.html" import acciones %}
 
-{% block titulo %}Ventas · RepuAuto{% endblock %}
+{% block titulo %}Ventas registradas · RepuAuto{% endblock %}
 
 {% block content %}
 {% set colores = {"Completada": "success", "Pendiente": "warning", "Cancelada": "secondary"} %}
 <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
-  <h1 class="h3 mb-0">Ventas</h1>
+  <h1 class="h3 mb-0">Ventas registradas</h1>
   <a class="btn btn-primary" href="{{ url_for('ventas.nueva') }}">Registrar venta</a>
 </div>
+
+<ul class="nav nav-pills mb-3">
+  <li class="nav-item">
+    <a class="nav-link {% if not estado %}active{% endif %}" href="{{ url_for('ventas.index') }}">Todas</a>
+  </li>
+  {% for nombre in estados %}
+  <li class="nav-item">
+    <a class="nav-link {% if estado == nombre %}active{% endif %}" href="{{ url_for('ventas.index', estado=nombre) }}">{{ nombre }}s</a>
+  </li>
+  {% endfor %}
+</ul>
 
 {% if ventas %}
 <div class="card shadow-sm">
@@ -35,8 +47,9 @@
           <td>{{ venta.metodo_pago }}</td>
           <td class="text-end">${{ "{:,.2f}".format(venta.total) }}</td>
           <td><span class="badge text-bg-{{ colores.get(venta.estado.nombre, 'secondary') }}">{{ venta.estado.nombre }}</span></td>
-          <td class="text-end">
+          <td class="text-end text-nowrap">
             <a class="btn btn-outline-secondary btn-sm" href="{{ url_for('ventas.detalle', id_venta=venta.id_venta) }}">Ver</a>
+            {{ acciones(venta, request.full_path) }}
           </td>
         </tr>
         {% endfor %}
@@ -45,6 +58,6 @@
   </div>
 </div>
 {% else %}
-<div class="alert alert-info">Todavía no hay ventas registradas.</div>
+<div class="alert alert-info">{{ "No hay ventas " ~ (estado|lower) ~ "s." if estado else "Todavía no hay ventas registradas." }}</div>
 {% endif %}
 {% endblock %}
