@@ -57,7 +57,7 @@
           </td>
           <td class="text-end text-nowrap">
             <a class="btn btn-outline-primary btn-sm"
-               href="{{ url_for('ventas.mi_compra', codigo=venta.id_venta) }}">Ver detalle</a>
+               href="{{ url_for('ventas.mi_compra', codigo=venta.codigo.lstrip('#')) }}">Ver detalle</a>
           </td>
         </tr>
         {% endfor %}

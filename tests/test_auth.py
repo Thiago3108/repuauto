@@ -190,9 +190,9 @@ def test_cerrar_sesion(client, crear_cuenta, iniciar_sesion):
 
 
 @pytest.mark.parametrize("rol, ve, no_ve", [
-    ("cliente", {"Catálogo"}, {"Ventas", "Clientes", "Reportes", "Cuentas y acceso"}),
-    ("vendedor", {"Catálogo", "Ventas", "Clientes", "Repuestos y stock"}, {"Vehículos", "Reportes"}),
-    ("administrador", {"Catálogo", "Ventas", "Reportes", "Cuentas y acceso"}, set()),
+    ("cliente", {"Catálogo", "Mis compras"}, {"Ventas", "Clientes", "Reportes", "Cuentas y acceso"}),
+    ("vendedor", {"Catálogo", "Ventas", "Clientes", "Repuestos y stock"}, {"Mis compras", "Vehículos", "Reportes"}),
+    ("administrador", {"Catálogo", "Ventas", "Reportes", "Cuentas y acceso"}, {"Mis compras"}),
 ])
 def test_cada_rol_ve_solo_su_menu(client, crear_cuenta, iniciar_sesion, rol, ve, no_ve):
     iniciar_sesion(crear_cuenta(rol))

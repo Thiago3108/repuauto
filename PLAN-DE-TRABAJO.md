@@ -430,6 +430,11 @@ Cada ficha resume lo que hay que construir. Los criterios de aceptación complet
 | T3 · Vista "Mis compras" (UI-05) | 4 | 1 |
 | T4 · Pruebas del módulo | 2 | 1 |
 
+**Avance de implementación (David):**
+
+- **T1 y T2 — Estado e historial de compras:** consulta del estado e historial de compras del cliente ordenadas de más reciente a más antigua con código `#VTA` (`app/ventas/services.py`, `app/models/venta.py`) implementada.
+- **T3 y T4 — Vista "Mis compras" (UI-05), menú y pruebas:** entrada en `app/menu.py`, rutas (`app/ventas/routes.py`), plantillas (`app/templates/ventas/mis_compras.html`, `mi_compra.html`) y pruebas de privacidad entre clientes (`tests/test_historial.py`) aprobadas.
+
 **Claves:**
 
 - Muestra solo las ventas del cliente que inició sesión, de la más reciente a la más antigua, con código `#VTA`, fecha, número de productos, total y estado.

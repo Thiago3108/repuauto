@@ -1,4 +1,4 @@
-"""Tablas de ventas: estado_venta, venta y detalle_venta (US-06).
+"""Tablas de ventas: estado_venta, venta y detalle_venta (US-06 y US-08).
 
 Nombres, longitudes y restricciones tal como están en docs/diagramas/repuauto_bd.dbml.
 """

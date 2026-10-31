@@ -3,7 +3,6 @@
 Cada entrada dice a qué vista lleva, qué historia la construye y qué roles la ven.
 Cada usuario ve solo las entradas de su rol (menu_para). Ocultar una opción no protege
 la vista: cada módulo la protege con @rol_requerido (app/auth/decoradores.py).
-US-08 agregará "Mis compras" para el cliente.
 """
 
 TODOS = ("cliente", "vendedor", "administrador")
@@ -14,7 +13,7 @@ CLIENTE = ("cliente",)
 MENU = [
     {"texto": "Catálogo", "endpoint": "catalogo.index", "historia": "US-05", "roles": TODOS},
     {"texto": "Mis compras", "endpoint": "ventas.mis_compras", "historia": "US-08", "roles": CLIENTE},
-    {"texto": "Ventas", "endpoint": "ventas.index", "historia": "US-06 y US-08", "roles": PERSONAL},
+    {"texto": "Ventas", "endpoint": "ventas.index", "historia": "US-06", "roles": PERSONAL},
     {"texto": "Clientes", "endpoint": "clientes.index", "historia": "US-02", "roles": PERSONAL},
     {"texto": "Repuestos y stock", "endpoint": "repuestos.index", "historia": "US-04", "roles": PERSONAL},
     {"texto": "Vehículos", "endpoint": "vehiculos.index", "historia": "US-03", "roles": ADMIN},
