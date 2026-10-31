@@ -17,3 +17,4 @@ from app.models.usuario import Rol, Usuario  # noqa: F401
 from app.models.cliente import Cliente  # noqa: F401
 from app.models.repuesto import Categoria, MarcaRepuesto, Repuesto  # noqa: F401
 from app.models.venta import DetalleVenta, EstadoVenta, Venta  # noqa: F401
+from app.models.vehiculo import MarcaVehiculo, RepuestoVehiculo, Vehiculo  # noqa: F401

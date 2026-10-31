@@ -11,8 +11,13 @@ import click
 
 from app.auth import services as cuentas
 from app.extensions import db
-from app.models import Categoria, EstadoVenta, MarcaRepuesto, Rol
+from app.models import Categoria, EstadoVenta, MarcaRepuesto, MarcaVehiculo, Rol
 from app.models.venta import ESTADOS_DE_VENTA
+
+MARCAS_VEHICULO = (
+    "Chevrolet", "Renault", "Mazda", "Kia", "Toyota", "Nissan", "Hyundai",
+    "Volkswagen", "Ford", "Suzuki", "Mitsubishi", "Honda",
+)
 
 SEMILLAS = []
 
@@ -72,6 +77,14 @@ def estados_venta():
     for nombre in ESTADOS_DE_VENTA:
         if not db.session.scalar(db.select(EstadoVenta).filter_by(nombre=nombre)):
             db.session.add(EstadoVenta(nombre=nombre))
+
+
+@semilla
+def marcas_vehiculo():
+    """Las marcas de carro más comunes (US-03). El administrador puede agregar más."""
+    for nombre in MARCAS_VEHICULO:
+        if not db.session.scalar(db.select(MarcaVehiculo).filter_by(nombre=nombre)):
+            db.session.add(MarcaVehiculo(nombre=nombre))
 
 
 @semilla

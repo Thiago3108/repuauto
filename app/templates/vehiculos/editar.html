@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block titulo %}Editar vehículo · RepuAuto{% endblock %}
+
+{% block content %}
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb small">
+    <li class="breadcrumb-item"><a href="{{ url_for('vehiculos.index') }}">Vehículos</a></li>
+    <li class="breadcrumb-item active" aria-current="page">Editar</li>
+  </ol>
+</nav>
+
+<div class="row">
+  <div class="col-md-8 col-lg-5">
+    <div class="card shadow-sm">
+      <div class="card-body p-4">
+        <h1 class="h4 mb-1">Editar vehículo</h1>
+        <p class="text-muted small mb-3">{{ vehiculo.descripcion }}</p>
+        <form id="form-editar-vehiculo" method="post" novalidate>
+          {% include "vehiculos/_formulario.html" %}
+          <div class="d-flex gap-2">
+            {{ form.enviar(class="btn btn-primary flex-grow-1", value="Guardar cambios") }}
+            <a class="btn btn-outline-secondary" href="{{ url_for('vehiculos.index') }}">Cancelar</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

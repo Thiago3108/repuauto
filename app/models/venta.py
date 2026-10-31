@@ -1,4 +1,4 @@
-"""Tablas de ventas: estado_venta, venta y detalle_venta (US-06).
+"""Tablas de ventas: estado_venta, venta y detalle_venta (US-06 y US-08).
 
 Nombres, longitudes y restricciones tal como están en docs/diagramas/repuauto_bd.dbml.
 """
@@ -61,6 +61,16 @@ class Venta(db.Model):
     detalles: Mapped[list["DetalleVenta"]] = relationship(
         back_populates="venta", cascade="all, delete-orphan"
     )
+
+    @property
+    def codigo(self):
+        """Código legible de la venta para mostrar al cliente (US-08)."""
+        return f"#VTA-{self.id_venta:04d}"
+
+    @property
+    def cantidad_productos(self):
+        """Total de unidades compradas en la venta."""
+        return sum(detalle.cantidad for detalle in self.detalles)
 
     def __repr__(self):
         return f"<Venta {self.id_venta}>"

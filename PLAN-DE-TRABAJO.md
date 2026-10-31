@@ -310,6 +310,13 @@ Cada ficha resume lo que hay que construir. Los criterios de aceptación complet
 | T3 · Asociar repuestos compatibles | 5 | 2 | `feature/US-03-compatibles` |
 | T4 · Vista "Gestión de vehículos" (UI-11) y pruebas | 5 | 2 | con T2 y T3 |
 
+**Avance de implementación (David):**
+
+- **T1 — Tablas de vehículos:** migración y modelos (`MarcaVehiculo`, `Vehiculo`, `RepuestoVehiculo`) implementados.
+- **T2 — CRUD de vehículos:** servicios, formularios, semilla de marcas y vistas de gestión implementados.
+- **T3 — Repuestos compatibles:** asociación y desasociación de repuestos compatibles sin duplicados y borrado en cascada implementados.
+- **T4 — Vista y pruebas:** vista "Gestión de vehículos" (UI-11) y suite de pruebas automatizadas (`tests/test_vehiculos.py`) aprobadas.
+
 **Claves:**
 
 - Un vehículo tiene marca, línea, referencia opcional y un año de 4 dígitos.
@@ -357,6 +364,11 @@ Cada ficha resume lo que hay que construir. Los criterios de aceptación complet
 | T2 · Filtro por marca, línea y año del vehículo | David | 5 | 3 |
 | T3 · Vista "Catálogo" (UI-04) | Jairo | 6 | 2 |
 | T4 · Pruebas del catálogo | Jairo | 2 | 1 |
+
+**Avance de implementación (David):**
+
+- **T1 y T2 — Catálogo y filtro en cascada por vehículo:** consulta de repuestos activos por texto y categoría, y filtro en cascada Marca → Línea → Año (`app/catalogo/services.py`) implementados.
+- **T3 y T4 — Vista "Catálogo" (UI-04) y pruebas:** rutas (`app/catalogo/routes.py`), plantilla (`app/templates/catalogo/index.html`) y pruebas automatizadas (`tests/test_catalogo.py`) aprobadas.
 
 **Claves:**
 
@@ -418,6 +430,11 @@ Cada ficha resume lo que hay que construir. Los criterios de aceptación complet
 | T3 · Vista "Mis compras" (UI-05) | 4 | 1 |
 | T4 · Pruebas del módulo | 2 | 1 |
 
+**Avance de implementación (David):**
+
+- **T1 y T2 — Estado e historial de compras:** consulta del estado e historial de compras del cliente ordenadas de más reciente a más antigua con código `#VTA` (`app/ventas/services.py`, `app/models/venta.py`) implementada.
+- **T3 y T4 — Vista "Mis compras" (UI-05), menú y pruebas:** entrada en `app/menu.py`, rutas (`app/ventas/routes.py`), plantillas (`app/templates/ventas/mis_compras.html`, `mi_compra.html`) y pruebas de privacidad entre clientes (`tests/test_historial.py`) aprobadas.
+
 **Claves:**
 
 - Muestra solo las ventas del cliente que inició sesión, de la más reciente a la más antigua, con código `#VTA`, fecha, número de productos, total y estado.
@@ -457,4 +474,4 @@ Cada ficha resume lo que hay que construir. Los criterios de aceptación complet
 
 ---
 
-_Última actualización: 2026-09-29_
+_Última actualización: 2026-10-31_
