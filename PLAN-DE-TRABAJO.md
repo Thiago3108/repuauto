@@ -310,6 +310,13 @@ Cada ficha resume lo que hay que construir. Los criterios de aceptación complet
 | T3 · Asociar repuestos compatibles | 5 | 2 | `feature/US-03-compatibles` |
 | T4 · Vista "Gestión de vehículos" (UI-11) y pruebas | 5 | 2 | con T2 y T3 |
 
+**Avance de implementación (David):**
+
+- **T1 — Tablas de vehículos:** migración y modelos (`MarcaVehiculo`, `Vehiculo`, `RepuestoVehiculo`) implementados.
+- **T2 — CRUD de vehículos:** servicios, formularios, semilla de marcas y vistas de gestión implementados.
+- **T3 — Repuestos compatibles:** asociación y desasociación de repuestos compatibles sin duplicados y borrado en cascada implementados.
+- **T4 — Vista y pruebas:** vista "Gestión de vehículos" (UI-11) y suite de pruebas automatizadas (`tests/test_vehiculos.py`) aprobadas.
+
 **Claves:**
 
 - Un vehículo tiene marca, línea, referencia opcional y un año de 4 dígitos.
@@ -457,4 +464,4 @@ Cada ficha resume lo que hay que construir. Los criterios de aceptación complet
 
 ---
 
-_Última actualización: 2026-09-29_
+_Última actualización: 2026-10-31_

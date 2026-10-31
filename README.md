@@ -153,4 +153,4 @@ Cada integrante trabaja su historia de punta a punta: modelo, migración, servic
 
 ---
 
-_Última actualización: 2026-09-29_
+_Última actualización: 2026-10-31_
