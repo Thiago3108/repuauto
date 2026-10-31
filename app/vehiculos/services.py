@@ -9,6 +9,8 @@ Reglas de US-03:
   escribe una marca que no existe, se crea; si ya existe (sin importar mayúsculas),
   se reutiliza.
 - No se repite un vehículo con la misma marca, línea, referencia y año.
+- A cada vehículo se le asocian los repuestos compatibles sin duplicarlos. Al eliminar
+  el vehículo se borran sus compatibilidades, pero no los repuestos.
 """
 from datetime import date
 
@@ -16,13 +18,13 @@ from sqlalchemy import String, cast, func, or_
 from sqlalchemy.exc import IntegrityError
 
 from app.extensions import db
-from app.models import MarcaVehiculo, Vehiculo
+from app.models import Categoria, MarcaRepuesto, MarcaVehiculo, Repuesto, RepuestoVehiculo, Vehiculo
 
 ANIO_MINIMO = 1900
 
 
 class VehiculoRechazado(Exception):
-    """El vehículo no se puede guardar. campo dice qué campo del formulario lo causó."""
+    """La operación no se puede completar. campo dice qué campo del formulario lo causó."""
 
     def __init__(self, campo, mensaje):
         super().__init__(mensaje)
@@ -185,3 +187,83 @@ def eliminar_vehiculo(vehiculo):
     US-03 T3), pero los repuestos no se tocan."""
     db.session.delete(vehiculo)
     db.session.commit()
+    db.session.expire_all()
+
+
+# ---------- Repuestos compatibles (US-03 T3) ----------
+
+def _id_repuesto(repuesto_o_id):
+    if isinstance(repuesto_o_id, Repuesto):
+        return repuesto_o_id.id_repuesto
+    try:
+        return int(repuesto_o_id)
+    except (TypeError, ValueError):
+        raise VehiculoRechazado("id_repuesto", "Elige un repuesto válido.")
+
+
+def listar_repuestos_compatibles(vehiculo):
+    """Repuestos asociados con el vehículo, ordenados por nombre y código."""
+    consulta = (
+        db.select(Repuesto)
+        .join(RepuestoVehiculo, RepuestoVehiculo.id_repuesto == Repuesto.id_repuesto)
+        .where(RepuestoVehiculo.id_vehiculo == vehiculo.id_vehiculo)
+        .order_by(Repuesto.nombre, Repuesto.codigo)
+    )
+    return db.session.scalars(consulta).all()
+
+
+def listar_repuestos_disponibles(vehiculo, busqueda=None):
+    """Repuestos activos que todavía no están asociados con este vehículo."""
+    ya_asociados = (
+        db.select(RepuestoVehiculo.id_repuesto)
+        .where(RepuestoVehiculo.id_vehiculo == vehiculo.id_vehiculo)
+    )
+    consulta = (
+        db.select(Repuesto)
+        .join(Repuesto.categoria)
+        .join(Repuesto.marca)
+        .where(Repuesto.activo.is_(True), Repuesto.id_repuesto.not_in(ya_asociados))
+        .order_by(Repuesto.nombre, Repuesto.codigo)
+    )
+    busqueda = limpiar(busqueda)
+    if busqueda:
+        patron = f"%{busqueda}%"
+        consulta = consulta.where(or_(
+            Repuesto.codigo.ilike(patron),
+            Repuesto.nombre.ilike(patron),
+            Categoria.nombre.ilike(patron),
+            MarcaRepuesto.nombre.ilike(patron),
+        ))
+    return db.session.scalars(consulta).all()
+
+
+def asociar_repuesto(vehiculo, repuesto_o_id):
+    """Asocia un repuesto compatible a un vehículo (US-03 T3) sin duplicar la relación."""
+    id_repuesto = _id_repuesto(repuesto_o_id)
+    repuesto = db.session.get(Repuesto, id_repuesto)
+    if repuesto is None or not repuesto.activo:
+        raise VehiculoRechazado("id_repuesto", "Elige un repuesto activo del catálogo.")
+
+    if db.session.get(RepuestoVehiculo, (repuesto.id_repuesto, vehiculo.id_vehiculo)) is not None:
+        raise VehiculoRechazado("id_repuesto", "Ese repuesto ya está asociado con este vehículo.")
+
+    db.session.add(RepuestoVehiculo(id_repuesto=repuesto.id_repuesto, id_vehiculo=vehiculo.id_vehiculo))
+    try:
+        db.session.commit()
+    except IntegrityError:
+        db.session.rollback()
+        raise VehiculoRechazado("id_repuesto", "Ese repuesto ya está asociado con este vehículo.")
+    db.session.expire(vehiculo, ["repuestos"])
+    return repuesto
+
+
+def desasociar_repuesto(vehiculo, repuesto_o_id):
+    """Quita la compatibilidad entre un vehículo y un repuesto. No borra el repuesto."""
+    id_repuesto = _id_repuesto(repuesto_o_id)
+    enlace = db.session.get(RepuestoVehiculo, (id_repuesto, vehiculo.id_vehiculo))
+    if enlace is None:
+        return False
+    db.session.delete(enlace)
+    db.session.commit()
+    db.session.expire(vehiculo, ["repuestos"])
+    return True

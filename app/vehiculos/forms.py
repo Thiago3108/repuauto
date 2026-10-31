@@ -1,6 +1,6 @@
 """Formularios del módulo Gestión de vehículos (US-03)."""
 from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField
+from wtforms import SelectField, StringField, SubmitField
 from wtforms.validators import DataRequired, Length, Optional, Regexp
 
 from app.validadores import limpiar
@@ -30,3 +30,14 @@ class VehiculoForm(FlaskForm):
         Regexp(r"^[0-9]{4}$", message="El año debe tener 4 dígitos, por ejemplo 2018."),
     ])
     enviar = SubmitField("Guardar")
+
+
+class CompatibilidadForm(FlaskForm):
+    """UI-11: asociar un repuesto compatible a un vehículo (US-03 T3)."""
+
+    id_repuesto = SelectField(
+        "Repuesto compatible",
+        coerce=int,
+        validators=[DataRequired("Elige un repuesto.")],
+    )
+    enviar = SubmitField("Asociar repuesto")

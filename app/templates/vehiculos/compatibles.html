@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+
+{% block titulo %}Repuestos compatibles · {{ vehiculo.descripcion }} · RepuAuto{% endblock %}
+
+{% block content %}
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb small">
+    <li class="breadcrumb-item"><a href="{{ url_for('vehiculos.index') }}">Vehículos</a></li>
+    <li class="breadcrumb-item active" aria-current="page">{{ vehiculo.descripcion }}</li>
+  </ol>
+</nav>
+
+<div class="d-flex flex-wrap justify-content-between align-items-end gap-2 mb-3">
+  <div>
+    <h1 class="h3 mb-1">Repuestos compatibles</h1>
+    <p class="text-muted small mb-0">Vehículo: <strong>{{ vehiculo.descripcion }}</strong></p>
+  </div>
+  <a class="btn btn-outline-secondary btn-sm" href="{{ url_for('vehiculos.index') }}">Volver a vehículos</a>
+</div>
+
+<div class="row g-4">
+  <div class="col-lg-7">
+    <div class="card shadow-sm">
+      <div class="card-header bg-white fw-semibold">
+        Compatibles asociados ({{ compatibles|length }})
+      </div>
+      <div class="card-body p-0">
+        {% if compatibles %}
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+              <tr>
+                <th scope="col">Código</th>
+                <th scope="col">Repuesto</th>
+                <th scope="col">Categoría</th>
+                <th scope="col">Marca</th>
+                <th scope="col" class="text-end">Acción</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for repuesto in compatibles %}
+              <tr>
+                <td><code>{{ repuesto.codigo }}</code></td>
+                <td>{{ repuesto.nombre }}</td>
+                <td>{{ repuesto.categoria.nombre }}</td>
+                <td>{{ repuesto.marca.nombre }}</td>
+                <td class="text-end">
+                  <form class="d-inline" method="post"
+                        action="{{ url_for('vehiculos.quitar_compatible', id_vehiculo=vehiculo.id_vehiculo, id_repuesto=repuesto.id_repuesto) }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button id="quitar-compatible-{{ repuesto.id_repuesto }}" type="submit"
+                            class="btn btn-sm btn-outline-danger">Quitar</button>
+                  </form>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% else %}
+        <p class="text-muted p-4 mb-0">Este vehículo todavía no tiene repuestos compatibles asociados.</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-5">
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <h2 class="h5 mb-3">Asociar repuesto compatible</h2>
+
+        <form class="d-flex gap-2 mb-3" method="get" role="search">
+          <input id="buscar-repuesto-compatible" class="form-control form-control-sm" type="search" name="q"
+                 value="{{ busqueda }}" placeholder="Filtrar por código, nombre o marca"
+                 aria-label="Filtrar repuestos disponibles">
+          <button class="btn btn-sm btn-outline-primary" type="submit">Filtrar</button>
+          {% if busqueda %}
+          <a class="btn btn-sm btn-outline-secondary"
+             href="{{ url_for('vehiculos.compatibles', id_vehiculo=vehiculo.id_vehiculo) }}">Limpiar</a>
+          {% endif %}
+        </form>
+
+        {% if disponibles or form.id_repuesto.errors %}
+        <form id="form-asociar-repuesto" method="post"
+              action="{{ url_for('vehiculos.compatibles', id_vehiculo=vehiculo.id_vehiculo) }}" novalidate>
+          {{ form.hidden_tag() }}
+          <div class="mb-3">
+            {{ form.id_repuesto.label(class="form-label") }}
+            {{ form.id_repuesto(class="form-select" + (" is-invalid" if form.id_repuesto.errors else "")) }}
+            {% for error in form.id_repuesto.errors %}
+            <div class="invalid-feedback">{{ error }}</div>
+            {% endfor %}
+          </div>
+          {{ form.enviar(class="btn btn-primary w-100") }}
+        </form>
+        {% elif busqueda %}
+        <p class="text-muted small mb-0">No hay repuestos disponibles que coincidan con «{{ busqueda }}».</p>
+        {% else %}
+        <p class="text-muted small mb-0">No hay más repuestos activos disponibles para asociar.</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+

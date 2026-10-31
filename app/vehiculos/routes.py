@@ -9,7 +9,7 @@ from flask import abort, flash, redirect, render_template, request, url_for
 
 from app.auth.decoradores import rol_requerido
 from app.vehiculos import bp, services
-from app.vehiculos.forms import VehiculoForm
+from app.vehiculos.forms import CompatibilidadForm, VehiculoForm
 
 
 def _datos(form):
@@ -87,3 +87,53 @@ def eliminar(id_vehiculo):
     services.eliminar_vehiculo(vehiculo)
     flash(f"Vehículo eliminado: {descripcion}.", "success")
     return redirect(url_for("vehiculos.index"))
+
+
+@bp.route("/<int:id_vehiculo>/compatibles", methods=["GET", "POST"])
+@rol_requerido("administrador")
+def compatibles(id_vehiculo):
+    """UI-11: consultar y asociar los repuestos compatibles con un vehículo (US-03 T3)."""
+    vehiculo = _vehiculo_o_404(id_vehiculo)
+    busqueda = request.args.get("q", "").strip()
+    disponibles = services.listar_repuestos_disponibles(vehiculo, busqueda)
+
+    form = CompatibilidadForm()
+    form.id_repuesto.choices = [
+        (r.id_repuesto, f"{r.codigo} · {r.nombre} ({r.marca.nombre})")
+        for r in disponibles
+    ]
+
+    if request.method == "POST":
+        id_elegido = request.form.get("id_repuesto", type=int)
+        if id_elegido is not None and all(r.id_repuesto != id_elegido for r in disponibles):
+            form.id_repuesto.choices.append((id_elegido, str(id_elegido)))
+        if form.validate_on_submit():
+            try:
+                repuesto = services.asociar_repuesto(vehiculo, form.id_repuesto.data)
+            except services.VehiculoRechazado as rechazo:
+                form.id_repuesto.errors.append(rechazo.mensaje)
+            else:
+                flash(
+                    f"Se asoció el repuesto {repuesto.nombre} ({repuesto.codigo}) con {vehiculo.descripcion}.",
+                    "success",
+                )
+                return redirect(url_for("vehiculos.compatibles", id_vehiculo=vehiculo.id_vehiculo))
+
+    return render_template(
+        "vehiculos/compatibles.html",
+        vehiculo=vehiculo,
+        compatibles=services.listar_repuestos_compatibles(vehiculo),
+        disponibles=disponibles,
+        busqueda=busqueda,
+        form=form,
+    )
+
+
+@bp.post("/<int:id_vehiculo>/compatibles/<int:id_repuesto>/quitar")
+@rol_requerido("administrador")
+def quitar_compatible(id_vehiculo, id_repuesto):
+    """UI-11: quitar un repuesto de la lista de compatibles de un vehículo."""
+    vehiculo = _vehiculo_o_404(id_vehiculo)
+    if services.desasociar_repuesto(vehiculo, id_repuesto):
+        flash("Se quitó la compatibilidad del repuesto.", "info")
+    return redirect(url_for("vehiculos.compatibles", id_vehiculo=vehiculo.id_vehiculo))

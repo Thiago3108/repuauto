@@ -29,6 +29,7 @@
                 <th scope="col">Línea</th>
                 <th scope="col">Referencia</th>
                 <th scope="col">Año</th>
+                <th scope="col" class="text-center">Repuestos</th>
                 <th scope="col" class="text-end">Acciones</th>
               </tr>
             </thead>
@@ -39,7 +40,12 @@
                 <td>{{ vehiculo.linea }}</td>
                 <td>{{ vehiculo.referencia or "—" }}</td>
                 <td>{{ vehiculo.anio }}</td>
+                <td class="text-center">
+                  <span class="badge text-bg-secondary">{{ vehiculo.repuestos|length }}</span>
+                </td>
                 <td class="text-end text-nowrap">
+                  <a id="compatibles-vehiculo-{{ vehiculo.id_vehiculo }}" class="btn btn-sm btn-outline-secondary"
+                     href="{{ url_for('vehiculos.compatibles', id_vehiculo=vehiculo.id_vehiculo) }}">Compatibles</a>
                   <a id="editar-vehiculo-{{ vehiculo.id_vehiculo }}" class="btn btn-sm btn-outline-primary"
                      href="{{ url_for('vehiculos.editar', id_vehiculo=vehiculo.id_vehiculo) }}">Editar</a>
                   <form class="d-inline" method="post"
