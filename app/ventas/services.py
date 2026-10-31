@@ -178,3 +178,52 @@ def _venta_bloqueada(id_venta):
 
 def _estado(nombre):
     return db.session.scalar(db.select(EstadoVenta).filter_by(nombre=nombre))
+
+
+# ---------- Estado e historial de compras del cliente (US-08) ----------
+
+
+def extraer_id_venta(codigo_o_id):
+    """Extrae el id_venta numérico desde un entero, un número o un código #VTA-0001."""
+    if isinstance(codigo_o_id, int):
+        return codigo_o_id if codigo_o_id > 0 else None
+    texto = str(codigo_o_id or "").strip().upper()
+    for prefijo in ("#VTA-", "VTA-", "#VTA", "VTA", "#"):
+        if texto.startswith(prefijo):
+            texto = texto[len(prefijo):]
+            break
+    if not texto.isdigit():
+        return None
+    id_venta = int(texto)
+    return id_venta if id_venta > 0 else None
+
+
+def listar_compras_cliente(usuario, estado=None):
+    """Historial de compras del cliente que inició sesión, de la más reciente a la más
+    antigua (US-08 T1 y T2). Si la cuenta no está enlazada a un cliente, devuelve []."""
+    if usuario is None or usuario.cliente is None:
+        return []
+    consulta = db.select(Venta).filter(Venta.id_cliente == usuario.cliente.id_cliente)
+    if estado:
+        consulta = consulta.join(Venta.estado).filter(EstadoVenta.nombre == estado)
+    return db.session.scalars(
+        consulta.order_by(Venta.fecha.desc(), Venta.id_venta.desc())
+    ).all()
+
+
+def obtener_compra_cliente(usuario, codigo_o_id):
+    """Devuelve la compra solo si pertenece al cliente que inició sesión (US-08 T1).
+
+    Un cliente nunca puede ver compras de otro, aunque cambie el código en la URL.
+    """
+    if usuario is None or usuario.cliente is None:
+        return None
+    id_venta = extraer_id_venta(codigo_o_id)
+    if id_venta is None:
+        return None
+    return db.session.scalar(
+        db.select(Venta).filter(
+            Venta.id_venta == id_venta,
+            Venta.id_cliente == usuario.cliente.id_cliente,
+        )
+    )

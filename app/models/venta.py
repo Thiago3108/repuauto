@@ -62,6 +62,16 @@ class Venta(db.Model):
         back_populates="venta", cascade="all, delete-orphan"
     )
 
+    @property
+    def codigo(self):
+        """Código legible de la venta para mostrar al cliente (US-08)."""
+        return f"#VTA-{self.id_venta:04d}"
+
+    @property
+    def cantidad_productos(self):
+        """Total de unidades compradas en la venta."""
+        return sum(detalle.cantidad for detalle in self.detalles)
+
     def __repr__(self):
         return f"<Venta {self.id_venta}>"
 
