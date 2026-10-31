@@ -9,9 +9,11 @@ US-08 agregará "Mis compras" para el cliente.
 TODOS = ("cliente", "vendedor", "administrador")
 PERSONAL = ("vendedor", "administrador")
 ADMIN = ("administrador",)
+CLIENTE = ("cliente",)
 
 MENU = [
     {"texto": "Catálogo", "endpoint": "catalogo.index", "historia": "US-05", "roles": TODOS},
+    {"texto": "Mis compras", "endpoint": "ventas.mis_compras", "historia": "US-08", "roles": CLIENTE},
     {"texto": "Ventas", "endpoint": "ventas.index", "historia": "US-06 y US-08", "roles": PERSONAL},
     {"texto": "Clientes", "endpoint": "clientes.index", "historia": "US-02", "roles": PERSONAL},
     {"texto": "Repuestos y stock", "endpoint": "repuestos.index", "historia": "US-04", "roles": PERSONAL},

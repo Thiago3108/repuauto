@@ -98,3 +98,35 @@ def _cambiar_estado(id_venta, cambio, mensaje):
     if not volver.startswith("/ventas/"):
         volver = url_for("ventas.detalle", id_venta=id_venta)
     return redirect(volver)
+
+
+# ---------- Mis compras: estado e historial del cliente (US-08) ----------
+
+
+@bp.get("/mis-compras")
+@rol_requerido("cliente")
+def mis_compras():
+    """UI-05 Mis compras: estado e historial de compras del cliente que inició sesión."""
+    estado = request.args.get("estado", "")
+    if estado not in ESTADOS_DE_VENTA:
+        estado = ""
+    usuario = current_user._get_current_object()
+    enlazada = usuario.cliente is not None
+    return render_template(
+        "ventas/mis_compras.html",
+        compras=services.listar_compras_cliente(usuario, estado),
+        enlazada=enlazada,
+        estado=estado,
+        estados=ESTADOS_DE_VENTA,
+    )
+
+
+@bp.get("/mis-compras/<codigo>")
+@rol_requerido("cliente")
+def mi_compra(codigo):
+    """UI-05: detalle y estado de una compra del cliente."""
+    usuario = current_user._get_current_object()
+    venta = services.obtener_compra_cliente(usuario, codigo)
+    if venta is None:
+        abort(404)
+    return render_template("ventas/mi_compra.html", venta=venta)
