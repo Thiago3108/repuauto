@@ -19,6 +19,7 @@ from sqlalchemy.exc import IntegrityError
 
 from app.extensions import db
 from app.models import Categoria, MarcaRepuesto, MarcaVehiculo, Repuesto, RepuestoVehiculo, Vehiculo
+from app.validadores import limpiar as _limpiar_texto
 
 ANIO_MINIMO = 1900
 
@@ -36,8 +37,7 @@ def limpiar(texto):
     """Quita los espacios de los extremos y deja uno solo entre palabras. Vacío -> None."""
     if texto is None:
         return None
-    texto = " ".join(str(texto).split())
-    return texto or None
+    return _limpiar_texto(str(texto)) or None
 
 
 def anio_maximo():
