@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+
+{% block titulo %}Gestión de vehículos · RepuAuto{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-end gap-2 mb-3">
+  <div>
+    <h1 class="h3 mb-1">Gestión de vehículos</h1>
+    <p class="text-muted small mb-0">Vehículos del catálogo y los repuestos compatibles con cada uno.</p>
+  </div>
+  <form class="d-flex gap-2" method="get" role="search">
+    <input id="buscar-vehiculo" class="form-control" type="search" name="q" value="{{ busqueda }}"
+           placeholder="Marca, línea, referencia o año" aria-label="Buscar vehículo">
+    <button class="btn btn-outline-primary" type="submit">Buscar</button>
+    {% if busqueda %}<a class="btn btn-outline-secondary" href="{{ url_for('vehiculos.index') }}">Limpiar</a>{% endif %}
+  </form>
+</div>
+
+<div class="row g-4">
+  <div class="col-lg-8">
+    <div class="card shadow-sm">
+      <div class="card-body p-0">
+        {% if vehiculos %}
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+              <tr>
+                <th scope="col">Marca</th>
+                <th scope="col">Línea</th>
+                <th scope="col">Referencia</th>
+                <th scope="col">Año</th>
+                <th scope="col" class="text-center">Repuestos</th>
+                <th scope="col" class="text-end">Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for vehiculo in vehiculos %}
+              <tr>
+                <td>{{ vehiculo.marca.nombre }}</td>
+                <td>{{ vehiculo.linea }}</td>
+                <td>{{ vehiculo.referencia or "—" }}</td>
+                <td>{{ vehiculo.anio }}</td>
+                <td class="text-center">
+                  <span class="badge text-bg-secondary">{{ vehiculo.repuestos|length }}</span>
+                </td>
+                <td class="text-end text-nowrap">
+                  <a id="compatibles-vehiculo-{{ vehiculo.id_vehiculo }}" class="btn btn-sm btn-outline-secondary"
+                     href="{{ url_for('vehiculos.compatibles', id_vehiculo=vehiculo.id_vehiculo) }}">Compatibles</a>
+                  <a id="editar-vehiculo-{{ vehiculo.id_vehiculo }}" class="btn btn-sm btn-outline-primary"
+                     href="{{ url_for('vehiculos.editar', id_vehiculo=vehiculo.id_vehiculo) }}">Editar</a>
+                  <form class="d-inline" method="post"
+                        action="{{ url_for('vehiculos.eliminar', id_vehiculo=vehiculo.id_vehiculo) }}"
+                        data-confirmar="¿Eliminar {{ vehiculo.descripcion }}? Se borran sus compatibilidades, pero no los repuestos."
+                        onsubmit="return confirm(this.dataset.confirmar);">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button id="eliminar-vehiculo-{{ vehiculo.id_vehiculo }}" type="submit"
+                            class="btn btn-sm btn-outline-danger">Eliminar</button>
+                  </form>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% elif busqueda %}
+        <p class="text-muted p-4 mb-0">No hay vehículos que coincidan con «{{ busqueda }}».</p>
+        {% else %}
+        <p class="text-muted p-4 mb-0">Todavía no hay vehículos registrados. Registra el primero con el formulario.</p>
+        {% endif %}
+      </div>
+    </div>
+    <p class="text-muted small mt-2 mb-0">{{ vehiculos|length }} vehículo{{ "s" if vehiculos|length != 1 }}</p>
+  </div>
+
+  <div class="col-lg-4">
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <h2 class="h5 mb-3">Nuevo vehículo</h2>
+        <form id="form-nuevo-vehiculo" method="post" action="{{ url_for('vehiculos.index') }}" novalidate>
+          {% include "vehiculos/_formulario.html" %}
+          {{ form.enviar(class="btn btn-primary w-100", value="Registrar vehículo") }}
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

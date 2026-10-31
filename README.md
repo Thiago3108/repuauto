@@ -124,12 +124,12 @@ Los sprints duran 4 semanas cada uno (sprint 1: semanas 1 a 4, sprint 2: semanas
 
 - [x] US-01 — Registro e inicio de sesión de usuarios (Santiago)
 - [x] US-02 — Gestionar clientes (Jhon)
-- [ ] US-03 — Gestionar vehículos (David)
+- [x] US-03 — Gestionar vehículos (David)
 - [x] US-04 — Gestionar repuestos y stock (Jairo)
 
 ### Sprint 2 — Catálogo y ventas · `v0.2-sprint2`
 
-- [ ] US-05 — Consultar catálogo de repuestos por vehículo (Jairo, con David)
+- [x] US-05 — Consultar catálogo de repuestos por vehículo (Jairo, con David)
 - [x] US-06 — Registrar venta con verificación de stock (Jhon, con Santiago)
 
 ### Sprint 3 — Reportes, historial y compras · `v1.0-sprint3`
@@ -153,4 +153,4 @@ Cada integrante trabaja su historia de punta a punta: modelo, migración, servic
 
 ---
 
-_Última actualización: 2026-09-29_
+_Última actualización: 2026-10-31_
