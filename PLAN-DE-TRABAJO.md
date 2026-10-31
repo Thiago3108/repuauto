@@ -365,6 +365,11 @@ Cada ficha resume lo que hay que construir. Los criterios de aceptación complet
 | T3 · Vista "Catálogo" (UI-04) | Jairo | 6 | 2 |
 | T4 · Pruebas del catálogo | Jairo | 2 | 1 |
 
+**Avance de implementación (David):**
+
+- **T1 y T2 — Catálogo y filtro en cascada por vehículo:** consulta de repuestos activos por texto y categoría, y filtro en cascada Marca → Línea → Año (`app/catalogo/services.py`) implementados.
+- **T3 y T4 — Vista "Catálogo" (UI-04) y pruebas:** rutas (`app/catalogo/routes.py`), plantilla (`app/templates/catalogo/index.html`) y pruebas automatizadas (`tests/test_catalogo.py`) aprobadas.
+
 **Claves:**
 
 - Solo aparecen los repuestos **activos**, con su disponibilidad (en stock o agotado).
