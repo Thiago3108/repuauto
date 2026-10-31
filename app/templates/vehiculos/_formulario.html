@@ -1,0 +1,19 @@
+{# Campos del vehículo, compartidos por el registro (index.html) y la edición (editar.html).
+   La marca sugiere las que ya existen, pero acepta una nueva. #}
+{% from "macros.html" import campo %}
+
+{{ form.hidden_tag() }}
+<div class="mb-3">
+  {{ form.marca.label(class="form-label") }}
+  {{ form.marca(class="form-control" + (" is-invalid" if form.marca.errors else ""), list="marcas-vehiculo", autocomplete="off") }}
+  <datalist id="marcas-vehiculo">
+    {% for marca in marcas %}<option value="{{ marca.nombre }}">{% endfor %}
+  </datalist>
+  {% for error in form.marca.errors %}
+  <div class="invalid-feedback">{{ error }}</div>
+  {% endfor %}
+  {% if not form.marca.errors %}<div class="form-text">Si la marca no está en la lista, se crea.</div>{% endif %}
+</div>
+{{ campo(form.linea, autocompletar="off") }}
+{{ campo(form.referencia, autocompletar="off") }}
+{{ campo(form.anio, autocompletar="off") }}
