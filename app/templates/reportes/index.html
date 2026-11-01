@@ -8,8 +8,6 @@
   <p class="text-muted small mb-0">Solo cuentan las ventas completadas. Las pendientes y las canceladas quedan fuera.</p>
 </div>
 
-<h2 class="h5">Ventas</h2>
-
 <form class="row g-2 align-items-end mb-3" method="get" action="{{ url_for('reportes.index') }}">
   <div class="col-sm-auto">
     <label class="form-label" for="desde">Desde</label>
@@ -27,6 +25,12 @@
 {% if error %}
 <div class="alert alert-warning">{{ error }} Se muestra el mes actual.</div>
 {% endif %}
+
+<p class="small text-muted">
+  Del {{ ventas.desde.strftime("%d/%m/%Y") }} al {{ ventas.hasta.strftime("%d/%m/%Y") }}.
+</p>
+
+<h2 class="h5 mt-4">Ventas</h2>
 
 <div class="row g-3 mb-3">
   <div class="col-sm-4">
@@ -55,10 +59,6 @@
   </div>
 </div>
 
-<p class="small text-muted">
-  Del {{ ventas.desde.strftime("%d/%m/%Y") }} al {{ ventas.hasta.strftime("%d/%m/%Y") }}.
-</p>
-
 {% if ventas.ventas %}
 <div class="card shadow-sm">
   <div class="table-responsive">
@@ -85,4 +85,66 @@
 {% else %}
 <div class="alert alert-info">No hay ventas completadas en este rango de fechas.</div>
 {% endif %}
+
+<h2 class="h5 mt-4">Clientes</h2>
+
+<div class="row g-3">
+  <div class="col-lg-4">
+    <div class="card shadow-sm h-100">
+      <div class="card-body">
+        <div class="text-muted small">Clientes nuevos</div>
+        <div class="fs-4 fw-semibold mb-2">{{ clientes.nuevos }}</div>
+        {% if clientes.nuevos %}
+        <table class="table table-sm mb-0">
+          <tbody>
+            {% for mes in clientes.meses %}
+            <tr>
+              <td>{{ mes.nombre }}</td>
+              <td class="text-end">{{ mes.nuevos }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        {% else %}
+        <p class="small text-muted mb-0">No se registraron clientes en este rango de fechas.</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-8">
+    <div class="card shadow-sm h-100">
+      <div class="card-body">
+        <div class="text-muted small mb-2">Los que más compran</div>
+        {% if clientes.mejores %}
+        <div class="table-responsive">
+          <table class="table align-middle mb-0">
+            <thead class="table-light">
+              <tr>
+                <th scope="col">#</th>
+                <th scope="col">Cliente</th>
+                <th scope="col">Cédula</th>
+                <th scope="col" class="text-center">Compras</th>
+                <th scope="col" class="text-end">Total comprado</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for fila in clientes.mejores %}
+              <tr>
+                <td>{{ loop.index }}</td>
+                <td><a href="{{ url_for('clientes.detalle', id_cliente=fila.cliente.id_cliente) }}">{{ fila.cliente.nombre_completo }}</a></td>
+                <td>{{ fila.cliente.cedula }}</td>
+                <td class="text-center">{{ fila.compras }}</td>
+                <td class="text-end">${{ "{:,.2f}".format(fila.total) }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% else %}
+        <p class="small text-muted mb-0">Ningún cliente tiene compras completadas en este rango de fechas.</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
 {% endblock %}
