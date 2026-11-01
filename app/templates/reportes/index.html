@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+
+{% block titulo %}Reportes · RepuAuto{% endblock %}
+
+{% block content %}
+<div class="mb-3">
+  <h1 class="h3 mb-1">Reportes</h1>
+  <p class="text-muted small mb-0">Solo cuentan las ventas completadas. Las pendientes y las canceladas quedan fuera.</p>
+</div>
+
+<h2 class="h5">Ventas</h2>
+
+<form class="row g-2 align-items-end mb-3" method="get" action="{{ url_for('reportes.index') }}">
+  <div class="col-sm-auto">
+    <label class="form-label" for="desde">Desde</label>
+    <input class="form-control" type="date" id="desde" name="desde" value="{{ ventas.desde.isoformat() }}">
+  </div>
+  <div class="col-sm-auto">
+    <label class="form-label" for="hasta">Hasta</label>
+    <input class="form-control" type="date" id="hasta" name="hasta" value="{{ ventas.hasta.isoformat() }}">
+  </div>
+  <div class="col-sm-auto">
+    <button class="btn btn-primary" type="submit">Consultar</button>
+  </div>
+</form>
+
+{% if error %}
+<div class="alert alert-warning">{{ error }} Se muestra el mes actual.</div>
+{% endif %}
+
+<div class="row g-3 mb-3">
+  <div class="col-sm-4">
+    <div class="card shadow-sm h-100">
+      <div class="card-body">
+        <div class="text-muted small">Total vendido</div>
+        <div class="fs-4 fw-semibold">${{ "{:,.2f}".format(ventas.total) }}</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-sm-4">
+    <div class="card shadow-sm h-100">
+      <div class="card-body">
+        <div class="text-muted small">Número de ventas</div>
+        <div class="fs-4 fw-semibold">{{ ventas.ventas }}</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-sm-4">
+    <div class="card shadow-sm h-100">
+      <div class="card-body">
+        <div class="text-muted small">Promedio por venta</div>
+        <div class="fs-4 fw-semibold">${{ "{:,.2f}".format(ventas.promedio) }}</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<p class="small text-muted">
+  Del {{ ventas.desde.strftime("%d/%m/%Y") }} al {{ ventas.hasta.strftime("%d/%m/%Y") }}.
+</p>
+
+{% if ventas.ventas %}
+<div class="card shadow-sm">
+  <div class="table-responsive">
+    <table class="table align-middle mb-0">
+      <thead class="table-light">
+        <tr>
+          <th scope="col">Mes</th>
+          <th scope="col" class="text-center">Ventas</th>
+          <th scope="col" class="text-end">Total vendido</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for mes in ventas.meses %}
+        <tr>
+          <td>{{ mes.nombre }}</td>
+          <td class="text-center">{{ mes.ventas }}</td>
+          <td class="text-end">${{ "{:,.2f}".format(mes.total) }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% else %}
+<div class="alert alert-info">No hay ventas completadas en este rango de fechas.</div>
+{% endif %}
+{% endblock %}
