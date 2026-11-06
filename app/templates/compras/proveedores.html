@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+
+{% block titulo %}Proveedores · RepuAuto{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+  <div>
+    <h1 class="h3 mb-0">Proveedores y compras</h1>
+    <p class="text-muted mb-0">
+      {% if busqueda %}
+      {{ proveedores|length }} resultado{{ '' if proveedores|length == 1 else 's' }} para «{{ busqueda }}»
+      {% else %}
+      {{ proveedores|length }} proveedor{{ '' if proveedores|length == 1 else 'es' }} registrado{{ '' if proveedores|length == 1 else 's' }}
+      {% endif %}
+    </p>
+  </div>
+  <a class="btn btn-primary" href="{{ url_for('compras.nuevo_proveedor') }}">Nuevo proveedor</a>
+</div>
+
+{% set activa = "proveedores" %}
+{% include "compras/_pestanas.html" %}
+
+<form class="row g-2 mb-3" method="get" action="{{ url_for('compras.proveedores') }}" role="search">
+  <div class="col-sm-8 col-lg-6">
+    <label class="visually-hidden" for="q">Buscar proveedores</label>
+    <input class="form-control" type="search" id="q" name="q" value="{{ busqueda }}"
+           placeholder="Buscar por NIT o nombre" autocomplete="off">
+  </div>
+  <div class="col-auto">
+    <button class="btn btn-outline-primary" type="submit">Buscar</button>
+    {% if busqueda %}
+    <a class="btn btn-link" href="{{ url_for('compras.proveedores') }}">Ver todos</a>
+    {% endif %}
+  </div>
+</form>
+
+{% if proveedores %}
+<div class="card shadow-sm">
+  <div class="table-responsive">
+    <table class="table table-hover align-middle mb-0">
+      <thead>
+        <tr>
+          <th>NIT</th>
+          <th>Nombre</th>
+          <th>Teléfono</th>
+          <th>Correo</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for proveedor in proveedores %}
+        <tr>
+          <td>{{ proveedor.nit }}</td>
+          <td>{{ proveedor.nombre }}</td>
+          <td>{{ proveedor.telefono or "—" }}</td>
+          <td>{{ proveedor.correo or "—" }}</td>
+          <td class="text-end text-nowrap">
+            <a class="btn btn-outline-secondary btn-sm" href="{{ url_for('compras.editar_proveedor', id_proveedor=proveedor.id_proveedor) }}">Editar</a>
+            <a class="btn btn-outline-primary btn-sm" href="{{ url_for('compras.nueva', proveedor=proveedor.id_proveedor) }}">Comprarle</a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% else %}
+<div class="alert alert-info">{{ "No hay proveedores que coincidan." if busqueda else "Todavía no hay proveedores registrados." }}</div>
+{% endif %}
+{% endblock %}

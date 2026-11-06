@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block titulo %}Proveedores y compras · RepuAuto{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+  <div>
+    <h1 class="h3 mb-0">Proveedores y compras</h1>
+    <p class="text-muted mb-0">Cada compra suma sus cantidades al stock.</p>
+  </div>
+  <a class="btn btn-primary" href="{{ url_for('compras.nueva') }}">Registrar compra</a>
+</div>
+
+{% set activa = "compras" %}
+{% include "compras/_pestanas.html" %}
+
+{% if compras %}
+<div class="card shadow-sm">
+  <div class="table-responsive">
+    <table class="table table-hover align-middle mb-0">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Fecha</th>
+          <th>Proveedor</th>
+          <th>Registró</th>
+          <th class="text-center">Unidades</th>
+          <th class="text-end">Total</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for compra in compras %}
+        <tr>
+          <td>{{ compra.id_compra }}</td>
+          <td>{{ compra.fecha.strftime("%d/%m/%Y %H:%M") }}</td>
+          <td>{{ compra.proveedor.nombre }}</td>
+          <td>{{ compra.usuario.nombre }}</td>
+          <td class="text-center">{{ compra.detalles|sum(attribute="cantidad") }}</td>
+          <td class="text-end">${{ "{:,.2f}".format(compra.total) }}</td>
+          <td class="text-end">
+            <a class="btn btn-outline-secondary btn-sm" href="{{ url_for('compras.detalle', id_compra=compra.id_compra) }}">Ver</a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% else %}
+<div class="alert alert-info">Todavía no hay compras registradas.</div>
+{% endif %}
+{% endblock %}

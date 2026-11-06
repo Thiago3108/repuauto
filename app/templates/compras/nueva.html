@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+
+{% block titulo %}Registrar compra · RepuAuto{% endblock %}
+
+{% block content %}
+<nav aria-label="Ruta">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="{{ url_for('compras.index') }}">Proveedores y compras</a></li>
+    <li class="breadcrumb-item active" aria-current="page">Registrar compra</li>
+  </ol>
+</nav>
+
+<div class="row">
+  <div class="col-xl-9">
+    <div class="card shadow-sm">
+      <div class="card-body p-4">
+        <h1 class="h4 mb-3">Registrar compra</h1>
+        {% if sin_proveedores %}
+        <div class="alert alert-warning">
+          Todavía no hay proveedores.
+          <a class="alert-link" href="{{ url_for('compras.nuevo_proveedor') }}">Registra uno</a> antes de la compra.
+        </div>
+        {% endif %}
+        <form method="post" novalidate>
+          {{ form.hidden_tag() }}
+
+          <div class="row">
+            <div class="col-sm-8">
+              <div class="mb-3">
+                {{ form.id_proveedor.label(class="form-label") }}
+                {{ form.id_proveedor(class="form-select" + (" is-invalid" if form.id_proveedor.errors else "")) }}
+                {% for error in form.id_proveedor.errors %}<div class="invalid-feedback">{{ error }}</div>{% endfor %}
+              </div>
+            </div>
+          </div>
+
+          <h2 class="h6 mt-2">Repuestos</h2>
+          {% for error in form.lineas.errors if error is string %}
+          <div class="text-danger small mb-2">{{ error }}</div>
+          {% endfor %}
+          <div id="lineas">
+            {% for linea in form.lineas %}
+            <div class="row g-2 align-items-start mb-2 linea">
+              <div class="col-md-6">
+                {{ linea.id_repuesto(class="form-select" + (" is-invalid" if linea.id_repuesto.errors else ""), **{"aria-label": "Repuesto"}) }}
+                {% for error in linea.id_repuesto.errors %}<div class="invalid-feedback">{{ error }}</div>{% endfor %}
+              </div>
+              <div class="col-6 col-md-2">
+                {{ linea.cantidad(class="form-control" + (" is-invalid" if linea.cantidad.errors else ""), type="number", min="1", placeholder="Cantidad", **{"aria-label": "Cantidad"}) }}
+                {% for error in linea.cantidad.errors %}<div class="invalid-feedback">{{ error }}</div>{% endfor %}
+              </div>
+              <div class="col-6 col-md-2">
+                {{ linea.costo_unitario(class="form-control" + (" is-invalid" if linea.costo_unitario.errors else ""), type="number", min="0", step="0.01", placeholder="Costo c/u", **{"aria-label": "Costo unitario"}) }}
+                {% for error in linea.costo_unitario.errors %}<div class="invalid-feedback">{{ error }}</div>{% endfor %}
+              </div>
+              <div class="col-md-2">
+                <button type="button" class="btn btn-outline-danger w-100 quitar">Quitar</button>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+          <button type="button" class="btn btn-outline-primary btn-sm mb-3" id="agregar">Agregar otro repuesto</button>
+
+          <p class="fs-5">Total: <strong id="total">$0.00</strong></p>
+          <p class="text-muted small">Al guardar, las cantidades se suman al stock de cada repuesto. Si algo falla, no se guarda nada.</p>
+
+          <div class="d-flex gap-2">
+            {{ form.enviar(class="btn btn-primary") }}
+            <a class="btn btn-outline-secondary" href="{{ url_for('compras.index') }}">Cancelar</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  // Agrega y quita líneas de repuesto, y calcula el total con la cantidad y el costo de cada una.
+  // El total que vale es el que calcula el servidor al guardar.
+  const lineas = document.getElementById("lineas");
+  const formato = new Intl.NumberFormat("en-US", {minimumFractionDigits: 2, maximumFractionDigits: 2});
+
+  function calcularTotal() {
+    let total = 0;
+    lineas.querySelectorAll(".linea").forEach((linea) => {
+      const [cantidad, costo] = linea.querySelectorAll("input");
+      total += Math.max(parseInt(cantidad.value, 10) || 0, 0) * Math.max(parseFloat(costo.value) || 0, 0);
+    });
+    document.getElementById("total").textContent = "$" + formato.format(total);
+  }
+
+  document.getElementById("agregar").addEventListener("click", () => {
+    const filas = lineas.querySelectorAll(".linea");
+    const siguiente = Math.max(...[...filas].map((f) => parseInt(f.querySelector("select").name.split("-")[1], 10))) + 1;
+    const nueva = filas[filas.length - 1].cloneNode(true);
+    nueva.querySelectorAll("select, input").forEach((campo) => {
+      campo.name = campo.name.replace(/^lineas-\d+-/, `lineas-${siguiente}-`);
+      campo.id = campo.name;
+      campo.value = campo.tagName === "SELECT" ? "0" : "";
+      campo.classList.remove("is-invalid");
+    });
+    nueva.querySelectorAll(".invalid-feedback").forEach((error) => error.remove());
+    lineas.appendChild(nueva);
+  });
+
+  lineas.addEventListener("click", (evento) => {
+    if (!evento.target.classList.contains("quitar")) return;
+    const filas = lineas.querySelectorAll(".linea");
+    if (filas.length > 1) {
+      evento.target.closest(".linea").remove();
+    } else {
+      filas[0].querySelector("select").value = "0";
+      filas[0].querySelectorAll("input").forEach((campo) => { campo.value = ""; });
+    }
+    calcularTotal();
+  });
+
+  lineas.addEventListener("input", calcularTotal);
+  lineas.addEventListener("change", calcularTotal);
+  calcularTotal();
+</script>
+{% endblock %}

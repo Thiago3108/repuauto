@@ -111,7 +111,7 @@ Cada migración se une a `main` **antes** de generar la siguiente, porque las ta
 | 3 | 1 | `app/models/repuesto.py` | `categoria`, `marca_repuesto`, `repuesto` | US-04 T1 | Jairo |
 | 4 | 2 | `app/models/venta.py` | `estado_venta`, `venta`, `detalle_venta` | US-06 T1 | Jhon (la hizo Santiago) |
 | 5 | 1 | `app/models/vehiculo.py` | `marca_vehiculo`, `vehiculo`, `repuesto_vehiculo` | US-03 T1 | David |
-| 6 | 3 | `app/models/compra.py` | `proveedor`, `compra`, `detalle_compra` | US-09 T1 | Jairo |
+| 6 | 3 | `app/models/compra.py` | `proveedor`, `compra`, `detalle_compra` | US-09 T1 | Jairo (la hizo Santiago) |
 
 **Para crear o cambiar tablas:**
 
@@ -461,6 +461,13 @@ Cada ficha resume lo que hay que construir. Los criterios de aceptación complet
 | T3 · Registrar compra y sumar al stock (una transacción) | Jairo | 6 | 3 |
 | T4 · Vista "Proveedores y compras" (UI-14) y pruebas | Jhon | 5 | 2 |
 
+**Avance de implementación:** toda la historia la hizo Santiago (T1 y T3 en lugar de Jairo; T2 y T4 cubriendo a Jhon).
+
+- **T1 — Tablas de compras:** modelos `Proveedor`, `Compra` y `DetalleCompra` (`app/models/compra.py`) y migración `cf967cf7e86f`, iguales al DBML.
+- **T2 — Proveedores:** crear, editar y buscar por NIT o nombre, sin NIT repetido (`app/compras/services.py`, `forms.py`).
+- **T3 — Registrar compra:** `registrar_compra` bloquea los repuestos (`SELECT ... FOR UPDATE`), suma las cantidades al stock, calcula el total y guarda qué administrador la hizo, todo en una transacción. Si algo falla, no se guarda nada y el stock queda igual.
+- **T4 — Vista y pruebas:** UI-14 en `/compras/` con las pestañas Compras y Proveedores, solo para el administrador (`app/templates/compras/`), y pruebas en `tests/test_compras.py`.
+
 **Claves:**
 
 - El proveedor tiene un NIT único y un nombre. El teléfono y el correo son opcionales.
@@ -473,11 +480,13 @@ Cada ficha resume lo que hay que construir. Los criterios de aceptación complet
 
 ## Retrospectivas
 
+_Borrador con lo que pasó en cada sprint. El equipo lo revisa y lo ajusta en la retrospectiva._
+
 | Sprint | Qué funcionó | Qué no | Qué cambiamos |
 |---|---|---|---|
-| 1 | | | |
-| 2 | | | |
-| 3 | | | |
+| 1 | Las guías, la plantilla de PR y el CI con el check `pruebas` obligatorio. Las migraciones en orden evitaron conflictos. US-01 y US-02 quedaron completas. | Jhon quedó hospitalizado y Santiago tomó sus tareas. US-03 y US-04 no empezaron a tiempo y retrasaron el catálogo y las ventas. | Se quitó la aprobación obligatoria en `main`, porque faltaba quien revisara. Cada rama nueva sale de `main` actualizado. |
+| 2 | Entró US-04 y se pudo hacer US-06 completa: la venta descuenta el stock en una sola transacción, y cancelar lo devuelve. | Con US-04 se subió el `.env` con claves al repositorio público, junto con copias de carpetas y archivos `.pyc`. Los PR se subieron por la web, sin llenar la plantilla. | Se limpió el repositorio (PR #14) y el `.env` quedó fuera de git. Hay que cambiar las claves que quedaron públicas. |
+| 3 | David integró US-03, US-05 y US-08 en un PR con descripción completa y pruebas. US-07 y US-09 quedaron con todas sus pruebas en verde. | US-07 T2 y US-09 seguían sin empezar a pocas semanas de la entrega. Santiago las hizo para no arriesgarla. | Para el próximo proyecto: poner fechas límite por tarea y revisar el avance cada semana, para reasignar a tiempo. |
 
 ---
 

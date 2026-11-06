@@ -15,12 +15,14 @@ Este documento reúne las pruebas de qué hizo cada integrante y cómo se llega 
 
 ### 1.1 Qué hizo cada uno
 
-| Integrante | Historias y tareas | Pull requests |
-|---|---|---|
-| Santiago Martínez | US-01 completa · US-06 T3 y T4 · US-07 T3 y T4 · esqueleto de la app, CI y guías | _(al cerrar cada sprint)_ |
-| Jhon Sotelo | US-02 completa · US-06 T1, T2 y T5 · US-07 T1 · US-09 T2 y T4 | _(al cerrar cada sprint)_ |
-| Jairo Cardozo | US-04 completa · US-05 T1, T3 y T4 · US-07 T2 · US-09 T1 y T3 | _(al cerrar cada sprint)_ |
-| David Muñoz | US-03 completa · US-05 T2 · US-08 completa | _(al cerrar cada sprint)_ |
+La columna *Planeado* sale del [plan de trabajo](PLAN-DE-TRABAJO.md#quién-hace-qué). La columna *Lo que hizo* es lo que entró a `main`, según los pull requests. Jhon estuvo hospitalizado desde el 7 de octubre, así que sus tareas las hizo Santiago.
+
+| Integrante | Planeado | Lo que hizo | Pull requests |
+|---|---|---|---|
+| Santiago Martínez | US-01 completa · US-06 T3 y T4 · US-07 T3 y T4 | US-01 completa · US-06 T3 y T4 · US-07 T3 y T4 · esqueleto de la app, CI y guías · limpieza del repositorio. Cubriendo a Jhon: US-02 completa, US-06 T1, T2 y T5, US-07 T1 y US-09 T2 y T4. En lugar de Jairo: US-07 T2 y US-09 T1 y T3 | #1 a #9, #14 a #17, #19 a #22 |
+| Jhon Sotelo | US-02 completa · US-06 T1, T2 y T5 · US-07 T1 · US-09 T2 y T4 | Hospitalizado; sus tareas las hizo Santiago | — |
+| Jairo Cardozo | US-04 completa · US-05 T1, T3 y T4 · US-07 T2 · US-09 T1 y T3 | US-04 completa · revisó los PR #2 y #3 | #11, #12, #13 (el #10 se cerró) |
+| David Muñoz | US-03 completa · US-05 T2 · US-08 completa | US-03 completa · US-05 completa (también T1, T3 y T4, que eran de Jairo) · US-08 completa · revisó los PR #4 y #5 | #18 |
 
 ### 1.2 Commits y pull requests
 
@@ -36,10 +38,12 @@ Con *Squash and merge*, cada PR queda en `main` como un commit **a nombre de qui
 
 | Integrante | Commits en `main` | Pull requests unidos | Pull requests revisados |
 |---|---|---|---|
-| Santiago Martínez | | | |
-| Jhon Sotelo | | | |
-| Jairo Cardozo | | | |
-| David Muñoz | | | |
+| Santiago Martínez | 20 | 17 | — |
+| Jhon Sotelo | 0 | 0 | 0 |
+| Jairo Cardozo | 3 | 3 | 2 (#2 y #3) |
+| David Muñoz | 1 | 1 | 2 (#4 y #5) |
+
+Los números cuentan los PR #21 y #22 (US-07 y US-09). Los commits de Santiago incluyen los primeros del repositorio, hechos antes de usar pull requests, y que aparecen a nombre de *Thiago3108*. Desde el 15 de octubre `main` no exige aprobación, por eso los PR posteriores no tienen revisiones.
 
 Los PR de cada uno se ven en `https://github.com/Thiago3108/repuauto/pulls?q=is%3Apr+author%3A<usuario-de-github>`.
 
@@ -47,17 +51,19 @@ Los PR de cada uno se ven en `https://github.com/Thiago3108/repuauto/pulls?q=is%
 
 Cada historia se sigue desde el Excel hasta el código. La tarjeta de Trello y el PR llevan el mismo código `US-XX TY`, y el título del PR queda como el mensaje del commit en `main` ([guía de git](GUIA-GIT.md) §5). La matriz completa, con los casos de uso, está en el Excel (hoja *Trazabilidad*).
 
-| Historia | Épica | Vistas | Módulo | Pruebas | Responsables | Pull requests | Sprint en que terminó |
-|---|---|---|---|---|---|---|---|
-| US-01 Registro e inicio de sesión | EP-01 | UI-01, UI-02, UI-03, UI-13 | `app/auth` | `tests/test_auth.py` | Santiago | | |
-| US-02 Gestionar clientes | EP-02 | UI-08 | `app/clientes` | `tests/test_clientes.py` | Jhon | | |
-| US-03 Gestionar vehículos | EP-03 | UI-11 | `app/vehiculos` | `tests/test_vehiculos.py` | David | | |
-| US-04 Gestionar repuestos y stock | EP-03 | UI-09, UI-10 | `app/repuestos` | `tests/test_repuestos.py` | Jairo | | |
-| US-05 Catálogo por vehículo | EP-03 | UI-04 | `app/catalogo` | `tests/test_catalogo.py` | Jairo, David | | |
-| US-06 Registrar venta | EP-04 | UI-06, UI-07 | `app/ventas` | `tests/test_ventas.py` | Jhon, Santiago | | |
-| US-07 Generar reportes | EP-05 | UI-12 | `app/reportes` | `tests/test_reportes.py` | Santiago, Jhon, Jairo | | |
-| US-08 Estado e historial de compras | EP-04 | UI-05 | `app/ventas` | `tests/test_historial.py` | David | | |
-| US-09 Compras a proveedores | EP-06 | UI-14 | `app/compras` | `tests/test_compras.py` | Jairo, Jhon | | |
+| Historia | Épica | Vistas | Módulo | Pruebas | Responsables | Lo hizo | Pull requests | Terminó en `main` |
+|---|---|---|---|---|---|---|---|---|
+| US-01 Registro e inicio de sesión | EP-01 | UI-01, UI-02, UI-03, UI-13 | `app/auth` | `tests/test_auth.py` | Santiago | Santiago | #2, #3, #5, #6 | 2026-10-15 |
+| US-02 Gestionar clientes | EP-02 | UI-08 | `app/clientes` | `tests/test_clientes.py` | Jhon | Santiago | #4, #7, #8, #9 | 2026-10-15 |
+| US-03 Gestionar vehículos | EP-03 | UI-11 | `app/vehiculos` | `tests/test_vehiculos.py` | David | David | #18 | 2026-10-31 |
+| US-04 Gestionar repuestos y stock | EP-03 | UI-09, UI-10 | `app/repuestos` | `tests/test_repuestos.py` | Jairo | Jairo | #11, #12, #13 | 2026-10-20 |
+| US-05 Catálogo por vehículo | EP-03 | UI-04 | `app/catalogo` | `tests/test_catalogo.py` | Jairo, David | David | #18 | 2026-10-31 |
+| US-06 Registrar venta | EP-04 | UI-06, UI-07 | `app/ventas` | `tests/test_ventas.py` | Jhon, Santiago | Santiago | #15, #16, #17 | 2026-10-25 |
+| US-07 Generar reportes | EP-05 | UI-12 | `app/reportes` | `tests/test_reportes.py` | Santiago, Jhon, Jairo | Santiago | #19, #20, #21 | 2026-11-05 |
+| US-08 Estado e historial de compras | EP-04 | UI-05 | `app/ventas` | `tests/test_historial.py` | David | David | #18 | 2026-10-31 |
+| US-09 Compras a proveedores | EP-06 | UI-14 | `app/compras` | `tests/test_compras.py` | Jairo, Jhon | Santiago | #22 | 2026-11-05 |
+
+La matriz del Excel (hoja *Trazabilidad*) sigue igual: las historias, vistas, tablas y módulos se construyeron como se diseñaron. Lo que cambió fue quién hizo cada tarea, y eso queda en esta tabla.
 
 ## 3. Capturas por sprint
 
@@ -78,4 +84,4 @@ Cada historia se sigue desde el Excel hasta el código. La tarjeta de Trello y e
 
 ---
 
-_Última actualización: 2026-09-29_
+_Última actualización: 2026-11-05_

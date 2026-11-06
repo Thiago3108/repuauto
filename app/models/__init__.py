@@ -12,9 +12,11 @@ Orden de creación (cada migración se fusiona antes de generar la siguiente):
   3. repuesto.py  categoria, marca_repuesto, repuesto           US-04 T1
   4. venta.py     estado_venta, venta, detalle_venta            US-06 T1
   5. vehiculo.py  marca_vehiculo, vehiculo, repuesto_vehiculo   US-03 T1
+  6. compra.py    proveedor, compra, detalle_compra             US-09 T1
 """
 from app.models.usuario import Rol, Usuario  # noqa: F401
 from app.models.cliente import Cliente  # noqa: F401
 from app.models.repuesto import Categoria, MarcaRepuesto, Repuesto  # noqa: F401
 from app.models.venta import DetalleVenta, EstadoVenta, Venta  # noqa: F401
 from app.models.vehiculo import MarcaVehiculo, RepuestoVehiculo, Vehiculo  # noqa: F401
+from app.models.compra import Compra, DetalleCompra, Proveedor  # noqa: F401
