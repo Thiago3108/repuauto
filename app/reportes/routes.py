@@ -12,8 +12,8 @@ from app.reportes import bp, services
 @bp.get("/")
 @rol_requerido("administrador")
 def index():
-    """UI-12 Reportes de ventas (T1) y clientes (T3) en el mismo rango de fechas.
-    T2 agrega el de inventario."""
+    """UI-12 Reportes: ventas (T1) y clientes (T3) en el rango de fechas, e inventario (T2)
+    como está hoy."""
     desde = request.args.get("desde", "").strip()
     hasta = request.args.get("hasta", "").strip()
     error = None
@@ -26,5 +26,6 @@ def index():
         "reportes/index.html",
         ventas=services.reporte_ventas(inicio, fin),
         clientes=services.reporte_clientes(inicio, fin),
+        inventario=services.reporte_inventario(),
         error=error,
     )

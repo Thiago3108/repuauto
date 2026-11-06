@@ -6,15 +6,18 @@ Las rutas llaman a estas funciones y las plantillas nunca tocan la base de datos
 from datetime import date, datetime, timedelta
 from decimal import Decimal
 
-from sqlalchemy import func
+from sqlalchemy import case, func, or_
 
 from app.extensions import db
-from app.models import Cliente, EstadoVenta, Venta
+from app.models import Categoria, Cliente, EstadoVenta, Repuesto, Venta
 
 MESES = (
     "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
     "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre",
 )
+
+
+ESTADOS_DE_STOCK = ("En stock", "Stock bajo", "Agotado")
 
 
 class RangoInvalido(Exception):
@@ -123,6 +126,69 @@ def reporte_clientes(desde, hasta, limite=10):
             {"cliente": fila.Cliente, "compras": fila.compras, "total": Decimal(fila.total)}
             for fila in mejores
         ],
+    }
+
+
+def reporte_inventario():
+    """Repuestos activos por categoría y estado del stock, como están hoy (US-07 T2).
+
+    - Agotado: no queda ninguna unidad.
+    - Stock bajo: quedan unidades, pero menos que el stock mínimo (como en UI-09).
+    - En stock: el resto.
+
+    No depende del rango de fechas: muestra el inventario de este momento. valor es
+    lo que vale el stock a precio de venta.
+
+    Devuelve un diccionario con repuestos, unidades, valor, estados (cuántos repuestos hay
+    en cada estado), categorias (cada una con nombre, repuestos, unidades, valor y estados)
+    y por_reponer (los repuestos agotados o con stock bajo, primero los que menos tienen).
+    """
+    estado = case(
+        (Repuesto.stock_actual == 0, "Agotado"),
+        (Repuesto.stock_actual < Repuesto.stock_minimo, "Stock bajo"),
+        else_="En stock",
+    ).label("estado")
+    filas = db.session.execute(
+        db.select(
+            Categoria.nombre,
+            estado,
+            func.count(Repuesto.id_repuesto),
+            func.sum(Repuesto.stock_actual),
+            func.sum(Repuesto.stock_actual * Repuesto.precio_venta),
+        )
+        .join(Repuesto.categoria)
+        .filter(Repuesto.activo.is_(True))
+        .group_by(Categoria.nombre, estado)
+        .order_by(Categoria.nombre)
+    ).all()
+
+    categorias = {}
+    for nombre, estado_stock, repuestos, unidades, valor in filas:
+        categoria = categorias.setdefault(nombre, {
+            "nombre": nombre, "repuestos": 0, "unidades": 0, "valor": Decimal("0"),
+            "estados": dict.fromkeys(ESTADOS_DE_STOCK, 0),
+        })
+        categoria["repuestos"] += repuestos
+        categoria["unidades"] += unidades
+        categoria["valor"] += Decimal(valor)
+        categoria["estados"][estado_stock] += repuestos
+    categorias = list(categorias.values())
+
+    por_reponer = db.session.scalars(
+        db.select(Repuesto)
+        .filter(
+            Repuesto.activo.is_(True),
+            or_(Repuesto.stock_actual == 0, Repuesto.stock_actual < Repuesto.stock_minimo),
+        )
+        .order_by(Repuesto.stock_actual, Repuesto.nombre)
+    ).all()
+    return {
+        "repuestos": sum(c["repuestos"] for c in categorias),
+        "unidades": sum(c["unidades"] for c in categorias),
+        "valor": sum((c["valor"] for c in categorias), Decimal("0")),
+        "estados": {e: sum(c["estados"][e] for c in categorias) for e in ESTADOS_DE_STOCK},
+        "categorias": categorias,
+        "por_reponer": por_reponer,
     }
 
 
