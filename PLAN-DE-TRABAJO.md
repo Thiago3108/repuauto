@@ -411,6 +411,13 @@ Cada ficha resume lo que hay que construir. Los criterios de aceptación complet
 | T3 · Reporte de clientes | Santiago | 3 | 1 |
 | T4 · Vista "Reportes" (UI-12) y pruebas | Santiago | 7 | 3 |
 
+**Avance de implementación:**
+
+- **T1 — Reporte de ventas:** total vendido, número de ventas y promedio por rango de fechas y por mes, solo con ventas Completadas (`reporte_ventas` en `app/reportes/services.py`). La hizo Santiago, cubriendo a Jhon (PR #19).
+- **T3 — Reporte de clientes:** clientes nuevos por mes y los 10 que más compran en el rango (`reporte_clientes`). Santiago (PR #20).
+- **T2 — Reporte de inventario:** repuestos activos por categoría y estado del stock (en stock, bajo o agotado), valor a precio de venta y lista de repuestos por reponer (`reporte_inventario`). La hizo Santiago, en lugar de Jairo.
+- **T4 — Vista y pruebas:** UI-12 en `/reportes/` con las tres secciones, solo para el administrador (`app/templates/reportes/index.html`), y pruebas en `tests/test_reportes.py`. Santiago.
+
 **Claves:**
 
 - **Ventas:** total vendido y número de ventas por rango de fechas y por mes, contando **solo las Completadas**.
@@ -474,4 +481,4 @@ Cada ficha resume lo que hay que construir. Los criterios de aceptación complet
 
 ---
 
-_Última actualización: 2026-10-31_
+_Última actualización: 2026-11-05_

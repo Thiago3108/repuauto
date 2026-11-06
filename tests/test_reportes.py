@@ -1,4 +1,5 @@
-"""Pruebas de US-07: reportes de ventas (T1) y clientes (T3), y acceso a la vista Reportes (UI-12)."""
+"""Pruebas de US-07: reportes de ventas (T1), inventario (T2) y clientes (T3), y la vista
+Reportes (UI-12, T4)."""
 from datetime import date, datetime
 from decimal import Decimal
 
@@ -6,7 +7,7 @@ import pytest
 
 from app.cli import estados_venta
 from app.extensions import db
-from app.models import Cliente, EstadoVenta, Venta
+from app.models import Categoria, Cliente, EstadoVenta, MarcaRepuesto, Repuesto, Venta
 from app.reportes import services
 
 
@@ -210,6 +211,76 @@ def test_sin_clientes_ni_compras_el_reporte_queda_vacio(base_reporte):
     assert reporte["mejores"] == []
 
 
+# ---------- Reporte de inventario ----------
+
+
+@pytest.fixture()
+def repuesto(app):
+    """Guarda un repuesto en la categoría que se pida (la crea si no existe)."""
+    marca = MarcaRepuesto(nombre="Bosch")
+    categorias = {}
+
+    def crear(codigo, categoria, stock, minimo=0, precio="1000.00", activo=True):
+        if categoria not in categorias:
+            categorias[categoria] = Categoria(nombre=categoria)
+        nuevo = Repuesto(
+            codigo=codigo, nombre=f"Repuesto {codigo}", precio_venta=Decimal(precio),
+            stock_actual=stock, stock_minimo=minimo, activo=activo,
+            categoria=categorias[categoria], marca=marca,
+        )
+        db.session.add(nuevo)
+        db.session.commit()
+        return nuevo
+
+    return crear
+
+
+def test_el_inventario_cuenta_repuestos_por_categoria_y_estado_del_stock(repuesto):
+    repuesto("F-1", "Frenos", stock=10, minimo=3, precio="2000.00")
+    repuesto("F-2", "Frenos", stock=2, minimo=3, precio="5000.00")
+    repuesto("F-3", "Frenos", stock=0, minimo=3)
+    repuesto("A-1", "Aceites", stock=0)
+    repuesto("A-2", "Aceites", stock=4, minimo=4, precio="500.00")
+
+    reporte = services.reporte_inventario()
+
+    assert [c["nombre"] for c in reporte["categorias"]] == ["Aceites", "Frenos"]
+    aceites, frenos = reporte["categorias"]
+    assert frenos["estados"] == {"En stock": 1, "Stock bajo": 1, "Agotado": 1}
+    assert (frenos["repuestos"], frenos["unidades"], frenos["valor"]) == (3, 12, Decimal("30000.00"))
+    assert aceites["estados"] == {"En stock": 1, "Stock bajo": 0, "Agotado": 1}
+    assert reporte["estados"] == {"En stock": 2, "Stock bajo": 1, "Agotado": 2}
+    assert (reporte["repuestos"], reporte["unidades"], reporte["valor"]) == (5, 16, Decimal("32000.00"))
+
+
+def test_los_repuestos_desactivados_no_entran_al_inventario(repuesto):
+    repuesto("F-1", "Frenos", stock=5)
+    repuesto("F-2", "Frenos", stock=0, activo=False)
+    repuesto("L-1", "Luces", stock=9, activo=False)
+
+    reporte = services.reporte_inventario()
+
+    assert [c["nombre"] for c in reporte["categorias"]] == ["Frenos"]
+    assert reporte["repuestos"] == 1
+    assert reporte["por_reponer"] == []
+
+
+def test_por_reponer_trae_agotados_y_stock_bajo_primero_los_que_menos_tienen(repuesto):
+    repuesto("OK", "Frenos", stock=8, minimo=2)
+    bajo = repuesto("BAJO", "Frenos", stock=1, minimo=5)
+    agotado = repuesto("CERO", "Aceites", stock=0)
+
+    assert services.reporte_inventario()["por_reponer"] == [agotado, bajo]
+
+
+def test_sin_repuestos_el_inventario_queda_vacio(app):
+    reporte = services.reporte_inventario()
+
+    assert reporte["categorias"] == []
+    assert reporte["repuestos"] == 0
+    assert reporte["valor"] == Decimal("0")
+
+
 # ---------- Vista Reportes (UI-12) ----------
 
 
@@ -261,3 +332,28 @@ def test_la_vista_muestra_los_clientes_nuevos_y_los_que_mas_compran(
     assert "Luis Prueba" in html
     assert f"/clientes/{luis.id_cliente}" in html
     assert "$345,000.00" in html
+
+
+def test_la_vista_muestra_el_inventario_y_los_repuestos_por_reponer(
+    client, crear_cuenta, iniciar_sesion, repuesto
+):
+    repuesto("F-1", "Frenos", stock=10, precio="1500.00")
+    agotado = repuesto("F-2", "Frenos", stock=0)
+    iniciar_sesion(crear_cuenta("administrador"))
+
+    html = client.get("/reportes/").get_data(as_text=True)
+
+    assert 'id="inventario"' in html
+    assert "$15,000.00" in html
+    assert "Repuesto F-2" in html
+    assert f"/repuestos/{agotado.id_repuesto}/ajustar-stock" in html
+
+
+def test_la_vista_tiene_las_tres_secciones(client, crear_cuenta, iniciar_sesion):
+    iniciar_sesion(crear_cuenta("administrador"))
+
+    html = client.get("/reportes/").get_data(as_text=True)
+
+    for seccion in ("ventas", "clientes", "inventario"):
+        assert f'href="#{seccion}"' in html
+        assert f'id="{seccion}"' in html
