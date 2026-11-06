@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% from "macros.html" import campo %}
+
+{% set titulo = "Editar proveedor" if proveedor else "Nuevo proveedor" %}
+{% block titulo %}{{ titulo }} · RepuAuto{% endblock %}
+
+{% block content %}
+<nav aria-label="Ruta">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="{{ url_for('compras.index') }}">Proveedores y compras</a></li>
+    <li class="breadcrumb-item"><a href="{{ url_for('compras.proveedores') }}">Proveedores</a></li>
+    <li class="breadcrumb-item active" aria-current="page">{{ titulo }}</li>
+  </ol>
+</nav>
+
+<div class="row">
+  <div class="col-lg-7">
+    <div class="card shadow-sm">
+      <div class="card-body p-4">
+        <h1 class="h4 mb-3">{{ titulo }}</h1>
+        <form method="post" novalidate>
+          {{ form.hidden_tag() }}
+          <div class="row">
+            <div class="col-sm-6">{{ campo(form.nit, autocompletar="off") }}</div>
+            <div class="col-sm-6">{{ campo(form.nombre, autocompletar="off") }}</div>
+            <div class="col-sm-6">{{ campo(form.telefono, "tel", "off") }}</div>
+            <div class="col-sm-6">{{ campo(form.correo, "email", "off") }}</div>
+          </div>
+          <div class="d-flex gap-2">
+            {{ form.enviar(class="btn btn-primary") }}
+            <a class="btn btn-outline-secondary" href="{{ url_for('compras.proveedores') }}">Cancelar</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -136,7 +136,7 @@ Los sprints duran 4 semanas cada uno (sprint 1: semanas 1 a 4, sprint 2: semanas
 
 - [x] US-07 — Generar reportes (Santiago, con Jhon y Jairo)
 - [x] US-08 — Consultar estado de la venta e historial de compras (David)
-- [ ] US-09 — Registrar compras a proveedores (Jairo y Jhon)
+- [x] US-09 — Registrar compras a proveedores (Jairo y Jhon)
 - [ ] [Evidencias](EVIDENCIAS.md) completas
 - [ ] **Entrega final: 19 o 26 de noviembre** _(por confirmar)_
 
