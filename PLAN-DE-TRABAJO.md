@@ -25,10 +25,10 @@ El proyecto dura **12 semanas en 3 sprints de 4 semanas**, como en el burndown d
 |---|---|
 | Semana 1 · _por confirmar_ | Inicio del sprint 1 (semana 1 del burndown) |
 | **Vie 9 oct** | **Entrega.** _Qué se entrega: por confirmar con el profesor._ |
-| Fin de la semana 4 · _por confirmar_ | Cierre del sprint 1 · etiqueta `v0.1-sprint1` |
-| Fin de la semana 8 · _por confirmar_ | Cierre del sprint 2 · etiqueta `v0.2-sprint2` |
-| Una semana antes de la entrega final | **Congelamiento:** desde aquí no entran funcionalidades nuevas, solo correcciones, pulido y evidencias |
-| **19 o 26 de nov** _(por confirmar)_ | **Entrega final**, una semana antes de que termine el semestre · etiqueta `v1.0-sprint3` |
+| **Jue 15 oct** | Cierre del sprint 1 (US-01 y US-02 completas en `main`) · etiqueta `v0.1-sprint1` |
+| **Dom 25 oct** | Cierre del sprint 2 (US-06 completa en `main`) · etiqueta `v0.2-sprint2` |
+| **Mié 4 nov** | **Congelamiento:** desde aquí no entran funcionalidades nuevas, solo correcciones, pulido y evidencias |
+| **Mié 11 nov** | **Entrega final** · etiqueta `v1.0-sprint3`. La sustentación es por grupos, así que a algunos les toca otro día (_por confirmar_) |
 
 ## Quién hace qué
 
@@ -36,13 +36,13 @@ Los datos son del Excel: 9 historias, 44 tareas, **77 puntos** y **183 horas est
 
 | Integrante | Rol Scrum | Sprint 1 | Sprint 2 | Sprint 3 | Puntos |
 |---|---|---|---|---|---|
-| Santiago Martínez | _por definir_ | US-01 completa (10) | US-06 T3 y T4 (5) | US-07 T3 y T4 (4) | 19 |
-| Jhon Sotelo | _por definir_ | US-02 completa (7) | US-06 T1, T2 y T5 (10) | US-07 T1, US-09 T2 y T4 (6) | 23 |
-| Jairo Cardozo | _por definir_ | US-04 completa (8) | US-05 T1, T3 y T4 (5) | US-07 T2, US-09 T1 y T3 (6) | 19 |
-| David Muñoz | _por definir_ | US-03 completa (8) | US-05 T2 (3) | US-08 completa (5) | 16 |
+| Santiago Martínez | Scrum Master | US-01 completa (10) | US-06 T3 y T4 (5) | US-07 T3 y T4 (4) | 19 |
+| Jhon Sotelo | Desarrollo | US-02 completa (7) | US-06 T1, T2 y T5 (10) | US-07 T1, US-09 T2 y T4 (6) | 23 |
+| Jairo Cardozo | Product Owner | US-04 completa (8) | US-05 T1, T3 y T4 (5) | US-07 T2, US-09 T1 y T3 (6) | 19 |
+| David Muñoz | Desarrollo | US-03 completa (8) | US-05 T2 (3) | US-08 completa (5) | 16 |
 | **Total por sprint** | | **33** | **23** | **21** | **77** |
 
-**Roles Scrum:** hay que definir quién es Product Owner y quién es Scrum Master (puede rotar por sprint), y anotarlo aquí y en el [README](README.md#equipo).
+**Roles Scrum:** **Jairo** es el *Product Owner* (cuida el backlog y la prioridad de las historias) y **Santiago** es el *Scrum Master* (organiza el trabajo, revisa los PR y quita bloqueos). Todos son parte del equipo de desarrollo. También están en el [README](README.md#equipo).
 
 ## ¿Quién espera a quién?
 
@@ -490,4 +490,4 @@ _Borrador con lo que pasó en cada sprint. El equipo lo revisa y lo ajusta en la
 
 ---
 
-_Última actualización: 2026-11-05_
+_Última actualización: 2026-11-07_

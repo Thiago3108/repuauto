@@ -84,4 +84,4 @@ La matriz del Excel (hoja *Trazabilidad*) sigue igual: las historias, vistas, ta
 
 ---
 
-_Última actualización: 2026-11-05_
+_Última actualización: 2026-11-07_
