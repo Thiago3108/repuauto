@@ -8,7 +8,7 @@
 ![pytest](https://img.shields.io/badge/pytest-9-0A9EDC?logo=pytest&logoColor=white)
 [![CI](https://github.com/Thiago3108/repuauto/actions/workflows/ci.yml/badge.svg)](https://github.com/Thiago3108/repuauto/actions/workflows/ci.yml)
 
-**Ingeniería de Software II** · Universidad Industrial de Santander (UIS) · 2026 · Próxima entrega: **9 de octubre** · Entrega final: **19 o 26 de noviembre** _(por confirmar)_
+**Ingeniería de Software II** · Universidad Industrial de Santander (UIS) · 2026 · Entrega final: **miércoles 11 de noviembre** _(la sustentación es por grupos: el día de cada grupo puede ser después)_
 
 Sistema web de gestión para una **serviteca de repuestos para carro**. El catálogo se puede filtrar por vehículo, las ventas controlan el stock y hay módulos de clientes, compras a proveedores y reportes. Cada persona entra con su cuenta y solo ve lo que corresponde a su rol: **cliente**, **vendedor** o **administrador**.
 
@@ -138,19 +138,19 @@ Los sprints duran 4 semanas cada uno (sprint 1: semanas 1 a 4, sprint 2: semanas
 - [x] US-08 — Consultar estado de la venta e historial de compras (David)
 - [x] US-09 — Registrar compras a proveedores (Jairo y Jhon)
 - [ ] [Evidencias](EVIDENCIAS.md) completas
-- [ ] **Entrega final: 19 o 26 de noviembre** _(por confirmar)_
+- [ ] **Entrega final: miércoles 11 de noviembre**
 
 ## Equipo
 
 | Integrante | Rol Scrum | Historias de las que se hace cargo | Puntos |
 |---|---|---|---|
-| Santiago Martínez | _por definir_ | US-01, US-07 · apoya US-06 (stock y cancelación) | 19 |
-| Jhon Sotelo | _por definir_ | US-02, US-06 · apoya US-07 y US-09 | 23 |
-| Jairo Cardozo | _por definir_ | US-04, US-05, US-09 · apoya US-07 | 19 |
-| David Muñoz | _por definir_ | US-03, US-08 · apoya US-05 (filtro por vehículo) | 16 |
+| Santiago Martínez | Scrum Master | US-01, US-07 · apoya US-06 (stock y cancelación) | 19 |
+| Jhon Sotelo | Desarrollo | US-02, US-06 · apoya US-07 y US-09 | 23 |
+| Jairo Cardozo | Product Owner | US-04, US-05, US-09 · apoya US-07 | 19 |
+| David Muñoz | Desarrollo | US-03, US-08 · apoya US-05 (filtro por vehículo) | 16 |
 
 Cada integrante trabaja su historia de punta a punta: modelo, migración, servicio, rutas, vista y pruebas. El detalle por tarea está en el [plan de trabajo](PLAN-DE-TRABAJO.md#quién-hace-qué).
 
 ---
 
-_Última actualización: 2026-11-05_
+_Última actualización: 2026-11-07_
