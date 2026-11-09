@@ -1,5 +1,5 @@
-"""Pruebas de US-07: reportes de ventas (T1), inventario (T2) y clientes (T3), y la vista
-Reportes (UI-12, T4)."""
+"""Pruebas de US-07: reportes de ventas (T1), inventario (T2) y clientes (T3), compras y
+resumen de ventas y compras, y la vista Reportes (UI-12, T4) con sus gráficos."""
 from datetime import date, datetime
 from decimal import Decimal
 
@@ -7,7 +7,7 @@ import pytest
 
 from app.cli import estados_venta
 from app.extensions import db
-from app.models import Categoria, Cliente, EstadoVenta, MarcaRepuesto, Repuesto, Venta
+from app.models import Categoria, Cliente, Compra, EstadoVenta, MarcaRepuesto, Proveedor, Repuesto, Venta
 from app.reportes import services
 
 
@@ -55,6 +55,26 @@ def nuevo_cliente(base_reporte):
         db.session.add(cliente)
         db.session.commit()
         return cliente
+
+    return crear
+
+
+@pytest.fixture()
+def compra(app, crear_cuenta):
+    """Guarda una compra con la fecha y el total que se pidan. Sin proveedor, es de uno de
+    prueba (NIT 900111222-3)."""
+    administrador = crear_cuenta("administrador", correo="compras@repuauto.com")
+    por_defecto = []
+
+    def crear(fecha, total, proveedor=None):
+        if proveedor is None:
+            if not por_defecto:
+                por_defecto.append(Proveedor(nit="900111222-3", nombre="Proveedor de prueba"))
+            proveedor = por_defecto[0]
+        nueva = Compra(proveedor=proveedor, usuario=administrador, total=Decimal(total), fecha=fecha)
+        db.session.add(nueva)
+        db.session.commit()
+        return nueva
 
     return crear
 
@@ -281,6 +301,83 @@ def test_sin_repuestos_el_inventario_queda_vacio(app):
     assert reporte["valor"] == Decimal("0")
 
 
+# ---------- Reporte de compras ----------
+
+
+def test_las_compras_se_agrupan_por_mes_con_los_meses_sin_compras(compra):
+    compra(datetime(2026, 8, 3, 9, 0), "100000.00")
+    compra(datetime(2026, 8, 25, 9, 0), "50000.00")
+    compra(datetime(2026, 10, 1, 0, 0), "20000.00")
+
+    reporte = services.reporte_compras(date(2026, 8, 1), date(2026, 10, 31))
+
+    assert reporte["compras"] == 3
+    assert reporte["total"] == Decimal("170000.00")
+    assert [(m["nombre"], m["compras"], m["total"]) for m in reporte["meses"]] == [
+        ("Agosto 2026", 2, Decimal("150000.00")),
+        ("Septiembre 2026", 0, Decimal("0")),
+        ("Octubre 2026", 1, Decimal("20000.00")),
+    ]
+
+
+def test_las_compras_fuera_del_rango_no_cuentan(compra):
+    compra(datetime(2026, 9, 30, 23, 59), "1000.00")
+    compra(datetime(2026, 10, 15, 12, 0), "2000.00")
+    compra(datetime(2026, 11, 1, 0, 0), "4000.00")
+
+    reporte = services.reporte_compras(date(2026, 10, 1), date(2026, 10, 31))
+
+    assert reporte["compras"] == 1
+    assert reporte["total"] == Decimal("2000.00")
+
+
+def test_los_proveedores_se_ordenan_por_lo_comprado_y_se_limitan(compra):
+    andina = Proveedor(nit="800000001-1", nombre="Andina")
+    boreal = Proveedor(nit="800000002-2", nombre="Boreal")
+    compra(datetime(2026, 10, 2, 9, 0), "30000.00", proveedor=andina)
+    compra(datetime(2026, 10, 3, 9, 0), "30000.00", proveedor=andina)
+    compra(datetime(2026, 10, 4, 9, 0), "90000.00", proveedor=boreal)
+    compra(datetime(2026, 10, 5, 9, 0), "10000.00")
+
+    reporte = services.reporte_compras(date(2026, 10, 1), date(2026, 10, 31), limite=2)
+
+    assert [(f["proveedor"].nombre, f["compras"], f["total"]) for f in reporte["proveedores"]] == [
+        ("Boreal", 1, Decimal("90000.00")),
+        ("Andina", 2, Decimal("60000.00")),
+    ]
+
+
+def test_sin_compras_el_reporte_da_cero(app):
+    reporte = services.reporte_compras(date(2026, 10, 1), date(2026, 10, 31))
+
+    assert reporte["compras"] == 0
+    assert reporte["total"] == Decimal("0")
+    assert reporte["proveedores"] == []
+
+
+# ---------- Resumen de ventas y compras ----------
+
+
+def test_el_resumen_resta_lo_comprado_de_lo_vendido_mes_por_mes(venta, compra):
+    venta(datetime(2026, 9, 10, 9, 0), "100000.00")
+    venta(datetime(2026, 10, 10, 9, 0), "40000.00")
+    venta(datetime(2026, 10, 11, 9, 0), "999999.00", estado="Cancelada")
+    compra(datetime(2026, 10, 2, 9, 0), "70000.00")
+    desde, hasta = date(2026, 9, 1), date(2026, 10, 31)
+
+    resumen = services.reporte_consolidado(
+        services.reporte_ventas(desde, hasta), services.reporte_compras(desde, hasta)
+    )
+
+    assert resumen["vendido"] == Decimal("140000.00")
+    assert resumen["comprado"] == Decimal("70000.00")
+    assert resumen["diferencia"] == Decimal("70000.00")
+    assert [(m["nombre"], m["vendido"], m["comprado"], m["diferencia"]) for m in resumen["meses"]] == [
+        ("Septiembre 2026", Decimal("100000.00"), Decimal("0"), Decimal("100000.00")),
+        ("Octubre 2026", Decimal("40000.00"), Decimal("70000.00"), Decimal("-30000.00")),
+    ]
+
+
 # ---------- Vista Reportes (UI-12) ----------
 
 
@@ -349,11 +446,52 @@ def test_la_vista_muestra_el_inventario_y_los_repuestos_por_reponer(
     assert f"/repuestos/{agotado.id_repuesto}/ajustar-stock" in html
 
 
-def test_la_vista_tiene_las_tres_secciones(client, crear_cuenta, iniciar_sesion):
+def test_la_vista_tiene_todas_las_secciones(client, crear_cuenta, iniciar_sesion):
     iniciar_sesion(crear_cuenta("administrador"))
 
     html = client.get("/reportes/").get_data(as_text=True)
 
-    for seccion in ("ventas", "clientes", "inventario"):
+    for seccion in ("resumen", "ventas", "compras", "clientes", "inventario"):
         assert f'href="#{seccion}"' in html
         assert f'id="{seccion}"' in html
+
+
+def test_la_vista_muestra_las_compras_y_el_resumen(client, crear_cuenta, iniciar_sesion, venta, compra):
+    venta(datetime(2026, 10, 10, 9, 0), "100000.00")
+    compra(datetime(2026, 10, 2, 9, 0), "130000.00", proveedor=Proveedor(nit="800000003-3", nombre="Autopartes Cali"))
+    iniciar_sesion(crear_cuenta("administrador"))
+
+    html = client.get("/reportes/?desde=2026-10-01&hasta=2026-10-31").get_data(as_text=True)
+
+    assert "Autopartes Cali" in html
+    assert "$130,000.00" in html
+    assert "-$30,000.00" in html
+
+
+def test_la_vista_dibuja_los_graficos_con_los_datos_del_rango(
+    client, crear_cuenta, iniciar_sesion, venta, compra, nuevo_cliente, repuesto
+):
+    venta(datetime(2026, 9, 10, 9, 0), "25000.50")
+    compra(datetime(2026, 10, 2, 9, 0), "130000.00")
+    nuevo_cliente("5002", "Marta", datetime(2026, 10, 3, 9, 0))
+    repuesto("F-1", "Frenos", stock=0)
+    iniciar_sesion(crear_cuenta("administrador"))
+
+    html = client.get("/reportes/?desde=2026-09-01&hasta=2026-10-31").get_data(as_text=True)
+
+    assert "chart.js@4.4.1" in html
+    for grafico in ("resumen", "ventas", "proveedores", "clientes", "inventario"):
+        assert f'id="grafico-{grafico}"' in html
+    assert 'id="datos-graficos"' in html
+    assert '"vendido": [25000.5, 0.0]' in html
+    assert '"comprado": [0.0, 130000.0]' in html
+    assert '"clientes": [0, 1]' in html
+
+
+def test_sin_datos_la_vista_no_dibuja_graficos(client, crear_cuenta, iniciar_sesion):
+    iniciar_sesion(crear_cuenta("administrador"))
+
+    html = client.get("/reportes/?desde=2026-09-01&hasta=2026-10-31").get_data(as_text=True)
+
+    assert "<canvas" not in html
+    assert "No hay ventas completadas ni compras en este rango de fechas." in html
