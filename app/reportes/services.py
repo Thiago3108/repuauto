@@ -9,7 +9,7 @@ from decimal import Decimal
 from sqlalchemy import case, func, or_
 
 from app.extensions import db
-from app.models import Categoria, Cliente, EstadoVenta, Repuesto, Venta
+from app.models import Categoria, Cliente, Compra, EstadoVenta, Proveedor, Repuesto, Venta
 
 MESES = (
     "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
@@ -126,6 +126,79 @@ def reporte_clientes(desde, hasta, limite=10):
             {"cliente": fila.Cliente, "compras": fila.compras, "total": Decimal(fila.total)}
             for fila in mejores
         ],
+    }
+
+
+def reporte_compras(desde, hasta, limite=10):
+    """Total comprado a proveedores entre dos fechas, por mes y por proveedor.
+
+    Una compra suma al stock apenas se registra, así que todas cuentan. Las dos fechas
+    se incluyen completas.
+
+    Devuelve un diccionario con desde, hasta, compras, total, meses y proveedores. meses
+    trae todos los meses del rango con anio, mes, nombre, compras y total. proveedores trae
+    los primeros limite, de mayor a menor total, cada uno con proveedor, compras y total.
+    """
+    mes = func.date_trunc("month", Compra.fecha).label("mes")
+    filas = db.session.execute(
+        db.select(mes, func.count(Compra.id_compra), func.coalesce(func.sum(Compra.total), 0))
+        .filter(*_en_rango(Compra.fecha, desde, hasta))
+        .group_by(mes)
+    ).all()
+    por_mes = {(fila.mes.year, fila.mes.month): (fila[1], Decimal(fila[2])) for fila in filas}
+
+    meses = []
+    for anio, numero, nombre in _meses(desde, hasta):
+        compras, total = por_mes.get((anio, numero), (0, Decimal("0")))
+        meses.append({"anio": anio, "mes": numero, "nombre": nombre, "compras": compras, "total": total})
+
+    total = func.sum(Compra.total).label("total")
+    compras = func.count(Compra.id_compra).label("compras")
+    proveedores = db.session.execute(
+        db.select(Proveedor, compras, total)
+        .join(Compra, Compra.id_proveedor == Proveedor.id_proveedor)
+        .filter(*_en_rango(Compra.fecha, desde, hasta))
+        .group_by(Proveedor.id_proveedor)
+        .order_by(total.desc(), compras.desc(), Proveedor.nombre)
+        .limit(limite)
+    ).all()
+
+    return {
+        "desde": desde,
+        "hasta": hasta,
+        "compras": sum(m["compras"] for m in meses),
+        "total": sum((m["total"] for m in meses), Decimal("0")),
+        "meses": meses,
+        "proveedores": [
+            {"proveedor": fila.Proveedor, "compras": fila.compras, "total": Decimal(fila.total)}
+            for fila in proveedores
+        ],
+    }
+
+
+def reporte_consolidado(ventas, compras):
+    """Junta el reporte de ventas y el de compras del mismo rango, mes por mes.
+
+    diferencia es lo vendido menos lo comprado. No es la utilidad: lo comprado en un mes
+    puede venderse en otro.
+
+    Devuelve un diccionario con vendido, comprado, diferencia y meses (cada uno con nombre,
+    vendido, comprado y diferencia).
+    """
+    meses = [
+        {
+            "nombre": venta["nombre"],
+            "vendido": venta["total"],
+            "comprado": compra["total"],
+            "diferencia": venta["total"] - compra["total"],
+        }
+        for venta, compra in zip(ventas["meses"], compras["meses"], strict=True)
+    ]
+    return {
+        "vendido": ventas["total"],
+        "comprado": compras["total"],
+        "diferencia": ventas["total"] - compras["total"],
+        "meses": meses,
     }
 
 
