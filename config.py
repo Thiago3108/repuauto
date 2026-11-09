@@ -18,6 +18,11 @@ class Config:
     SECRET_KEY = os.environ.get("SECRET_KEY")
     SQLALCHEMY_DATABASE_URI = os.environ.get("DATABASE_URL")
 
+    # API REST para la integración entre sedes (opcionales en el .env).
+    API_SUCURSAL = os.environ.get("API_SUCURSAL", "Bucaramanga")
+    API_IVA = int(os.environ.get("API_IVA", "19"))  # porcentaje, incluido en los precios
+    API_TOKEN_HORAS = float(os.environ.get("API_TOKEN_HORAS", "8"))
+
 
 class TestConfig(Config):
     """Configuración de pruebas: usa otra base de datos que se puede borrar sin miedo."""

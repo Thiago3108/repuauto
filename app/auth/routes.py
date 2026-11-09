@@ -25,6 +25,9 @@ def exigir_sesion():
     """Cualquier página, de cualquier módulo, pide iniciar sesión primero."""
     if request.endpoint in VISTAS_PUBLICAS or request.endpoint is None:
         return None
+    if request.blueprint == "api":
+        # La API no usa la sesión del navegador: cada ruta exige su token (app/api).
+        return None
     if not current_user.is_authenticated:
         return login_manager.unauthorized()
     return None
