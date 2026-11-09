@@ -1,5 +1,6 @@
 @startuml casos_de_uso
-' RepuAuto - Diagrama de casos de uso general (versión 2)
+' RepuAuto - Diagrama de casos de uso general (versión 3, noviembre 2026)
+' La imagen casos_de_uso.png se dibuja desde casos_de_uso.svg; este archivo es la fuente en PlantUML.
 ' Actores según la matriz de roles aprobada (D3).
 ' Los códigos US-xx enlazan cada caso de uso con su historia del backlog.
 
@@ -33,6 +34,7 @@ actor "//Usuario//" as Usuario
 actor Cliente
 actor Vendedor
 actor Administrador
+actor "Aplicativo consolidador\n<<sistema>>" as Consolidador
 
 Usuario <|-- Cliente
 Usuario <|-- Vendedor
@@ -55,8 +57,16 @@ rectangle "Sistema RepuAuto" {
   usecase "Gestionar repuestos\ny ajustar stock\n<size:10>US-04</size>" as UC_Repuestos
   usecase "Gestionar vehículos\ny compatibilidades\n<size:10>US-03</size>" as UC_Vehiculos
   usecase "Generar reportes\n<size:10>US-07</size>" as UC_Reportes
+  usecase "Informe consolidado\n<size:10>US-07</size>" as UC_Consolidado
+  usecase "Informe tabular\n<size:10>US-07</size>" as UC_Tabular
+  usecase "Informe gráfico\n<size:10>US-07</size>" as UC_Grafico
+  usecase "Gestionar proveedores\n<size:10>US-09</size>" as UC_Proveedores
   usecase "Crear cuentas\nde vendedor\n<size:10>US-01</size>" as UC_Cuentas
   usecase "Registrar compras\na proveedores\n<size:10>US-09</size>" as UC_Compras
+
+  usecase "Iniciar sesión\nen la API\n<size:10>API REST</size>" as UC_ApiLogin
+  usecase "Consultar facturas\nen JSON\n<size:10>API REST</size>" as UC_Facturas
+  usecase "Validar token\n<size:10>API REST</size>" as UC_Token
 }
 
 ' Asociaciones (líneas simples, sin flecha)
@@ -77,7 +87,15 @@ Administrador -- UC_Repuestos
 Administrador -- UC_Vehiculos
 Administrador -- UC_Reportes
 Administrador -- UC_Cuentas
+Administrador -- UC_Proveedores
 Administrador -- UC_Compras
+UC_Reportes <.. UC_Consolidado : <<extend>>
+UC_Reportes <.. UC_Tabular : <<extend>>
+UC_Reportes <.. UC_Grafico : <<extend>>
+
+UC_ApiLogin -- Consolidador
+UC_Facturas -- Consolidador
+UC_Facturas ..> UC_Token : <<include>>
 
 note bottom of Administrador
   Hereda todos los casos

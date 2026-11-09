@@ -59,19 +59,20 @@
   <text x="805" y="118" text-anchor="middle" class="titulo">Servidor web · Flask 3.1 (Python)</text>
 
   <rect x="520" y="135" width="570" height="52" rx="8" class="nota"/>
-  <text x="535" y="157" class="texto"><tspan font-weight="bold">Seguridad:</tspan> Flask-Login (sesión) · @rol_requerido (cliente, vendedor, administrador)</text>
-  <text x="535" y="177" class="texto">Flask-WTF (validación y CSRF) · contraseñas guardadas como hash</text>
+  <text x="535" y="157" class="texto"><tspan font-weight="bold">Páginas:</tspan> Flask-Login (sesión) · @rol_requerido · Flask-WTF (validación y CSRF)</text>
+  <text x="535" y="177" class="texto"><tspan font-weight="bold">API:</tspan> token Bearer firmado, solo administrador · contraseñas con hash</text>
 
-  <text x="520" y="212" class="texto" font-weight="bold">Módulos (blueprints): uno por historia de usuario</text>
+  <text x="520" y="212" class="texto" font-weight="bold">Módulos (blueprints): uno por historia de usuario, más la API</text>
   <g class="texto" text-anchor="middle">
-    <rect x="520" y="222" width="135" height="40" rx="6" class="caja"/><text x="587" y="240">auth</text><text x="587" y="255" class="peq">US-01</text>
-    <rect x="665" y="222" width="135" height="40" rx="6" class="caja"/><text x="732" y="240">clientes</text><text x="732" y="255" class="peq">US-02</text>
-    <rect x="810" y="222" width="135" height="40" rx="6" class="caja"/><text x="877" y="240">vehiculos</text><text x="877" y="255" class="peq">US-03</text>
-    <rect x="955" y="222" width="135" height="40" rx="6" class="caja"/><text x="1022" y="240">repuestos</text><text x="1022" y="255" class="peq">US-04</text>
-    <rect x="520" y="270" width="135" height="40" rx="6" class="caja"/><text x="587" y="288">catalogo</text><text x="587" y="303" class="peq">US-05</text>
-    <rect x="665" y="270" width="135" height="40" rx="6" class="caja"/><text x="732" y="288">ventas</text><text x="732" y="303" class="peq">US-06 y US-08</text>
-    <rect x="810" y="270" width="135" height="40" rx="6" class="caja"/><text x="877" y="288">reportes</text><text x="877" y="303" class="peq">US-07</text>
-    <rect x="955" y="270" width="135" height="40" rx="6" class="caja"/><text x="1022" y="288">compras</text><text x="1022" y="303" class="peq">US-09</text>
+    <rect x="520" y="222" width="106" height="40" rx="6" class="caja"/><text x="573" y="240">auth</text><text x="573" y="255" class="peq" font-size="10">US-01</text>
+    <rect x="636" y="222" width="106" height="40" rx="6" class="caja"/><text x="689" y="240">clientes</text><text x="689" y="255" class="peq" font-size="10">US-02</text>
+    <rect x="752" y="222" width="106" height="40" rx="6" class="caja"/><text x="805" y="240">vehiculos</text><text x="805" y="255" class="peq" font-size="10">US-03</text>
+    <rect x="868" y="222" width="106" height="40" rx="6" class="caja"/><text x="921" y="240">repuestos</text><text x="921" y="255" class="peq" font-size="10">US-04</text>
+    <rect x="984" y="222" width="106" height="40" rx="6" class="caja"/><text x="1037" y="240">catalogo</text><text x="1037" y="255" class="peq" font-size="10">US-05</text>
+    <rect x="520" y="270" width="106" height="40" rx="6" class="caja"/><text x="573" y="288">ventas</text><text x="573" y="303" class="peq" font-size="10">US-06 y US-08</text>
+    <rect x="636" y="270" width="106" height="40" rx="6" class="caja"/><text x="689" y="288">reportes</text><text x="689" y="303" class="peq" font-size="10">US-07: 3 informes</text>
+    <rect x="752" y="270" width="106" height="40" rx="6" class="caja"/><text x="805" y="288">compras</text><text x="805" y="303" class="peq" font-size="10">US-09</text>
+    <rect x="868" y="270" width="106" height="40" rx="6" class="nota"/><text x="921" y="288">api</text><text x="921" y="303" class="peq" font-size="10">API REST</text>
   </g>
 
   <text x="520" y="335" class="peq">Cada módulo tiene las mismas capas:</text>
