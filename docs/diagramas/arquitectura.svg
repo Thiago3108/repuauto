@@ -1,0 +1,147 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1500" height="980" viewBox="0 0 1500 980" font-family="Arial, Helvetica, sans-serif">
+  <!-- RepuAuto - Diagrama de arquitectura. Se edita a mano; el PNG se genera desde este archivo. -->
+  <defs>
+    <marker id="flecha" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#3C4A5C"/>
+    </marker>
+    <style>
+      .caja { fill: #F2F6FB; stroke: #2F5D8A; stroke-width: 1.5; }
+      .blanca { fill: #FFFFFF; stroke: #2F5D8A; stroke-width: 1.5; }
+      .nota { fill: #FFF8E1; stroke: #C9A227; stroke-width: 1.5; }
+      .linea { stroke: #3C4A5C; stroke-width: 1.6; fill: none; marker-end: url(#flecha); }
+      .doble { stroke: #3C4A5C; stroke-width: 1.6; fill: none; marker-end: url(#flecha); marker-start: url(#flecha); }
+      .punteada { stroke: #C9A227; stroke-width: 1.6; fill: none; stroke-dasharray: 6 5; marker-end: url(#flecha); }
+      .titulo { font-size: 15px; font-weight: bold; fill: #1F2D3D; }
+      .texto { font-size: 12.5px; fill: #1F2D3D; }
+      .peq { font-size: 11px; fill: #4A5868; }
+      .etq { font-size: 11px; fill: #3C4A5C; }
+    </style>
+  </defs>
+
+  <rect width="1500" height="980" fill="#FFFFFF"/>
+  <text x="750" y="40" text-anchor="middle" font-size="20" font-weight="bold" fill="#1F2D3D">Diagrama de arquitectura - RepuAuto</text>
+  <text x="750" y="62" text-anchor="middle" class="peq">Aplicación web Flask en tres capas con el patrón MVC</text>
+
+  <!-- Usuarios -->
+  <text x="115" y="130" text-anchor="middle" class="titulo">Usuarios</text>
+  <rect x="30" y="150" width="170" height="70" rx="8" class="blanca"/>
+  <text x="115" y="178" text-anchor="middle" class="titulo">Cliente</text>
+  <text x="115" y="198" text-anchor="middle" class="peq">se registra y ve sus compras</text>
+  <rect x="30" y="260" width="170" height="70" rx="8" class="blanca"/>
+  <text x="115" y="288" text-anchor="middle" class="titulo">Vendedor</text>
+  <text x="115" y="308" text-anchor="middle" class="peq">clientes, ventas y stock</text>
+  <rect x="30" y="370" width="170" height="70" rx="8" class="blanca"/>
+  <text x="115" y="398" text-anchor="middle" class="titulo">Administrador</text>
+  <text x="115" y="418" text-anchor="middle" class="peq">todo, más compras y reportes</text>
+  <path d="M200,185 L248,250" class="linea"/>
+  <path d="M200,295 L248,295" class="linea"/>
+  <path d="M200,405 L248,340" class="linea"/>
+
+  <!-- Navegador -->
+  <rect x="250" y="170" width="200" height="250" rx="10" class="caja"/>
+  <text x="350" y="200" text-anchor="middle" class="titulo">Navegador web</text>
+  <text x="268" y="232" class="texto">• Páginas HTML (Jinja2)</text>
+  <text x="268" y="256" class="texto">• Bootstrap 5.3</text>
+  <text x="268" y="280" class="texto">• Formularios con token</text>
+  <text x="280" y="298" class="texto">CSRF</text>
+  <text x="268" y="322" class="texto">• JavaScript para sumar</text>
+  <text x="280" y="340" class="texto">el total de venta y compra</text>
+  <text x="350" y="400" text-anchor="middle" class="peq">Menú según el rol</text>
+
+  <!-- Flechas navegador - servidor -->
+  <path d="M450,265 L498,265" class="linea"/>
+  <text x="474" y="255" text-anchor="middle" class="etq">HTTP</text>
+  <path d="M498,335 L452,335" class="linea"/>
+  <text x="474" y="355" text-anchor="middle" class="etq">HTML</text>
+
+  <!-- Servidor Flask -->
+  <rect x="500" y="90" width="610" height="550" rx="12" fill="#FFFFFF" stroke="#2F5D8A" stroke-width="2"/>
+  <text x="805" y="118" text-anchor="middle" class="titulo">Servidor web · Flask 3.1 (Python)</text>
+
+  <rect x="520" y="135" width="570" height="52" rx="8" class="nota"/>
+  <text x="535" y="157" class="texto"><tspan font-weight="bold">Seguridad:</tspan> Flask-Login (sesión) · @rol_requerido (cliente, vendedor, administrador)</text>
+  <text x="535" y="177" class="texto">Flask-WTF (validación y CSRF) · contraseñas guardadas como hash</text>
+
+  <text x="520" y="212" class="texto" font-weight="bold">Módulos (blueprints): uno por historia de usuario</text>
+  <g class="texto" text-anchor="middle">
+    <rect x="520" y="222" width="135" height="40" rx="6" class="caja"/><text x="587" y="240">auth</text><text x="587" y="255" class="peq">US-01</text>
+    <rect x="665" y="222" width="135" height="40" rx="6" class="caja"/><text x="732" y="240">clientes</text><text x="732" y="255" class="peq">US-02</text>
+    <rect x="810" y="222" width="135" height="40" rx="6" class="caja"/><text x="877" y="240">vehiculos</text><text x="877" y="255" class="peq">US-03</text>
+    <rect x="955" y="222" width="135" height="40" rx="6" class="caja"/><text x="1022" y="240">repuestos</text><text x="1022" y="255" class="peq">US-04</text>
+    <rect x="520" y="270" width="135" height="40" rx="6" class="caja"/><text x="587" y="288">catalogo</text><text x="587" y="303" class="peq">US-05</text>
+    <rect x="665" y="270" width="135" height="40" rx="6" class="caja"/><text x="732" y="288">ventas</text><text x="732" y="303" class="peq">US-06 y US-08</text>
+    <rect x="810" y="270" width="135" height="40" rx="6" class="caja"/><text x="877" y="288">reportes</text><text x="877" y="303" class="peq">US-07</text>
+    <rect x="955" y="270" width="135" height="40" rx="6" class="caja"/><text x="1022" y="288">compras</text><text x="1022" y="303" class="peq">US-09</text>
+  </g>
+
+  <text x="520" y="335" class="peq">Cada módulo tiene las mismas capas:</text>
+  <rect x="520" y="345" width="340" height="62" rx="8" class="caja"/>
+  <text x="535" y="368" class="texto"><tspan font-weight="bold">routes.py + forms.py</tspan> · Controlador</text>
+  <text x="535" y="390" class="peq">recibe la petición, valida y elige la vista</text>
+  <rect x="870" y="345" width="220" height="62" rx="8" class="caja"/>
+  <text x="885" y="368" class="texto"><tspan font-weight="bold">templates/</tspan> · Vista</text>
+  <text x="885" y="390" class="peq">páginas Jinja2</text>
+  <path d="M860,376 L868,376" class="linea"/>
+
+  <path d="M690,407 L690,433" class="linea"/>
+  <rect x="520" y="435" width="570" height="66" rx="8" class="caja"/>
+  <text x="535" y="458" class="texto"><tspan font-weight="bold">services.py</tspan> · Reglas de negocio (la única capa que consulta la base)</text>
+  <text x="535" y="480" class="peq">Ventas y compras en una sola transacción: bloquea el stock (SELECT … FOR UPDATE)</text>
+  <text x="535" y="494" class="peq">y si algo falla deshace todo</text>
+
+  <path d="M690,501 L690,527" class="linea"/>
+  <rect x="520" y="529" width="570" height="62" rx="8" class="caja"/>
+  <text x="535" y="552" class="texto"><tspan font-weight="bold">app/models</tspan> · Modelo (SQLAlchemy 2.0)</text>
+  <text x="535" y="574" class="peq">15 tablas, iguales al diagrama de base de datos (repuauto_bd.dbml)</text>
+
+  <text x="520" y="620" class="peq">Flask-Migrate (Alembic): las tablas solo se crean y cambian con migraciones</text>
+
+  <!-- Base de datos -->
+  <path d="M1090,560 L1178,560" class="doble"/>
+  <text x="1134" y="550" text-anchor="middle" class="etq">SQL</text>
+  <g>
+    <path d="M1180,500 L1180,610 A75,18 0 0 0 1330,610 L1330,500" class="caja"/>
+    <ellipse cx="1255" cy="500" rx="75" ry="18" class="caja"/>
+    <text x="1255" y="555" text-anchor="middle" class="titulo">PostgreSQL 18</text>
+    <text x="1255" y="577" text-anchor="middle" class="peq">base repuauto</text>
+  </g>
+  <rect x="1180" y="400" width="150" height="56" rx="8" class="blanca"/>
+  <text x="1255" y="423" text-anchor="middle" class="texto">repuauto_test</text>
+  <text x="1255" y="443" text-anchor="middle" class="peq">base para las pruebas</text>
+
+  <!-- Proceso -->
+  <rect x="30" y="675" width="1440" height="130" rx="12" fill="#FAFBFD" stroke="#9DB3CC" stroke-width="1.2"/>
+  <text x="50" y="700" class="titulo">Proceso de desarrollo (Scrum)</text>
+  <rect x="60" y="715" width="270" height="72" rx="8" class="blanca"/>
+  <text x="195" y="742" text-anchor="middle" class="titulo">Trello</text>
+  <text x="195" y="764" text-anchor="middle" class="peq">backlog, sprints y una tarjeta por tarea</text>
+  <path d="M330,751 L398,751" class="linea"/>
+  <rect x="400" y="715" width="300" height="72" rx="8" class="blanca"/>
+  <text x="550" y="742" text-anchor="middle" class="titulo">GitHub</text>
+  <text x="550" y="764" text-anchor="middle" class="peq">una rama y un pull request por tarea</text>
+  <path d="M700,751 L768,751" class="linea"/>
+  <rect x="770" y="715" width="300" height="72" rx="8" class="blanca"/>
+  <text x="920" y="742" text-anchor="middle" class="titulo">GitHub Actions (CI)</text>
+  <text x="920" y="764" text-anchor="middle" class="peq">corre pytest con PostgreSQL en cada PR</text>
+  <path d="M1070,751 L1138,751" class="linea"/>
+  <rect x="1140" y="715" width="300" height="72" rx="8" class="blanca"/>
+  <text x="1290" y="742" text-anchor="middle" class="titulo">Rama main protegida</text>
+  <text x="1290" y="764" text-anchor="middle" class="peq">solo entra con CI en verde · etiqueta por sprint</text>
+
+  <!-- Integración (próximo paso) -->
+  <rect x="30" y="830" width="1440" height="130" rx="12" fill="#FFFDF5" stroke="#C9A227" stroke-width="1.4" stroke-dasharray="8 6"/>
+  <text x="50" y="855" class="titulo">Próximo paso: integración con la otra sede (todavía no implementado)</text>
+  <rect x="60" y="870" width="330" height="72" rx="8" class="nota"/>
+  <text x="225" y="897" text-anchor="middle" class="titulo">Sede RepuAuto · API REST</text>
+  <text x="225" y="919" text-anchor="middle" class="peq">compras y ventas en JSON, con login</text>
+  <path d="M390,906 L578,906" class="punteada"/>
+  <text x="484" y="896" text-anchor="middle" class="etq">JSON</text>
+  <rect x="580" y="870" width="340" height="72" rx="8" class="nota"/>
+  <text x="750" y="897" text-anchor="middle" class="titulo">Aplicativo consolidador</text>
+  <text x="750" y="919" text-anchor="middle" class="peq">informes de compras y ventas de las dos sedes</text>
+  <path d="M1110,906 L922,906" class="punteada"/>
+  <text x="1016" y="896" text-anchor="middle" class="etq">JSON</text>
+  <rect x="1110" y="870" width="330" height="72" rx="8" class="nota"/>
+  <text x="1275" y="897" text-anchor="middle" class="titulo">Sede UD1 · API REST</text>
+  <text x="1275" y="919" text-anchor="middle" class="peq">la del otro grupo (Django)</text>
+</svg>
