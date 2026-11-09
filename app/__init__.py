@@ -39,10 +39,11 @@ def create_app(config_class=Config):
     from app.ventas import bp as ventas_bp
     from app.reportes import bp as reportes_bp
     from app.compras import bp as compras_bp
+    from app.api import bp as api_bp
 
     blueprints = (
         auth_bp, clientes_bp, vehiculos_bp, repuestos_bp,
-        catalogo_bp, ventas_bp, reportes_bp, compras_bp,
+        catalogo_bp, ventas_bp, reportes_bp, compras_bp, api_bp,
     )
     for blueprint in blueprints:
         app.register_blueprint(blueprint)
