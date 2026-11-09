@@ -1,0 +1,206 @@
+{% extends "reportes/_base.html" %}
+{# Informe tabular (UI-12): el detalle del rango en tablas. #}
+
+{% macro pesos(valor) %}{{ "-" if valor < 0 }}${{ "{:,.2f}".format(valor|abs) }}{% endmacro %}
+
+{% block informe %}
+{% set colores_stock = {"En stock": "success", "Stock bajo": "warning", "Agotado": "danger"} %}
+
+<h2 class="h5">Ventas y compras por mes</h2>
+<div class="card shadow-sm mb-4">
+  <div class="table-responsive">
+    <table class="table align-middle mb-0">
+      <thead class="table-light">
+        <tr>
+          <th scope="col">Mes</th>
+          <th scope="col" class="text-center">Ventas</th>
+          <th scope="col" class="text-end">Vendido</th>
+          <th scope="col" class="text-center">Compras</th>
+          <th scope="col" class="text-end">Comprado</th>
+          <th scope="col" class="text-end">Vendido menos comprado</th>
+          <th scope="col" class="text-center">Clientes nuevos</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for mes in consolidado.meses %}
+        {% set i = loop.index0 %}
+        <tr>
+          <td>{{ mes.nombre }}</td>
+          <td class="text-center">{{ ventas.meses[i].ventas }}</td>
+          <td class="text-end">{{ pesos(mes.vendido) }}</td>
+          <td class="text-center">{{ compras.meses[i].compras }}</td>
+          <td class="text-end">{{ pesos(mes.comprado) }}</td>
+          <td class="text-end {{ 'text-danger' if mes.diferencia < 0 }}">{{ pesos(mes.diferencia) }}</td>
+          <td class="text-center">{{ clientes.meses[i].nuevos }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+      <tfoot>
+        <tr>
+          <th scope="row">Total</th>
+          <th class="text-center">{{ ventas.ventas }}</th>
+          <th class="text-end">{{ pesos(consolidado.vendido) }}</th>
+          <th class="text-center">{{ compras.compras }}</th>
+          <th class="text-end">{{ pesos(consolidado.comprado) }}</th>
+          <th class="text-end {{ 'text-danger' if consolidado.diferencia < 0 }}">{{ pesos(consolidado.diferencia) }}</th>
+          <th class="text-center">{{ clientes.nuevos }}</th>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+</div>
+
+<div class="row g-4 mb-4">
+  <div class="col-xl-5">
+    <h2 class="h5">Compras por proveedor</h2>
+    {% if compras.proveedores %}
+    <div class="card shadow-sm">
+      <div class="table-responsive">
+        <table class="table align-middle mb-0">
+          <thead class="table-light">
+            <tr>
+              <th scope="col">Proveedor</th>
+              <th scope="col" class="text-center">Compras</th>
+              <th scope="col" class="text-end">Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for fila in compras.proveedores %}
+            <tr>
+              <td>{{ fila.proveedor.nombre }}<br><span class="small text-muted">NIT {{ fila.proveedor.nit }}</span></td>
+              <td class="text-center">{{ fila.compras }}</td>
+              <td class="text-end">{{ pesos(fila.total) }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+    {% else %}
+    <div class="alert alert-info">No hay compras a proveedores en este rango de fechas.</div>
+    {% endif %}
+  </div>
+
+  <div class="col-xl-7">
+    <h2 class="h5">Los clientes que más compran</h2>
+    {% if clientes.mejores %}
+    <div class="card shadow-sm">
+      <div class="table-responsive">
+        <table class="table align-middle mb-0">
+          <thead class="table-light">
+            <tr>
+              <th scope="col">#</th>
+              <th scope="col">Cliente</th>
+              <th scope="col">Cédula</th>
+              <th scope="col" class="text-center">Compras</th>
+              <th scope="col" class="text-end">Total comprado</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for fila in clientes.mejores %}
+            <tr>
+              <td>{{ loop.index }}</td>
+              <td><a href="{{ url_for('clientes.detalle', id_cliente=fila.cliente.id_cliente) }}">{{ fila.cliente.nombre_completo }}</a></td>
+              <td>{{ fila.cliente.cedula }}</td>
+              <td class="text-center">{{ fila.compras }}</td>
+              <td class="text-end">{{ pesos(fila.total) }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+    {% else %}
+    <div class="alert alert-info">Ningún cliente tiene compras completadas en este rango de fechas.</div>
+    {% endif %}
+  </div>
+</div>
+
+<h2 class="h5">Inventario de hoy por categoría</h2>
+{% if inventario.categorias %}
+<div class="card shadow-sm mb-4">
+  <div class="table-responsive">
+    <table class="table align-middle mb-0">
+      <thead class="table-light">
+        <tr>
+          <th scope="col">Categoría</th>
+          <th scope="col" class="text-center">Repuestos</th>
+          <th scope="col" class="text-center">Unidades</th>
+          {% for nombre in colores_stock %}
+          <th scope="col" class="text-center">{{ nombre }}</th>
+          {% endfor %}
+          <th scope="col" class="text-end">Valor</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for categoria in inventario.categorias %}
+        <tr>
+          <td>{{ categoria.nombre }}</td>
+          <td class="text-center">{{ categoria.repuestos }}</td>
+          <td class="text-center">{{ categoria.unidades }}</td>
+          {% for nombre, color in colores_stock.items() %}
+          <td class="text-center">
+            {% if categoria.estados[nombre] %}<span class="badge text-bg-{{ color }}">{{ categoria.estados[nombre] }}</span>{% else %}0{% endif %}
+          </td>
+          {% endfor %}
+          <td class="text-end">{{ pesos(categoria.valor) }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+      <tfoot>
+        <tr>
+          <th scope="row">Total</th>
+          <th class="text-center">{{ inventario.repuestos }}</th>
+          <th class="text-center">{{ inventario.unidades }}</th>
+          {% for nombre in colores_stock %}
+          <th class="text-center">{{ inventario.estados[nombre] }}</th>
+          {% endfor %}
+          <th class="text-end">{{ pesos(inventario.valor) }}</th>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+</div>
+
+<h2 class="h5">Repuestos por reponer</h2>
+{% if inventario.por_reponer %}
+<div class="card shadow-sm">
+  <div class="table-responsive">
+    <table class="table align-middle mb-0">
+      <thead class="table-light">
+        <tr>
+          <th scope="col">Código</th>
+          <th scope="col">Repuesto</th>
+          <th scope="col">Categoría</th>
+          <th scope="col" class="text-center">Stock</th>
+          <th scope="col" class="text-center">Mínimo</th>
+          <th scope="col">Estado</th>
+          <th scope="col"></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for repuesto in inventario.por_reponer %}
+        {% set nombre = "Agotado" if repuesto.stock_actual == 0 else "Stock bajo" %}
+        <tr>
+          <td>{{ repuesto.codigo }}</td>
+          <td>{{ repuesto.nombre }}</td>
+          <td>{{ repuesto.categoria.nombre }}</td>
+          <td class="text-center">{{ repuesto.stock_actual }}</td>
+          <td class="text-center">{{ repuesto.stock_minimo }}</td>
+          <td><span class="badge text-bg-{{ colores_stock[nombre] }}">{{ nombre }}</span></td>
+          <td class="text-end">
+            <a class="btn btn-outline-secondary btn-sm" href="{{ url_for('repuestos.ajustar_stock', id_repuesto=repuesto.id_repuesto) }}">Ajustar stock</a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% else %}
+<div class="alert alert-success">Ningún repuesto está agotado ni por debajo del mínimo.</div>
+{% endif %}
+{% else %}
+<div class="alert alert-info">Todavía no hay repuestos activos.</div>
+{% endif %}
+{% endblock %}
