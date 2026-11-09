@@ -55,6 +55,7 @@ Las tablas se crean y se cambian **solo con migraciones** (Flask-Migrate).
 | [Guía de Trello](docs/guias/TRELLO.md) | Listas del tablero, cómo cargar las tarjetas, etiquetas y cómo mover cada tarjeta |
 | [Evidencias](EVIDENCIAS.md) | Participación de cada integrante y trazabilidad de cada historia hasta su código y sus pruebas |
 | [Diagrama de la base de datos](docs/diagramas/repuauto_bd.dbml) | Todas las tablas, columnas, restricciones y relaciones. Se ve en [dbdiagram.io](https://dbdiagram.io) |
+| [Arquitectura](docs/diagramas/arquitectura.png) | Capas, módulos, base de datos, proceso de desarrollo e integración prevista con la otra sede ([fuente .svg](docs/diagramas/arquitectura.svg)) |
 | [Casos de uso](docs/diagramas/casos_de_uso.png) | Diagrama de casos de uso ([fuente .puml](docs/diagramas/casos_de_uso.puml)) |
 | [Vistas por usuario](docs/diagramas/vistas_usuario.png) | Qué vistas (UI-01 a UI-14) ve cada rol ([fuente .puml](docs/diagramas/vistas_usuario.puml)) |
 | [Actividades: registrar venta](docs/diagramas/actividades_registrar_venta.png) | Flujo de una venta con verificación de stock ([fuente .puml](docs/diagramas/actividades_registrar_venta.puml)) |
