@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{# Encabezado común de los tres informes de UI-12: pestañas, rango de fechas y avisos. #}
+
+{% block titulo %}Reportes · RepuAuto{% endblock %}
+
+{% block content %}
+<div class="mb-3">
+  <h1 class="h3 mb-1">Reportes</h1>
+  <p class="text-muted small mb-0">Solo cuentan las ventas completadas. Las pendientes y las canceladas quedan fuera. Las compras cuentan todas.</p>
+</div>
+
+{% set fechas = {"desde": ventas.desde.isoformat(), "hasta": ventas.hasta.isoformat()} %}
+<ul class="nav nav-tabs mb-3">
+  {% for endpoint, nombre in informes %}
+  <li class="nav-item">
+    <a class="nav-link {% if request.endpoint == endpoint %}active{% endif %}"
+       {% if request.endpoint == endpoint %}aria-current="page"{% endif %}
+       href="{{ url_for(endpoint, **fechas) }}">{{ nombre }}</a>
+  </li>
+  {% endfor %}
+</ul>
+
+<form class="row g-2 align-items-end mb-2" method="get" action="{{ url_for(request.endpoint) }}">
+  <div class="col-sm-auto">
+    <label class="form-label" for="desde">Desde</label>
+    <input class="form-control" type="date" id="desde" name="desde" value="{{ fechas.desde }}">
+  </div>
+  <div class="col-sm-auto">
+    <label class="form-label" for="hasta">Hasta</label>
+    <input class="form-control" type="date" id="hasta" name="hasta" value="{{ fechas.hasta }}">
+  </div>
+  <div class="col-sm-auto">
+    <button class="btn btn-primary" type="submit">Consultar</button>
+  </div>
+</form>
+
+{% if error %}
+<div class="alert alert-warning">{{ error }} Se muestra el mes actual.</div>
+{% endif %}
+
+<p class="small text-muted mb-4">
+  Del {{ ventas.desde.strftime("%d/%m/%Y") }} al {{ ventas.hasta.strftime("%d/%m/%Y") }}.
+  El inventario es el de hoy: no depende de las fechas.
+</p>
+
+{% block informe scoped %}{% endblock %}
+{% endblock %}

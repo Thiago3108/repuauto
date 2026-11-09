@@ -378,120 +378,114 @@ def test_el_resumen_resta_lo_comprado_de_lo_vendido_mes_por_mes(venta, compra):
     ]
 
 
-# ---------- Vista Reportes (UI-12) ----------
+# ---------- Vista Reportes (UI-12): consolidado, tabular y gráfico ----------
+
+INFORMES = ["/reportes/", "/reportes/tabular", "/reportes/grafico"]
 
 
+@pytest.fixture()
+def administrador(client, crear_cuenta, iniciar_sesion):
+    iniciar_sesion(crear_cuenta("administrador"))
+
+
+@pytest.mark.parametrize("url", INFORMES)
 @pytest.mark.parametrize("rol", ["cliente", "vendedor"])
-def test_solo_el_administrador_entra_a_reportes(client, crear_cuenta, iniciar_sesion, rol):
+def test_solo_el_administrador_entra_a_los_informes(client, crear_cuenta, iniciar_sesion, rol, url):
     iniciar_sesion(crear_cuenta(rol))
-    assert client.get("/reportes/").status_code == 403
+    assert client.get(url).status_code == 403
 
 
-def test_reportes_sin_sesion_va_al_login(client):
-    assert client.get("/reportes/").status_code == 302
+@pytest.mark.parametrize("url", INFORMES)
+def test_los_informes_sin_sesion_van_al_login(client, url):
+    assert client.get(url).status_code == 302
 
 
-def test_la_vista_muestra_el_total_y_los_meses_del_rango(
-    client, crear_cuenta, iniciar_sesion, venta
-):
-    venta(datetime(2026, 9, 10, 9, 0), "25000.00")
-    venta(datetime(2026, 10, 10, 9, 0), "1234567.50")
-    iniciar_sesion(crear_cuenta("administrador"))
+@pytest.mark.parametrize("url", INFORMES)
+def test_cada_informe_tiene_las_tres_pestanas_con_el_mismo_rango(client, administrador, url):
+    html = client.get(f"{url}?desde=2026-09-01&hasta=2026-10-31").get_data(as_text=True)
 
-    html = client.get("/reportes/?desde=2026-09-01&hasta=2026-10-31").get_data(as_text=True)
-
-    assert "$1,259,567.50" in html
-    assert "Septiembre 2026" in html
-    assert "Octubre 2026" in html
+    for pestana in INFORMES:
+        assert f'href="{pestana}?desde=2026-09-01&amp;hasta=2026-10-31"' in html
+    assert 'aria-current="page"' in html
+    assert 'value="2026-09-01"' in html
 
 
-def test_con_fechas_invalidas_la_vista_avisa_y_muestra_el_mes_actual(
-    client, crear_cuenta, iniciar_sesion
-):
-    iniciar_sesion(crear_cuenta("administrador"))
-
-    respuesta = client.get("/reportes/?desde=2026-10-31&hasta=2026-10-01")
+@pytest.mark.parametrize("url", INFORMES)
+def test_con_fechas_invalidas_cada_informe_avisa_y_muestra_el_mes_actual(client, administrador, url):
+    respuesta = client.get(f"{url}?desde=2026-10-31&hasta=2026-10-01")
 
     assert respuesta.status_code == 200
     assert "La fecha inicial no puede ir después de la fecha final." in respuesta.get_data(as_text=True)
 
 
-def test_la_vista_muestra_los_clientes_nuevos_y_los_que_mas_compran(
-    client, crear_cuenta, iniciar_sesion, venta, nuevo_cliente
-):
+def test_el_consolidado_muestra_solo_los_totales(client, administrador, venta, compra, nuevo_cliente, repuesto):
+    luis = nuevo_cliente("5001", "Luis", datetime(2026, 10, 3, 9, 0))
+    venta(datetime(2026, 9, 10, 9, 0), "25000.00")
+    venta(datetime(2026, 10, 10, 9, 0), "75000.00", cliente=luis)
+    compra(datetime(2026, 10, 2, 9, 0), "130000.00")
+    repuesto("F-1", "Frenos", stock=0)
+
+    html = client.get("/reportes/?desde=2026-09-01&hasta=2026-10-31").get_data(as_text=True)
+
+    assert "$100,000.00" in html       # vendido
+    assert "$130,000.00" in html       # comprado
+    assert "-$30,000.00" in html       # vendido menos comprado
+    assert "$50,000.00" in html        # promedio por venta
+    assert "Luis Prueba" in html       # el cliente que más compró
+    assert "Agotados" in html
+    assert "<table" not in html
+    assert "<canvas" not in html
+
+
+def test_el_tabular_muestra_el_detalle_en_tablas(client, administrador, venta, compra, nuevo_cliente, repuesto):
     luis = nuevo_cliente("5001", "Luis", datetime(2026, 10, 3, 9, 0))
     venta(datetime(2026, 10, 10, 9, 0), "345000.00", cliente=luis)
-    iniciar_sesion(crear_cuenta("administrador"))
-
-    html = client.get("/reportes/?desde=2026-10-01&hasta=2026-10-31").get_data(as_text=True)
-
-    assert "Clientes nuevos" in html
-    assert "Luis Prueba" in html
-    assert f"/clientes/{luis.id_cliente}" in html
-    assert "$345,000.00" in html
-
-
-def test_la_vista_muestra_el_inventario_y_los_repuestos_por_reponer(
-    client, crear_cuenta, iniciar_sesion, repuesto
-):
+    compra(datetime(2026, 10, 2, 9, 0), "130000.00", proveedor=Proveedor(nit="800000003-3", nombre="Autopartes Cali"))
     repuesto("F-1", "Frenos", stock=10, precio="1500.00")
     agotado = repuesto("F-2", "Frenos", stock=0)
-    iniciar_sesion(crear_cuenta("administrador"))
 
-    html = client.get("/reportes/").get_data(as_text=True)
+    html = client.get("/reportes/tabular?desde=2026-09-01&hasta=2026-10-31").get_data(as_text=True)
 
-    assert 'id="inventario"' in html
+    assert "Septiembre 2026" in html and "Octubre 2026" in html
+    assert "$345,000.00" in html
+    assert "Autopartes Cali" in html and "NIT 800000003-3" in html
+    assert f"/clientes/{luis.id_cliente}" in html
     assert "$15,000.00" in html
-    assert "Repuesto F-2" in html
     assert f"/repuestos/{agotado.id_repuesto}/ajustar-stock" in html
+    assert "<canvas" not in html
 
 
-def test_la_vista_tiene_todas_las_secciones(client, crear_cuenta, iniciar_sesion):
-    iniciar_sesion(crear_cuenta("administrador"))
+def test_el_tabular_sin_datos_avisa_en_cada_tabla(client, administrador):
+    html = client.get("/reportes/tabular?desde=2026-09-01&hasta=2026-10-31").get_data(as_text=True)
 
-    html = client.get("/reportes/").get_data(as_text=True)
-
-    for seccion in ("resumen", "ventas", "compras", "clientes", "inventario"):
-        assert f'href="#{seccion}"' in html
-        assert f'id="{seccion}"' in html
+    assert "No hay compras a proveedores en este rango de fechas." in html
+    assert "Ningún cliente tiene compras completadas en este rango de fechas." in html
+    assert "Todavía no hay repuestos activos." in html
 
 
-def test_la_vista_muestra_las_compras_y_el_resumen(client, crear_cuenta, iniciar_sesion, venta, compra):
-    venta(datetime(2026, 10, 10, 9, 0), "100000.00")
-    compra(datetime(2026, 10, 2, 9, 0), "130000.00", proveedor=Proveedor(nit="800000003-3", nombre="Autopartes Cali"))
-    iniciar_sesion(crear_cuenta("administrador"))
-
-    html = client.get("/reportes/?desde=2026-10-01&hasta=2026-10-31").get_data(as_text=True)
-
-    assert "Autopartes Cali" in html
-    assert "$130,000.00" in html
-    assert "-$30,000.00" in html
-
-
-def test_la_vista_dibuja_los_graficos_con_los_datos_del_rango(
-    client, crear_cuenta, iniciar_sesion, venta, compra, nuevo_cliente, repuesto
+def test_el_grafico_dibuja_los_graficos_con_los_datos_del_rango(
+    client, administrador, venta, compra, nuevo_cliente, repuesto
 ):
     venta(datetime(2026, 9, 10, 9, 0), "25000.50")
     compra(datetime(2026, 10, 2, 9, 0), "130000.00")
     nuevo_cliente("5002", "Marta", datetime(2026, 10, 3, 9, 0))
     repuesto("F-1", "Frenos", stock=0)
-    iniciar_sesion(crear_cuenta("administrador"))
 
-    html = client.get("/reportes/?desde=2026-09-01&hasta=2026-10-31").get_data(as_text=True)
+    html = client.get("/reportes/grafico?desde=2026-09-01&hasta=2026-10-31").get_data(as_text=True)
 
     assert "chart.js@4.4.1" in html
-    for grafico in ("resumen", "ventas", "proveedores", "clientes", "inventario"):
+    for grafico in ("resumen", "ventas", "clientes", "proveedores", "inventario"):
         assert f'id="grafico-{grafico}"' in html
-    assert 'id="datos-graficos"' in html
     assert '"vendido": [25000.5, 0.0]' in html
     assert '"comprado": [0.0, 130000.0]' in html
+    assert '"ventas": [1, 0]' in html
     assert '"clientes": [0, 1]' in html
+    assert "<table" not in html
 
 
-def test_sin_datos_la_vista_no_dibuja_graficos(client, crear_cuenta, iniciar_sesion):
-    iniciar_sesion(crear_cuenta("administrador"))
-
-    html = client.get("/reportes/?desde=2026-09-01&hasta=2026-10-31").get_data(as_text=True)
+def test_el_grafico_sin_datos_no_dibuja_graficos_vacios(client, administrador):
+    html = client.get("/reportes/grafico?desde=2026-09-01&hasta=2026-10-31").get_data(as_text=True)
 
     assert "<canvas" not in html
     assert "No hay ventas completadas ni compras en este rango de fechas." in html
+    assert "Todavía no hay repuestos activos." in html

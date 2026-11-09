@@ -1,0 +1,52 @@
+{% extends "reportes/_base.html" %}
+{# Informe consolidado (UI-12): solo totales del rango y del inventario de hoy. #}
+
+{% macro tarjeta(titulo, valor, nota="", color="") %}
+<div class="card shadow-sm h-100">
+  <div class="card-body">
+    <div class="text-muted small">{{ titulo }}</div>
+    <div class="fs-4 fw-semibold {{ color }}">{{ valor }}</div>
+    {% if nota %}<div class="small text-muted">{{ nota }}</div>{% endif %}
+  </div>
+</div>
+{% endmacro %}
+
+{% macro pesos(valor) %}{{ "-" if valor < 0 }}${{ "{:,.2f}".format(valor|abs) }}{% endmacro %}
+
+{% block informe %}
+<h2 class="h5">Ventas y compras</h2>
+<div class="row g-3 mb-4">
+  <div class="col-md-4">{{ tarjeta("Total vendido", pesos(consolidado.vendido), ventas.ventas ~ " ventas completadas") }}</div>
+  <div class="col-md-4">{{ tarjeta("Total comprado", pesos(consolidado.comprado), compras.compras ~ " compras a proveedores") }}</div>
+  <div class="col-md-4">
+    {{ tarjeta("Vendido menos comprado", pesos(consolidado.diferencia),
+               "No es la utilidad: lo comprado en un mes se puede vender en otro.",
+               "text-danger" if consolidado.diferencia < 0 else "text-success") }}
+  </div>
+</div>
+
+<h2 class="h5">Ventas y clientes</h2>
+<div class="row g-3 mb-4">
+  <div class="col-sm-6 col-lg-3">{{ tarjeta("Número de ventas", ventas.ventas) }}</div>
+  <div class="col-sm-6 col-lg-3">{{ tarjeta("Promedio por venta", pesos(ventas.promedio)) }}</div>
+  <div class="col-sm-6 col-lg-3">{{ tarjeta("Clientes nuevos", clientes.nuevos) }}</div>
+  <div class="col-sm-6 col-lg-3">
+    {% set mejor = clientes.mejores[0] if clientes.mejores else none %}
+    {{ tarjeta("Cliente que más compró", mejor.cliente.nombre_completo if mejor else "Ninguno",
+               pesos(mejor.total) ~ " en " ~ mejor.compras ~ " compras" if mejor else "") }}
+  </div>
+</div>
+
+<h2 class="h5">Inventario de hoy</h2>
+<div class="row g-3">
+  <div class="col-sm-6 col-lg-3">{{ tarjeta("Repuestos activos", inventario.repuestos, inventario.unidades ~ " unidades") }}</div>
+  <div class="col-sm-6 col-lg-3">{{ tarjeta("Valor a precio de venta", pesos(inventario.valor)) }}</div>
+  <div class="col-sm-6 col-lg-3">{{ tarjeta("Stock bajo", inventario.estados["Stock bajo"], color="text-warning") }}</div>
+  <div class="col-sm-6 col-lg-3">{{ tarjeta("Agotados", inventario.estados["Agotado"], color="text-danger") }}</div>
+</div>
+
+<p class="small text-muted mt-4 mb-0">
+  El detalle está en <a href="{{ url_for('reportes.tabular', **fechas) }}">Tabular</a>
+  y los gráficos en <a href="{{ url_for('reportes.grafico', **fechas) }}">Gráfico</a>.
+</p>
+{% endblock %}

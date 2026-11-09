@@ -1,0 +1,137 @@
+{% extends "reportes/_base.html" %}
+{# Informe gráfico (UI-12): los datos del rango en gráficos de Chart.js. #}
+
+{% macro grafico(id, titulo, descripcion, clase="col-lg-6") %}
+<div class="{{ clase }}">
+  <div class="card shadow-sm h-100">
+    <div class="card-body">
+      <h2 class="h6 mb-3">{{ titulo }}</h2>
+      <div class="grafico"><canvas id="grafico-{{ id }}" aria-label="{{ descripcion }}" role="img"></canvas></div>
+    </div>
+  </div>
+</div>
+{% endmacro %}
+
+{% macro sin_datos(clase, mensaje) %}
+<div class="{{ clase }}"><div class="alert alert-info h-100 mb-0">{{ mensaje }}</div></div>
+{% endmacro %}
+
+{% block informe %}
+<style>
+  .grafico { position: relative; height: 300px; }
+</style>
+
+<div class="row g-4">
+  {% if consolidado.vendido or consolidado.comprado %}
+  {{ grafico("resumen", "Vendido y comprado por mes", "Gráfico de barras de lo vendido y lo comprado por mes", "col-12") }}
+  {% else %}
+  {{ sin_datos("col-12", "No hay ventas completadas ni compras en este rango de fechas.") }}
+  {% endif %}
+
+  {% if ventas.ventas %}
+  {{ grafico("ventas", "Número de ventas por mes", "Gráfico de barras del número de ventas completadas por mes") }}
+  {% else %}
+  {{ sin_datos("col-lg-6", "No hay ventas completadas en este rango de fechas.") }}
+  {% endif %}
+
+  {% if clientes.nuevos %}
+  {{ grafico("clientes", "Clientes nuevos por mes", "Gráfico de barras de los clientes nuevos por mes") }}
+  {% else %}
+  {{ sin_datos("col-lg-6", "No se registraron clientes en este rango de fechas.") }}
+  {% endif %}
+
+  {% if compras.proveedores %}
+  {{ grafico("proveedores", "Total comprado por proveedor", "Gráfico de barras del total comprado a cada proveedor") }}
+  {% else %}
+  {{ sin_datos("col-lg-6", "No hay compras a proveedores en este rango de fechas.") }}
+  {% endif %}
+
+  {% if inventario.repuestos %}
+  {{ grafico("inventario", "Inventario de hoy por estado del stock", "Gráfico de dona de los repuestos en stock, con stock bajo y agotados") }}
+  {% else %}
+  {{ sin_datos("col-lg-6", "Todavía no hay repuestos activos.") }}
+  {% endif %}
+</div>
+
+<p class="small text-muted mt-3 mb-0">
+  Los números exactos están en <a href="{{ url_for('reportes.tabular', **fechas) }}">Tabular</a>.
+</p>
+
+{% set graficos = {
+  "meses": ventas.meses | map(attribute="nombre") | list,
+  "vendido": consolidado.meses | map(attribute="vendido") | map("float") | list,
+  "comprado": consolidado.meses | map(attribute="comprado") | map("float") | list,
+  "ventas": ventas.meses | map(attribute="ventas") | list,
+  "clientes": clientes.meses | map(attribute="nuevos") | list,
+  "proveedores": compras.proveedores | map(attribute="proveedor.nombre") | list,
+  "por_proveedor": compras.proveedores | map(attribute="total") | map("float") | list,
+  "estados": inventario.estados.keys() | list,
+  "por_estado": inventario.estados.values() | list,
+} %}
+<script type="application/json" id="datos-graficos">{{ graficos | tojson }}</script>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script>
+  // Gráficos del informe. Los datos vienen del servidor en #datos-graficos.
+  (function () {
+    if (!window.Chart) return;
+    const datos = JSON.parse(document.getElementById("datos-graficos").textContent);
+    const formato = new Intl.NumberFormat("en-US", {style: "currency", currency: "USD", maximumFractionDigits: 0});
+    const dinero = (valor) => formato.format(valor);
+    const colores = {vendido: "#0d6efd", comprado: "#fd7e14", ventas: "#0dcaf0", clientes: "#6f42c1"};
+    const tooltipDinero = {callbacks: {label: (c) => `${c.dataset.label}: ${dinero(c.raw)}`}};
+    const enteros = {y: {beginAtZero: true, ticks: {precision: 0}}};
+    Chart.defaults.maintainAspectRatio = false;
+
+    function dibujar(id, config) {
+      const lienzo = document.getElementById("grafico-" + id);
+      if (lienzo) new Chart(lienzo, config);
+    }
+
+    dibujar("resumen", {
+      type: "bar",
+      data: {
+        labels: datos.meses,
+        datasets: [
+          {label: "Vendido", data: datos.vendido, backgroundColor: colores.vendido},
+          {label: "Comprado", data: datos.comprado, backgroundColor: colores.comprado},
+        ],
+      },
+      options: {scales: {y: {beginAtZero: true, ticks: {callback: dinero}}}, plugins: {tooltip: tooltipDinero}},
+    });
+
+    dibujar("ventas", {
+      type: "bar",
+      data: {labels: datos.meses, datasets: [{label: "Ventas", data: datos.ventas, backgroundColor: colores.ventas}]},
+      options: {scales: enteros, plugins: {legend: {display: false}}},
+    });
+
+    dibujar("clientes", {
+      type: "bar",
+      data: {labels: datos.meses, datasets: [{label: "Clientes nuevos", data: datos.clientes, backgroundColor: colores.clientes}]},
+      options: {scales: enteros, plugins: {legend: {display: false}}},
+    });
+
+    dibujar("proveedores", {
+      type: "bar",
+      data: {labels: datos.proveedores, datasets: [{label: "Comprado", data: datos.por_proveedor, backgroundColor: colores.comprado}]},
+      options: {
+        indexAxis: "y",
+        scales: {x: {beginAtZero: true, ticks: {callback: dinero}}},
+        plugins: {legend: {display: false}, tooltip: tooltipDinero},
+      },
+    });
+
+    dibujar("inventario", {
+      type: "doughnut",
+      data: {
+        labels: datos.estados,
+        datasets: [{data: datos.por_estado, backgroundColor: ["#198754", "#ffc107", "#dc3545"]}],
+      },
+      options: {plugins: {legend: {position: "bottom"}}},
+    });
+  })();
+</script>
+{% endblock %}
