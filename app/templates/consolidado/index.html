@@ -1,0 +1,150 @@
+{% extends "base.html" %}
+{# Informe consolidado de las dos sedes: compras y ventas con IVA, por rango, tipo, sede y tercero. #}
+
+{% block titulo %}Consolidado de sedes · RepuAuto{% endblock %}
+
+{% macro pesos(valor) %}{{ "-" if valor < 0 }}${{ "{:,.2f}".format(valor|abs) }}{% endmacro %}
+
+{% block content %}
+<div class="mb-3">
+  <h1 class="h3 mb-1">Consolidado de sedes</h1>
+  <p class="text-muted small mb-0">
+    Compras y ventas de {{ datos.sucursales | join(" y ") }}. El IVA va incluido en el total.
+    Solo cuentan las ventas completadas o activas.
+  </p>
+</div>
+
+<form class="row g-2 align-items-end mb-3" method="get" action="{{ url_for('consolidado.index') }}">
+  <div class="col-sm-6 col-lg-2">
+    <label class="form-label" for="desde">Desde</label>
+    <input class="form-control" type="date" id="desde" name="desde" value="{{ filtros.desde.isoformat() }}">
+  </div>
+  <div class="col-sm-6 col-lg-2">
+    <label class="form-label" for="hasta">Hasta</label>
+    <input class="form-control" type="date" id="hasta" name="hasta" value="{{ filtros.hasta.isoformat() }}">
+  </div>
+  <div class="col-sm-4 col-lg-2">
+    <label class="form-label" for="tipo">Tipo</label>
+    <select class="form-select" id="tipo" name="tipo">
+      <option value="">Ventas y compras</option>
+      <option value="venta" {{ "selected" if filtros.tipo == "venta" }}>Solo ventas</option>
+      <option value="compra" {{ "selected" if filtros.tipo == "compra" }}>Solo compras</option>
+    </select>
+  </div>
+  <div class="col-sm-4 col-lg-2">
+    <label class="form-label" for="sucursal">Sede</label>
+    <select class="form-select" id="sucursal" name="sucursal">
+      <option value="">Las dos</option>
+      {% for nombre in datos.sucursales %}
+      <option value="{{ nombre }}" {{ "selected" if filtros.sucursal == nombre }}>{{ nombre }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="col-sm-4 col-lg-2">
+    <label class="form-label" for="tercero">Tercero</label>
+    <input class="form-control" type="search" id="tercero" name="tercero" value="{{ filtros.tercero }}" placeholder="Nombre o documento">
+  </div>
+  <div class="col-lg-2">
+    <button class="btn btn-primary w-100" type="submit">Consultar</button>
+  </div>
+</form>
+
+{% if error %}
+<div class="alert alert-warning">{{ error }} Se muestra el mes actual.</div>
+{% endif %}
+{% if datos.aviso %}
+<div class="alert alert-warning">
+  <strong>Sin datos de {{ datos.sucursales[1] }}.</strong> {{ datos.aviso }}
+  El informe muestra solo {{ datos.sucursales[0] }}.
+</div>
+{% endif %}
+
+<p class="small text-muted">
+  Del {{ filtros.desde.strftime("%d/%m/%Y") }} al {{ filtros.hasta.strftime("%d/%m/%Y") }}.
+</p>
+
+<h2 class="h5">Totales por sede</h2>
+<div class="card shadow-sm mb-4">
+  <div class="table-responsive">
+    <table class="table align-middle mb-0">
+      <thead class="table-light">
+        <tr>
+          <th scope="col">Sede</th>
+          <th scope="col" class="text-center">Ventas</th>
+          <th scope="col" class="text-end">Vendido</th>
+          <th scope="col" class="text-end">IVA ventas</th>
+          <th scope="col" class="text-center">Compras</th>
+          <th scope="col" class="text-end">Comprado</th>
+          <th scope="col" class="text-end">IVA compras</th>
+          <th scope="col" class="text-end">Vendido menos comprado</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for fila in datos.por_sucursal %}
+        <tr>
+          <td>{{ fila.sucursal }}</td>
+          <td class="text-center">{{ fila.venta.cantidad }}</td>
+          <td class="text-end">{{ pesos(fila.venta.total) }}</td>
+          <td class="text-end">{{ pesos(fila.venta.iva) }}</td>
+          <td class="text-center">{{ fila.compra.cantidad }}</td>
+          <td class="text-end">{{ pesos(fila.compra.total) }}</td>
+          <td class="text-end">{{ pesos(fila.compra.iva) }}</td>
+          <td class="text-end {{ 'text-danger' if fila.diferencia < 0 }}">{{ pesos(fila.diferencia) }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+      <tfoot>
+        {% set t = datos.totales %}
+        <tr>
+          <th scope="row">Consolidado</th>
+          <th class="text-center">{{ t.venta.cantidad }}</th>
+          <th class="text-end">{{ pesos(t.venta.total) }}</th>
+          <th class="text-end">{{ pesos(t.venta.iva) }}</th>
+          <th class="text-center">{{ t.compra.cantidad }}</th>
+          <th class="text-end">{{ pesos(t.compra.total) }}</th>
+          <th class="text-end">{{ pesos(t.compra.iva) }}</th>
+          <th class="text-end {{ 'text-danger' if t.diferencia < 0 }}">{{ pesos(t.diferencia) }}</th>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+</div>
+
+<h2 class="h5">Facturas <span class="text-muted small fw-normal">({{ datos.facturas | length }})</span></h2>
+{% if datos.facturas %}
+<div class="card shadow-sm">
+  <div class="table-responsive">
+    <table class="table table-sm align-middle mb-0">
+      <thead class="table-light">
+        <tr>
+          <th scope="col">Fecha</th>
+          <th scope="col">Sede</th>
+          <th scope="col">Tipo</th>
+          <th scope="col">Número</th>
+          <th scope="col">Tercero</th>
+          <th scope="col" class="text-end">Subtotal</th>
+          <th scope="col" class="text-end">IVA</th>
+          <th scope="col" class="text-end">Total</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for f in datos.facturas %}
+        <tr>
+          <td class="text-nowrap">{{ f.fecha[:10] }} <span class="text-muted small">{{ f.fecha[11:16] }}</span></td>
+          <td>{{ f.sucursal }}</td>
+          <td><span class="badge text-bg-{{ 'primary' if f.tipo == 'venta' else 'warning' }}">{{ f.tipo | capitalize }}</span></td>
+          <td>{{ f.numero }}</td>
+          <td>{{ f.tercero.nombre }}{% if f.tercero.documento %}<br><span class="small text-muted">{{ f.tercero.documento }}</span>{% endif %}</td>
+          <td class="text-end">{{ pesos(f.subtotal | float) }}</td>
+          <td class="text-end">{{ pesos(f.iva | float) }}</td>
+          <td class="text-end">{{ pesos(f.total | float) }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% else %}
+<div class="alert alert-info">No hay facturas con estos filtros.</div>
+{% endif %}
+{% endblock %}

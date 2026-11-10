@@ -18,6 +18,7 @@ MENU = [
     {"texto": "Repuestos y stock", "endpoint": "repuestos.index", "historia": "US-04", "roles": PERSONAL},
     {"texto": "Vehículos", "endpoint": "vehiculos.index", "historia": "US-03", "roles": ADMIN},
     {"texto": "Reportes", "endpoint": "reportes.index", "historia": "US-07", "roles": ADMIN},
+    {"texto": "Consolidado de sedes", "endpoint": "consolidado.index", "historia": "Integración", "roles": ADMIN},
     {"texto": "Proveedores y compras", "endpoint": "compras.index", "historia": "US-09", "roles": ADMIN},
     {"texto": "Cuentas y acceso", "endpoint": "auth.index", "historia": "US-01", "roles": ADMIN},
 ]
