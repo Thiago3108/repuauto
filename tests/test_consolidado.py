@@ -188,17 +188,18 @@ def test_si_rechaza_el_usuario_se_avisa(otra_sede, monkeypatch):
         sedes.facturas_remotas(*OCTUBRE)
 
 
-@pytest.mark.parametrize("codigo, mensaje", [
-    (400, "DJANGO_ALLOWED_HOSTS"),
-    (404, "cambia cada vez que reinician ngrok"),
-    (429, "Espera un minuto"),
+@pytest.mark.parametrize("codigo, encabezados, mensaje", [
+    (400, {}, "DJANGO_ALLOWED_HOSTS"),
+    (404, {"ngrok-error-code": "ERR_NGROK_3200"}, "ERR_NGROK_3200"),
+    (404, {}, "todavía no tiene /auth/login/"),
+    (429, {}, "Espera un minuto"),
 ])
-def test_los_errores_tipicos_de_ngrok_y_django_se_explican(app, otra_sede, monkeypatch, codigo, mensaje):
+def test_los_errores_tipicos_de_ngrok_y_django_se_explican(app, otra_sede, monkeypatch, codigo, encabezados, mensaje):
     monkeypatch.undo()
     app.config["SEDE_REMOTA_URL"] = "https://abcd-1234.ngrok-free.app/api"
 
     def falla(peticion, timeout):
-        raise url_error.HTTPError(peticion.full_url, codigo, "error", {}, io.BytesIO(b""))
+        raise url_error.HTTPError(peticion.full_url, codigo, "error", encabezados, io.BytesIO(b""))
 
     monkeypatch.setattr(sedes.request, "urlopen", falla)
 
@@ -313,3 +314,116 @@ def test_la_vista_avisa_si_la_otra_sede_no_responde(app, client, iniciar_sesion,
 
     assert "Sin datos de Sede UD1." in html
     assert "$119,000.00" in html
+
+
+# ---------- Inventario de las dos sedes ----------
+
+INVENTARIO_UD1 = {
+    "sucursal": "Cali", "fecha": "2026-11-10T10:00:00-05:00", "moneda": "COP",
+    "resumen": {"productos": 2, "unidades": 7, "valor": "9100000.00", "en_stock": 1, "stock_bajo": 0, "agotado": 1},
+    "productos": [
+        {"codigo": "GPU-1", "nombre": "Tarjeta de video", "categoria": "Gráficas", "marca": "Nvidia", "stock": 7,
+         "stock_minimo": 2, "precio_venta": "1300000.00", "valor": "9100000.00", "estado": "en_stock"},
+        {"codigo": "RAM-1", "nombre": "Memoria RAM", "categoria": "Memorias", "marca": "Kingston", "stock": 0,
+         "stock_minimo": 3, "precio_venta": "180000.00", "valor": "0.00", "estado": "agotado"},
+    ],
+}
+
+
+@pytest.fixture()
+def otra_sede_inventario(app, monkeypatch):
+    app.config.update(
+        SEDE_REMOTA_URL="https://ud1.ngrok-free.dev/api", SEDE_REMOTA_TIPO="repuauto", SEDE_REMOTA_NOMBRE="Sede Cali",
+        SEDE_REMOTA_USUARIO="repuauto@pcstock.com", SEDE_REMOTA_CLAVE="clave",
+    )
+    respuestas = {("POST", "/login"): {"token": "t"}, ("GET", "/inventario"): INVENTARIO_UD1}
+    monkeypatch.setattr(sedes, "_pedir", lambda metodo, ruta, cuerpo=None, token=None: respuestas[(metodo, ruta)])
+
+
+@pytest.fixture()
+def inventario_local(app):
+    from app.models import Categoria, MarcaRepuesto, Repuesto
+
+    db.session.add(Repuesto(
+        codigo="FRE-1", nombre="Pastillas de freno", categoria=Categoria(nombre="Frenos"),
+        marca=MarcaRepuesto(nombre="Bosch"), stock_actual=2, stock_minimo=4, precio_venta=Decimal("100000.00"),
+    ))
+    db.session.commit()
+
+
+def test_el_inventario_remoto_se_lee_con_nuestro_formato(otra_sede_inventario):
+    remoto = sedes.inventario_remoto()
+
+    assert remoto["resumen"]["productos"] == 2
+    assert [p["codigo"] for p in remoto["productos"]] == ["GPU-1", "RAM-1"]
+
+
+def test_con_la_api_anterior_de_ud1_no_hay_inventario(app):
+    app.config.update(SEDE_REMOTA_URL="http://ud1.local/api", SEDE_REMOTA_TIPO="ud1")
+
+    with pytest.raises(sedes.SedeNoDisponible, match="SEDE_REMOTA_TIPO=repuauto"):
+        sedes.inventario_remoto()
+
+
+def test_si_la_otra_sede_no_publica_inventario_se_dice_claramente(app, monkeypatch):
+    app.config.update(SEDE_REMOTA_URL="https://ud1.ngrok-free.dev/api", SEDE_REMOTA_TIPO="repuauto",
+                      SEDE_REMOTA_USUARIO="u", SEDE_REMOTA_CLAVE="c")
+    monkeypatch.setattr(sedes, "_token_repuauto", lambda: "t")
+
+    def no_existe(peticion, timeout):
+        # Así responde el Django de UD1 en modo de depuración: una página HTML, sin encabezado de ngrok.
+        raise url_error.HTTPError(peticion.full_url, 404, "Not Found", {}, io.BytesIO(b"<html>Page not found</html>"))
+
+    monkeypatch.setattr(sedes.request, "urlopen", no_existe)
+
+    with pytest.raises(sedes.SedeNoDisponible, match="todavía no tiene /inventario"):
+        sedes.inventario_remoto()
+
+
+def test_el_inventario_consolidado_suma_las_dos_sedes(inventario_local, otra_sede_inventario):
+    datos = services.inventario()
+
+    assert datos["aviso"] is None
+    assert [(f["sucursal"], f["productos"], f["valor"]) for f in datos["por_sucursal"]] == [
+        ("Bucaramanga", 1, Decimal("200000.00")), ("Sede Cali", 2, Decimal("9100000.00")),
+    ]
+    assert datos["totales"]["productos"] == 3
+    assert datos["totales"]["valor"] == Decimal("9300000.00")
+    assert (datos["totales"]["stock_bajo"], datos["totales"]["agotado"]) == (1, 1)
+    assert {p["sucursal"] for p in datos["productos"]} == {"Bucaramanga", "Sede Cali"}
+
+
+@pytest.mark.parametrize("filtros, codigos", [
+    ({"estado": "agotado"}, ["RAM-1"]),
+    ({"sucursal": "Bucaramanga"}, ["FRE-1"]),
+    ({"buscar": "graficas"}, ["GPU-1"]),
+    ({"buscar": "bosch"}, ["FRE-1"]),
+])
+def test_el_inventario_consolidado_se_filtra(inventario_local, otra_sede_inventario, filtros, codigos):
+    assert [p["codigo"] for p in services.inventario(**filtros)["productos"]] == codigos
+
+
+def test_la_pestana_inventario_muestra_las_dos_sedes(client, crear_cuenta, iniciar_sesion, inventario_local, otra_sede_inventario):
+    iniciar_sesion(crear_cuenta("administrador"))
+
+    html = client.get("/consolidado/inventario").get_data(as_text=True)
+
+    assert "Tarjeta de video" in html and "Pastillas de freno" in html
+    assert "$9,300,000.00" in html
+    assert 'href="/consolidado/inventario"' in html and 'href="/consolidado/"' in html
+
+
+def test_la_pestana_inventario_avisa_si_la_otra_sede_no_responde(client, crear_cuenta, iniciar_sesion, inventario_local):
+    iniciar_sesion(crear_cuenta("administrador"))
+
+    html = client.get("/consolidado/inventario").get_data(as_text=True)
+
+    assert "Sin inventario de Sede UD1." in html
+    assert "Pastillas de freno" in html
+
+
+@pytest.mark.parametrize("rol", ["cliente", "vendedor"])
+def test_solo_el_administrador_ve_el_inventario_consolidado(client, crear_cuenta, iniciar_sesion, rol):
+    iniciar_sesion(crear_cuenta(rol))
+
+    assert client.get("/consolidado/inventario").status_code == 403

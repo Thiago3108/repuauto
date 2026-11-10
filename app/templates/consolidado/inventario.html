@@ -1,0 +1,136 @@
+{% extends "base.html" %}
+{# Inventario de hoy de las dos sedes: totales por sede y productos, con filtros. #}
+
+{% block titulo %}Inventario de sedes · RepuAuto{% endblock %}
+
+{% macro pesos(valor) %}${{ "{:,.2f}".format(valor) }}{% endmacro %}
+
+{% block content %}
+{% with descripcion = "Inventario de hoy de " ~ (datos.sucursales | join(" y ")) ~ ". El valor es el stock a precio de venta." %}
+{% include "consolidado/_pestanas.html" %}
+{% endwith %}
+
+{% set colores = {"en_stock": "success", "stock_bajo": "warning", "agotado": "danger"} %}
+
+<form class="row g-2 align-items-end mb-3" method="get" action="{{ url_for('consolidado.inventario') }}">
+  <div class="col-sm-4 col-lg-3">
+    <label class="form-label" for="sucursal">Sede</label>
+    <select class="form-select" id="sucursal" name="sucursal">
+      <option value="">Las dos</option>
+      {% for nombre in datos.sucursales %}
+      <option value="{{ nombre }}" {{ "selected" if filtros.sucursal == nombre }}>{{ nombre }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="col-sm-4 col-lg-3">
+    <label class="form-label" for="estado">Estado del stock</label>
+    <select class="form-select" id="estado" name="estado">
+      <option value="">Todos</option>
+      {% for clave, nombre in nombres_de_estado.items() %}
+      <option value="{{ clave }}" {{ "selected" if filtros.estado == clave }}>{{ nombre }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="col-sm-4 col-lg-4">
+    <label class="form-label" for="buscar">Buscar</label>
+    <input class="form-control" type="search" id="buscar" name="buscar" value="{{ filtros.buscar }}" placeholder="Código, nombre, categoría o marca">
+  </div>
+  <div class="col-lg-2">
+    <button class="btn btn-primary w-100" type="submit">Consultar</button>
+  </div>
+</form>
+
+{% if datos.aviso %}
+<div class="alert alert-warning">
+  <strong>Sin inventario de {{ datos.sucursales[1] }}.</strong> {{ datos.aviso }}
+  Se muestra solo {{ datos.sucursales[0] }}.
+</div>
+{% endif %}
+
+<h2 class="h5">Totales por sede</h2>
+<div class="card shadow-sm mb-4">
+  <div class="table-responsive">
+    <table class="table align-middle mb-0">
+      <thead class="table-light">
+        <tr>
+          <th scope="col">Sede</th>
+          <th scope="col" class="text-center">Productos</th>
+          <th scope="col" class="text-center">Unidades</th>
+          {% for clave, nombre in nombres_de_estado.items() %}
+          <th scope="col" class="text-center">{{ nombre }}</th>
+          {% endfor %}
+          <th scope="col" class="text-end">Valor</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for fila in datos.por_sucursal %}
+        <tr>
+          <td>{{ fila.sucursal }}</td>
+          <td class="text-center">{{ fila.productos }}</td>
+          <td class="text-center">{{ fila.unidades }}</td>
+          {% for clave in nombres_de_estado %}
+          <td class="text-center">
+            {% if fila[clave] %}<span class="badge text-bg-{{ colores[clave] }}">{{ fila[clave] }}</span>{% else %}0{% endif %}
+          </td>
+          {% endfor %}
+          <td class="text-end">{{ pesos(fila.valor) }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+      <tfoot>
+        <tr>
+          <th scope="row">Consolidado</th>
+          <th class="text-center">{{ datos.totales.productos }}</th>
+          <th class="text-center">{{ datos.totales.unidades }}</th>
+          {% for clave in nombres_de_estado %}
+          <th class="text-center">{{ datos.totales[clave] }}</th>
+          {% endfor %}
+          <th class="text-end">{{ pesos(datos.totales.valor) }}</th>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+</div>
+
+<h2 class="h5">Productos <span class="text-muted small fw-normal">({{ datos.productos | length }})</span></h2>
+{% if datos.productos %}
+<div class="card shadow-sm">
+  <div class="table-responsive">
+    <table class="table table-sm align-middle mb-0">
+      <thead class="table-light">
+        <tr>
+          <th scope="col">Sede</th>
+          <th scope="col">Código</th>
+          <th scope="col">Producto</th>
+          <th scope="col">Categoría</th>
+          <th scope="col">Marca</th>
+          <th scope="col" class="text-center">Stock</th>
+          <th scope="col" class="text-center">Mínimo</th>
+          <th scope="col">Estado</th>
+          <th scope="col" class="text-end">Precio</th>
+          <th scope="col" class="text-end">Valor</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for p in datos.productos %}
+        <tr>
+          <td>{{ p.sucursal }}</td>
+          <td>{{ p.codigo }}</td>
+          <td>{{ p.nombre }}</td>
+          <td>{{ p.categoria }}</td>
+          <td>{{ p.marca }}</td>
+          <td class="text-center">{{ p.stock }}</td>
+          <td class="text-center">{{ p.stock_minimo }}</td>
+          <td><span class="badge text-bg-{{ colores.get(p.estado, 'secondary') }}">{{ nombres_de_estado.get(p.estado, p.estado) }}</span></td>
+          <td class="text-end">{{ pesos(p.precio_venta | float) }}</td>
+          <td class="text-end">{{ pesos(p.valor | float) }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% else %}
+<div class="alert alert-info">No hay productos con estos filtros.</div>
+{% endif %}
+{% endblock %}

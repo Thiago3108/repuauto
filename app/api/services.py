@@ -9,10 +9,12 @@ from flask import current_app
 from itsdangerous import BadSignature, SignatureExpired, URLSafeTimedSerializer
 
 from app.extensions import db
-from app.models import Compra, EstadoVenta, Usuario, Venta
+from app.models import Categoria, Compra, EstadoVenta, Repuesto, Usuario, Venta
 from app.reportes.services import _en_rango
 
 TIPOS = ("venta", "compra")
+# Estados del stock en la API, con el mismo criterio de los reportes (US-07 T2).
+ESTADOS = ("en_stock", "stock_bajo", "agotado")
 # Colombia no cambia la hora en el año: siempre UTC-5.
 HORA_COLOMBIA = timezone(timedelta(hours=-5), "COT")
 CENTAVO = Decimal("0.01")
@@ -99,6 +101,59 @@ def facturas(desde, hasta, tipo=None):
         "iva_porcentaje": current_app.config["API_IVA"],
         "resumen": {t: _resumen(lista, t) for t in TIPOS if tipo in (None, t)},
         "facturas": lista,
+    }
+
+
+def inventario(estado=None):
+    """Repuestos activos con su stock de hoy, en el formato acordado entre sedes.
+
+    - estado: "agotado" (stock 0), "stock_bajo" (menos que el mínimo), "en_stock" (el
+      resto) o None para todos. Es el mismo criterio de los reportes.
+    - valor es lo que vale el stock a precio de venta (con IVA incluido).
+
+    Devuelve el diccionario listo para convertir en JSON, con los productos ordenados por
+    categoría y nombre, y un resumen de todo el inventario (sin filtrar).
+    """
+    repuestos = db.session.scalars(
+        db.select(Repuesto)
+        .join(Repuesto.categoria)
+        .filter(Repuesto.activo.is_(True))
+        .order_by(Categoria.nombre, Repuesto.nombre)
+    ).all()
+    productos = [_producto(repuesto) for repuesto in repuestos]
+    return {
+        "sucursal": current_app.config["API_SUCURSAL"],
+        "fecha": fecha_iso(datetime.now()),
+        "moneda": "COP",
+        "resumen": {
+            "productos": len(productos),
+            "unidades": sum(p["stock"] for p in productos),
+            "valor": _texto(sum((Decimal(p["valor"]) for p in productos), Decimal("0"))),
+            **{e: sum(1 for p in productos if p["estado"] == e) for e in ESTADOS},
+        },
+        "productos": [p for p in productos if estado in (None, p["estado"])],
+    }
+
+
+def estado_de_stock(stock, minimo):
+    if stock == 0:
+        return "agotado"
+    if stock < minimo:
+        return "stock_bajo"
+    return "en_stock"
+
+
+def _producto(repuesto):
+    return {
+        "codigo": repuesto.codigo,
+        "nombre": repuesto.nombre,
+        "categoria": repuesto.categoria.nombre,
+        "marca": repuesto.marca.nombre,
+        "stock": repuesto.stock_actual,
+        "stock_minimo": repuesto.stock_minimo,
+        "precio_venta": _texto(repuesto.precio_venta),
+        "valor": _texto(repuesto.precio_venta * repuesto.stock_actual),
+        "estado": estado_de_stock(repuesto.stock_actual, repuesto.stock_minimo),
     }
 
 

@@ -39,5 +39,12 @@ class TestConfig(Config):
     SQLALCHEMY_DATABASE_URI = os.environ.get("TEST_DATABASE_URL")
     # Las pruebas envían formularios sin el token CSRF que pondría el navegador.
     WTF_CSRF_ENABLED = False
-    # Las pruebas nunca se conectan a la otra sede de verdad, aunque el .env la tenga.
+    # Las pruebas nunca se conectan a la otra sede de verdad ni dependen del .env.
+    API_SUCURSAL = "Bucaramanga"
+    API_IVA = 19
+    API_TOKEN_HORAS = 8
+    SEDE_REMOTA_NOMBRE = "Sede UD1"
     SEDE_REMOTA_URL = ""
+    SEDE_REMOTA_TIPO = "repuauto"
+    SEDE_REMOTA_USUARIO = ""
+    SEDE_REMOTA_CLAVE = ""

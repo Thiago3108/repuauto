@@ -6,13 +6,9 @@
 {% macro pesos(valor) %}{{ "-" if valor < 0 }}${{ "{:,.2f}".format(valor|abs) }}{% endmacro %}
 
 {% block content %}
-<div class="mb-3">
-  <h1 class="h3 mb-1">Consolidado de sedes</h1>
-  <p class="text-muted small mb-0">
-    Compras y ventas de {{ datos.sucursales | join(" y ") }}. El IVA va incluido en el total.
-    Solo cuentan las ventas completadas o activas.
-  </p>
-</div>
+{% with descripcion = "Compras y ventas de " ~ (datos.sucursales | join(" y ")) ~ ". El IVA va incluido en el total. Solo cuentan las ventas completadas o activas." %}
+{% include "consolidado/_pestanas.html" %}
+{% endwith %}
 
 <form class="row g-2 align-items-end mb-3" method="get" action="{{ url_for('consolidado.index') }}">
   <div class="col-sm-6 col-lg-2">
