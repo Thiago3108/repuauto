@@ -235,6 +235,11 @@ El menú lateral está en `app/menu.py`, con los roles que ven cada opción, seg
   {{ campo(form.cedula) }}
   {{ campo(form.correo, "email") }}
   ```
+- La apariencia está en `app/static/css/app.css`: colores, tipografía, menú lateral, tarjetas y tablas. Las plantillas usan las clases normales de Bootstrap y **no llevan estilos propios**. Para que una vista nueva se vea igual que las demás:
+  - cada tabla va dentro de `<div class="card"><div class="table-responsive">`;
+  - las acciones de una fila son botones pequeños con icono (`btn btn-sm btn-outline-… ra-icono`), con `title` y `aria-label` que digan qué hacen;
+  - los iconos son de [Bootstrap Icons](https://icons.getbootstrap.com): `<i class="bi bi-nombre" aria-hidden="true"></i>`;
+  - una entrada nueva del menú lleva su `icono` y su `descripcion` en `app/menu.py`.
 
 ## Definición de terminado
 

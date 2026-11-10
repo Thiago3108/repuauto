@@ -9,17 +9,17 @@
     <p class="text-muted">Completa la información del repuesto.</p>
   </div>
 
-  <div class="card shadow-sm">
-    <div class="card-body">
+  <div class="card shadow-sm ra-form">
+    <div class="card-body p-4">
       <form method="post">
         {{ form.hidden_tag() }}
 
-        {{ campo(form.codigo) }}
-        {{ campo(form.nombre) }}
-        {{ campo(form.descripcion) }}
-        {{ campo(form.precio_venta, tipo="number") }}
-
-        <div class="mb-3">
+        <div class="row gx-3">
+          <div class="col-sm-4">{{ campo(form.codigo) }}</div>
+          <div class="col-sm-8">{{ campo(form.nombre) }}</div>
+          <div class="col-12">{{ campo(form.descripcion) }}</div>
+          <div class="col-sm-4">{{ campo(form.precio_venta, tipo="number") }}</div>
+        <div class="col-sm-4 mb-3">
           {{ form.id_categoria.label(class="form-label") }}
           {{ form.id_categoria(class="form-select" + (" is-invalid" if form.id_categoria.errors else "")) }}
           {% for error in form.id_categoria.errors %}
@@ -27,7 +27,7 @@
           {% endfor %}
         </div>
 
-        <div class="mb-3">
+        <div class="col-sm-4 mb-3">
           {{ form.id_marca_repuesto.label(class="form-label") }}
           {{ form.id_marca_repuesto(class="form-select" + (" is-invalid" if form.id_marca_repuesto.errors else "")) }}
           {% for error in form.id_marca_repuesto.errors %}
@@ -35,16 +35,19 @@
           {% endfor %}
         </div>
 
-        {{ campo(form.stock_minimo, tipo="number") }}
+          <div class="col-sm-4">{{ campo(form.stock_minimo, tipo="number") }}</div>
 
         {% if form.stock_actual is defined %}
-          {{ campo(form.stock_actual, tipo="number") }}
+          <div class="col-sm-4">{{ campo(form.stock_actual, tipo="number") }}</div>
         {% elif repuesto is defined %}
+          <div class="col-12">
           <div class="alert alert-info">
             Stock actual: <strong>{{ repuesto.stock_actual }}</strong>.
             Para modificarlo utiliza la opción «Ajustar stock».
           </div>
+          </div>
         {% endif %}
+        </div>
 
         <div class="d-flex gap-2">
           {{ form.submit(class="btn btn-primary") }}

@@ -1,17 +1,44 @@
 {% extends "base.html" %}
 
-{% block content %}
-<h1 class="h3 mb-1">Hola, {{ current_user.nombre }}</h1>
-<p class="text-muted">Estos son tus accesos como {{ current_user.rol.nombre }}.</p>
+{% block titulo %}Inicio · RepuAuto{% endblock %}
 
+{% block content %}
+<div class="ra-saludo">
+  <div>
+    <div class="ra-saludo__fecha">{{ fecha }}</div>
+    <h1 class="h2 mb-0">Hola, {{ current_user.nombre }}</h1>
+  </div>
+  <span class="ra-chip"><i class="bi bi-person-badge" aria-hidden="true"></i>{{ current_user.rol.nombre|capitalize }}</span>
+</div>
+
+{% if resumen %}
+<div class="row g-3 mb-4">
+  {% for tarjeta in resumen %}
+  <div class="col-sm-6 col-xl">
+    <a class="card ra-cifra" href="{{ tarjeta.enlace }}">
+      <span class="ra-cifra__icono ra-{{ tarjeta.color }}"><i class="bi bi-{{ tarjeta.icono }}" aria-hidden="true"></i></span>
+      <span>
+        <span class="ra-cifra__titulo d-block">{{ tarjeta.titulo }}</span>
+        <span class="ra-cifra__valor d-block">{{ tarjeta.valor }}</span>
+        <span class="ra-cifra__detalle">{{ tarjeta.detalle }}</span>
+      </span>
+    </a>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+<h2 class="h5 mb-3">¿Qué quieres hacer?</h2>
 <div class="row g-3">
   {% for item in menu %}
-  <div class="col-sm-6 col-lg-3">
-    <a class="card h-100 text-decoration-none" href="{{ url_for(item.endpoint) }}">
-      <div class="card-body">
-        <h2 class="h6 card-title text-dark mb-1">{{ item.texto }}</h2>
-        <p class="card-text small text-muted mb-0">{{ item.historia }}</p>
-      </div>
+  <div class="col-md-6 col-xl-4">
+    <a class="card ra-acceso" href="{{ url_for(item.endpoint) }}">
+      <span class="ra-acceso__icono"><i class="bi bi-{{ item.icono }}" aria-hidden="true"></i></span>
+      <span>
+        <span class="ra-acceso__titulo d-block">{{ item.texto }}</span>
+        <span class="ra-acceso__texto">{{ item.descripcion }}</span>
+      </span>
+      <i class="bi bi-arrow-right ra-acceso__flecha" aria-hidden="true"></i>
     </a>
   </div>
   {% endfor %}

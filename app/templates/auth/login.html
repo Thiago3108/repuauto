@@ -4,22 +4,19 @@
 {% block titulo %}Iniciar sesión · RepuAuto{% endblock %}
 
 {% block content %}
-<div class="row justify-content-center">
-  <div class="col-sm-10 col-md-6 col-lg-4">
-    <div class="card shadow-sm mt-4">
-      <div class="card-body p-4">
-        <h1 class="h4 mb-3">Iniciar sesión</h1>
-        <form method="post" novalidate>
-          {{ form.hidden_tag() }}
-          {{ campo(form.correo, "email", "username") }}
-          {{ campo(form.clave, "password", "current-password") }}
-          {{ form.enviar(class="btn btn-primary w-100") }}
-        </form>
-        <p class="text-center small mt-3 mb-0">
-          ¿No tienes cuenta? <a href="{{ url_for('auth.registro') }}">Regístrate</a>
-        </p>
-      </div>
-    </div>
+<div class="card">
+  <div class="card-body p-4 p-md-5">
+    <h1 class="h3 mb-1">Iniciar sesión</h1>
+    <p class="text-muted mb-4">Entra con tu correo y tu contraseña.</p>
+    <form method="post" novalidate>
+      {{ form.hidden_tag() }}
+      {{ campo(form.correo, "email", "username") }}
+      {{ campo(form.clave, "password", "current-password") }}
+      {{ form.enviar(class="btn btn-primary w-100 mt-2") }}
+    </form>
+    <p class="text-center small text-muted mt-4 mb-0">
+      ¿No tienes cuenta? <a class="fw-semibold" href="{{ url_for('auth.registro') }}">Regístrate</a>
+    </p>
   </div>
 </div>
 {% endblock %}

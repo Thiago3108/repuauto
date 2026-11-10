@@ -84,7 +84,7 @@ app/
 ├── reportes/            US-07 Reportes
 ├── compras/             US-09 Proveedores y compras
 ├── templates/           vistas (Jinja)
-└── static/              CSS, JS e imágenes
+└── static/              css/app.css: la apariencia de toda la app, sobre Bootstrap
 migrations/              historial de la base de datos (Flask-Migrate)
 tests/                   pruebas (pytest)
 docs/

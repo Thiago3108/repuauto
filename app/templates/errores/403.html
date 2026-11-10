@@ -3,7 +3,10 @@
 {% block titulo %}Sin permiso · RepuAuto{% endblock %}
 
 {% block content %}
-<h1 class="h3">No tienes permiso para ver esta página</h1>
-<p class="text-muted">Tu rol no tiene acceso a esta sección.</p>
-<a class="btn btn-primary" href="{{ url_for('inicio') }}">Volver al inicio</a>
+<div class="ra-vacio">
+  <span class="ra-vacio__icono ra-ambar"><i class="bi bi-shield-lock" aria-hidden="true"></i></span>
+  <h1 class="h3 mt-3">No tienes permiso para ver esta página</h1>
+  <p class="text-muted">Tu rol no tiene acceso a esta sección. Si crees que es un error, habla con el administrador.</p>
+  <a class="btn btn-primary" href="{{ url_for('inicio') }}"><i class="bi bi-house-door" aria-hidden="true"></i> Volver al inicio</a>
+</div>
 {% endblock %}
