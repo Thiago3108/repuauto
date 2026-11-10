@@ -7,7 +7,7 @@
 {% set colores = {"Completada": "success", "Pendiente": "warning", "Cancelada": "secondary"} %}
 <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
   <h1 class="h3 mb-0">Ventas registradas</h1>
-  <a class="btn btn-primary" href="{{ url_for('ventas.nueva') }}">Registrar venta</a>
+  <a class="btn btn-primary" href="{{ url_for('ventas.nueva') }}"><i class="bi bi-plus-lg" aria-hidden="true"></i> Registrar venta</a>
 </div>
 
 <ul class="nav nav-pills mb-3">
@@ -41,15 +41,16 @@
         {% for venta in ventas %}
         <tr>
           <td>{{ venta.id_venta }}</td>
-          <td>{{ venta.fecha.strftime("%d/%m/%Y %H:%M") }}</td>
-          <td>{{ venta.cliente.nombre_completo }}</td>
+          <td>{{ venta.fecha.strftime("%d/%m/%Y") }} <span class="text-muted">{{ venta.fecha.strftime("%H:%M") }}</span></td>
+          <td class="fw-semibold">{{ venta.cliente.nombre_completo }}</td>
           <td>{{ venta.vendedor.nombre }}</td>
           <td>{{ venta.metodo_pago }}</td>
           <td class="text-end">${{ "{:,.2f}".format(venta.total) }}</td>
           <td><span class="badge text-bg-{{ colores.get(venta.estado.nombre, 'secondary') }}">{{ venta.estado.nombre }}</span></td>
           <td class="text-end text-nowrap">
-            <a class="btn btn-outline-secondary btn-sm" href="{{ url_for('ventas.detalle', id_venta=venta.id_venta) }}">Ver</a>
-            {{ acciones(venta, request.full_path) }}
+            <a class="btn btn-outline-secondary btn-sm ra-icono" title="Ver el detalle" aria-label="Ver la venta #{{ venta.id_venta }}"
+               href="{{ url_for('ventas.detalle', id_venta=venta.id_venta) }}"><i class="bi bi-eye" aria-hidden="true"></i></a>
+            {{ acciones(venta, request.full_path, solo_icono=True) }}
           </td>
         </tr>
         {% endfor %}

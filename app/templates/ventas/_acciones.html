@@ -1,20 +1,23 @@
 {# Botones de UI-07 para completar o cancelar una venta.
    Uso: {% from "ventas/_acciones.html" import acciones %} y luego {{ acciones(venta, volver) }} #}
 
-{% macro acciones(venta, volver, tamano="btn-sm") %}
+{# Con solo_icono=True los botones llevan el icono y la acción queda en el título (para las tablas). #}
+{% macro acciones(venta, volver, tamano="btn-sm", solo_icono=False) %}
 {% if venta.estado.nombre == "Pendiente" %}
 <form method="post" action="{{ url_for('ventas.completar', id_venta=venta.id_venta) }}" class="d-inline">
   <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
   <input type="hidden" name="volver" value="{{ volver }}">
-  <button type="submit" class="btn btn-outline-success {{ tamano }}">Completar</button>
+  <button type="submit" class="btn btn-outline-success {{ tamano }} {{ 'ra-icono' if solo_icono }}" title="Completar: el cliente pagó y recibió el repuesto"
+          {% if solo_icono %}aria-label="Completar la venta #{{ venta.id_venta }}"{% endif %}><i class="bi bi-check-lg" aria-hidden="true"></i>{% if not solo_icono %} Completar{% endif %}</button>
 </form>
 {% endif %}
 {% if venta.estado.nombre != "Cancelada" %}
 <form method="post" action="{{ url_for('ventas.cancelar', id_venta=venta.id_venta) }}" class="d-inline">
   <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
   <input type="hidden" name="volver" value="{{ volver }}">
-  <button type="submit" class="btn btn-outline-danger {{ tamano }}"
-          onclick="return confirm('¿Cancelar la venta #{{ venta.id_venta }}? Los repuestos vuelven al stock y esto no se puede deshacer.')">Cancelar</button>
+  <button type="submit" class="btn btn-outline-danger {{ tamano }} {{ 'ra-icono' if solo_icono }}" title="Cancelar la venta y devolver el stock"
+          {% if solo_icono %}aria-label="Cancelar la venta #{{ venta.id_venta }}"{% endif %}
+          onclick="return confirm('¿Cancelar la venta #{{ venta.id_venta }}? Los repuestos vuelven al stock y esto no se puede deshacer.')"><i class="bi bi-x-lg" aria-hidden="true"></i>{% if not solo_icono %} Cancelar{% endif %}</button>
 </form>
 {% endif %}
 {% endmacro %}

@@ -80,10 +80,15 @@
     const datos = JSON.parse(document.getElementById("datos-graficos").textContent);
     const formato = new Intl.NumberFormat("en-US", {style: "currency", currency: "USD", maximumFractionDigits: 0});
     const dinero = (valor) => formato.format(valor);
-    const colores = {vendido: "#0d6efd", comprado: "#fd7e14", ventas: "#0dcaf0", clientes: "#6f42c1"};
+    const colores = {vendido: "#2f5bea", comprado: "#f97316", ventas: "#38bdf8", clientes: "#8b5cf6"};
     const tooltipDinero = {callbacks: {label: (c) => `${c.dataset.label}: ${dinero(c.raw)}`}};
     const enteros = {y: {beginAtZero: true, ticks: {precision: 0}}};
     Chart.defaults.maintainAspectRatio = false;
+    Chart.defaults.font.family = 'Inter, system-ui, sans-serif';
+    Chart.defaults.color = "#64748b";
+    Chart.defaults.elements.bar.borderRadius = 6;
+    Chart.defaults.scale.grid.color = "#edf0f6";
+    Chart.defaults.plugins.legend.labels.usePointStyle = true;
 
     function dibujar(id, config) {
       const lienzo = document.getElementById("grafico-" + id);
@@ -128,7 +133,7 @@
       type: "doughnut",
       data: {
         labels: datos.estados,
-        datasets: [{data: datos.por_estado, backgroundColor: ["#198754", "#ffc107", "#dc3545"]}],
+        datasets: [{data: datos.por_estado, backgroundColor: ["#22c55e", "#fbbf24", "#ef4444"], borderWidth: 3, borderColor: "#fff"}],
       },
       options: {plugins: {legend: {position: "bottom"}}},
     });

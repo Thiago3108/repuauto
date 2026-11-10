@@ -19,7 +19,7 @@
 </div>
 
 <div class="row g-4">
-  <div class="col-lg-7">
+  <div class="col-lg-8">
     <div class="card shadow-sm">
       <div class="card-header bg-white fw-semibold">
         Compatibles asociados ({{ compatibles|length }})
@@ -34,7 +34,7 @@
                 <th scope="col">Repuesto</th>
                 <th scope="col">Categoría</th>
                 <th scope="col">Marca</th>
-                <th scope="col" class="text-end">Acción</th>
+                <th scope="col" class="text-end"><span class="visually-hidden">Acción</span></th>
               </tr>
             </thead>
             <tbody>
@@ -49,7 +49,7 @@
                         action="{{ url_for('vehiculos.quitar_compatible', id_vehiculo=vehiculo.id_vehiculo, id_repuesto=repuesto.id_repuesto) }}">
                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     <button id="quitar-compatible-{{ repuesto.id_repuesto }}" type="submit"
-                            class="btn btn-sm btn-outline-danger">Quitar</button>
+                            class="btn btn-sm btn-outline-danger ra-icono" title="Quitar de los compatibles" aria-label="Quitar {{ repuesto.nombre }} de los compatibles"><i class="bi bi-x-lg" aria-hidden="true"></i></button>
                   </form>
                 </td>
               </tr>
@@ -64,7 +64,7 @@
     </div>
   </div>
 
-  <div class="col-lg-5">
+  <div class="col-lg-4">
     <div class="card shadow-sm">
       <div class="card-body">
         <h2 class="h5 mb-3">Asociar repuesto compatible</h2>

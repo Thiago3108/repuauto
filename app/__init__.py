@@ -5,12 +5,17 @@ crear una con la configuración normal y otra con la de pruebas sin tocar códig
 Es el "controlador principal" del patrón MVC: recibe la petición y la reparte a
 los blueprints de cada módulo.
 """
+from datetime import date
+
 from flask import Flask, render_template
 from flask_login import current_user
 
 from app.extensions import csrf, db, login_manager, migrate
 from app.menu import menu_para
+from app.reportes.services import MESES
 from config import Config
+
+DIAS = ("Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo")
 
 VARIABLES_REQUERIDAS = {
     "SECRET_KEY": "SECRET_KEY",
@@ -64,7 +69,11 @@ def create_app(config_class=Config):
 
     @app.get("/")
     def inicio():
-        return render_template("inicio.html")
+        from app.resumen import resumen_para
+
+        hoy = date.today()
+        fecha = f"{DIAS[hoy.weekday()]}, {hoy.day} de {MESES[hoy.month - 1].lower()} de {hoy.year}"
+        return render_template("inicio.html", resumen=resumen_para(current_user, hoy), fecha=fecha)
 
     return app
 
