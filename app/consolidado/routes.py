@@ -1,6 +1,7 @@
 """Controlador del módulo Consolidado de sedes.
 
-La ruta recibe los filtros, llama a services.py y elige la plantilla.
+Las rutas reciben los filtros, llaman a services.py y eligen la plantilla. Hay dos
+pestañas: Facturas (/consolidado/) e Inventario (/consolidado/inventario).
 """
 from flask import render_template, request
 
@@ -33,4 +34,21 @@ def index():
         datos=datos,
         filtros={"desde": desde, "hasta": hasta, "tipo": tipo, "sucursal": sucursal, "tercero": tercero or ""},
         error=error,
+    )
+
+
+@bp.get("/inventario")
+@rol_requerido("administrador")
+def inventario():
+    """Inventario de hoy de las dos sedes, con filtros por sede, estado y texto."""
+    estado = request.args.get("estado", "").strip() or None
+    if estado not in (None, *services.ESTADOS):
+        estado = None
+    sucursal = request.args.get("sucursal", "").strip() or None
+    buscar = request.args.get("buscar", "").strip() or None
+    return render_template(
+        "consolidado/inventario.html",
+        datos=services.inventario(sucursal=sucursal, estado=estado, buscar=buscar),
+        filtros={"estado": estado, "sucursal": sucursal, "buscar": buscar or ""},
+        nombres_de_estado=services.NOMBRES_DE_ESTADO,
     )

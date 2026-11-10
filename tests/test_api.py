@@ -8,7 +8,7 @@ from itsdangerous import URLSafeTimedSerializer
 from app.api import services
 from app.cli import estados_venta
 from app.extensions import db
-from app.models import Cliente, Compra, EstadoVenta, Proveedor, Venta
+from app.models import Categoria, Cliente, Compra, EstadoVenta, MarcaRepuesto, Proveedor, Repuesto, Venta
 from tests.conftest import CLAVE
 
 
@@ -286,3 +286,60 @@ def test_fuera_de_la_api_los_errores_siguen_siendo_html(client, administrador, i
 
     assert respuesta.status_code == 404
     assert respuesta.mimetype == "text/html"
+
+
+# ---------- Inventario ----------
+
+
+@pytest.fixture()
+def repuestos(app):
+    """Uno en stock, uno con stock bajo, uno agotado y uno desactivado."""
+    frenos, filtros = Categoria(nombre="Frenos"), Categoria(nombre="Filtros")
+    bosch = MarcaRepuesto(nombre="Bosch")
+
+    def repuesto(codigo, nombre, categoria, stock, minimo, precio, activo=True):
+        return Repuesto(codigo=codigo, nombre=nombre, categoria=categoria, marca=bosch, stock_actual=stock,
+                        stock_minimo=minimo, precio_venta=Decimal(precio), activo=activo)
+
+    db.session.add_all([
+        repuesto("FRE-1", "Pastillas", frenos, 10, 4, "120000.00"),
+        repuesto("FRE-2", "Disco", frenos, 2, 4, "185000.00"),
+        repuesto("FIL-1", "Filtro de aceite", filtros, 0, 5, "28000.00"),
+        repuesto("FIL-9", "Viejo", filtros, 50, 0, "1000.00", activo=False),
+    ])
+    db.session.commit()
+
+
+def test_el_inventario_sigue_el_formato_acordado(pedir, repuestos):
+    respuesta = pedir("/api/inventario")
+
+    cuerpo = respuesta.get_json()
+    assert respuesta.status_code == 200
+    assert (cuerpo["sucursal"], cuerpo["moneda"]) == ("Bucaramanga", "COP")
+    assert cuerpo["fecha"].endswith("-05:00")
+    assert cuerpo["resumen"] == {
+        "productos": 3, "unidades": 12, "valor": "1570000.00", "en_stock": 1, "stock_bajo": 1, "agotado": 1,
+    }
+    assert cuerpo["productos"][0] == {
+        "codigo": "FIL-1", "nombre": "Filtro de aceite", "categoria": "Filtros", "marca": "Bosch",
+        "stock": 0, "stock_minimo": 5, "precio_venta": "28000.00", "valor": "0.00", "estado": "agotado",
+    }
+    assert [p["codigo"] for p in cuerpo["productos"]] == ["FIL-1", "FRE-2", "FRE-1"]
+
+
+def test_el_inventario_se_filtra_por_estado_sin_cambiar_el_resumen(pedir, repuestos):
+    cuerpo = pedir("/api/inventario?estado=stock_bajo").get_json()
+
+    assert [p["codigo"] for p in cuerpo["productos"]] == ["FRE-2"]
+    assert cuerpo["resumen"]["productos"] == 3
+
+
+def test_un_estado_que_no_existe_responde_400(pedir):
+    respuesta = pedir("/api/inventario?estado=perdido")
+
+    assert respuesta.status_code == 400
+    assert "en_stock" in respuesta.get_json()["error"]
+
+
+def test_el_inventario_pide_token(client):
+    assert client.get("/api/inventario").status_code == 401

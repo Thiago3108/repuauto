@@ -1,6 +1,6 @@
 # API REST de RepuAuto
 
-La API entrega las **facturas de venta y de compra** de esta sede en JSON, para que el aplicativo consolidador las junte con las de la otra sede (grupo UD1). Está hecha con el mismo Flask de la app, en el módulo `app/api/`, y usa las mismas reglas de negocio.
+La API entrega las **facturas de venta y de compra** y el **inventario** de esta sede en JSON, para que el aplicativo consolidador las junte con las de la otra sede (grupo UD1). Está hecha con el mismo Flask de la app, en el módulo `app/api/`, y usa las mismas reglas de negocio.
 
 - **Dirección base:** `http://127.0.0.1:5000/api` cuando la app corre con `flask run`.
 - **Formato:** todo es JSON, también los errores: `{"error": "mensaje"}`.
@@ -89,16 +89,61 @@ Reglas de los datos:
 - **Fechas:** formato ISO con la hora de Colombia (`-05:00`).
 - **Orden:** de la factura más antigua a la más reciente.
 
-## 3. Errores
+## 3. Consultar el inventario: `GET /api/inventario`
+
+Repuestos **activos** con su stock de hoy. Lleva el mismo token:
+
+```bash
+curl "http://127.0.0.1:5000/api/inventario?estado=stock_bajo" \
+  -H "Authorization: Bearer EL_TOKEN"
+```
+
+| Parámetro | Obligatorio | Qué es |
+|---|---|---|
+| `estado` | No | `en_stock`, `stock_bajo` o `agotado`. Si falta, trae todos |
+
+Respuesta:
+
+```json
+{
+  "sucursal": "Bucaramanga",
+  "fecha": "2026-11-10T11:45:00-05:00",
+  "moneda": "COP",
+  "resumen": {"productos": 16, "unidades": 298, "valor": "21157000.00", "en_stock": 10, "stock_bajo": 3, "agotado": 3},
+  "productos": [
+    {
+      "codigo": "FRE-DIS-011",
+      "nombre": "Disco de freno ventilado",
+      "categoria": "Frenos",
+      "marca": "Genérica",
+      "stock": 1,
+      "stock_minimo": 4,
+      "precio_venta": "185000.00",
+      "valor": "185000.00",
+      "estado": "stock_bajo"
+    }
+  ]
+}
+```
+
+Reglas de los datos:
+
+- **Estado:** `agotado` si el stock es 0, `stock_bajo` si es menor que el mínimo y `en_stock` en los demás casos. Es el mismo criterio de los reportes.
+- **Valor:** stock × precio de venta (con IVA incluido).
+- **Resumen:** siempre es de todo el inventario, aunque se filtre por `estado`.
+- **Orden:** por categoría y nombre.
+- Los repuestos desactivados no aparecen.
+
+## 4. Errores
 
 | Código | Cuándo |
 |---|---|
-| `400` | Falta el correo o la clave, una fecha está mal escrita, `desde` va después de `hasta` o el `tipo` no existe |
+| `400` | Falta el correo o la clave, una fecha está mal escrita, `desde` va después de `hasta`, o el `tipo` o el `estado` no existen |
 | `401` | Correo o clave incorrectos, falta el token, el token fue alterado, ya venció o la cuenta fue desactivada |
 | `403` | La cuenta no es de administrador |
 | `404` / `405` | La ruta no existe o el método no es el correcto |
 
-## 4. Configuración (opcional, en el `.env`)
+## 5. Configuración (opcional, en el `.env`)
 
 | Variable | Por defecto | Qué cambia |
 |---|---|---|
@@ -108,13 +153,12 @@ Reglas de los datos:
 
 Los tokens se firman con la `SECRET_KEY`: si se cambia, los tokens que ya se entregaron dejan de servir.
 
-## 5. Consolidado de sedes (`/consolidado/`)
+## 6. Consolidado de sedes (`/consolidado/`)
 
-Es la página que junta las dos sedes. La ve solo el administrador, en el menú **Consolidado de sedes**. Muestra:
+Es la página que junta las dos sedes. La ve solo el administrador, en el menú **Consolidado de sedes**, y tiene dos pestañas:
 
-- los totales de cada sede y del consolidado: ventas, compras, IVA y la diferencia;
-- todas las facturas de las dos sedes, de la más reciente a la más antigua;
-- filtros por rango de fechas, tipo (venta o compra), sede y tercero (nombre o documento, sin importar tildes).
+- **Facturas** (`/consolidado/`): los totales de cada sede y del consolidado (ventas, compras, IVA y la diferencia) y todas las facturas de las dos sedes, con filtros por rango de fechas, tipo, sede y tercero (nombre o documento, sin importar tildes).
+- **Inventario** (`/consolidado/inventario`): los totales de cada sede (productos, unidades, estados del stock y valor) y todos los productos, con filtros por sede, estado y texto (código, nombre, categoría o marca). Necesita que la otra sede publique `GET /api/inventario` con el formato de la sección 3; si no lo tiene, la pestaña lo avisa y muestra solo RepuAuto.
 
 Las facturas de RepuAuto salen de la base de datos con el formato de la sección 2. Las de la otra sede se piden por HTTP a su API cada vez que se abre la página. Si la otra sede no responde, la página muestra un aviso y trae solo las de RepuAuto.
 
@@ -148,7 +192,7 @@ Antes de que UD1 implementara nuestro formato, RepuAuto ya sabía leer su API de
 | Proveedor de la compra | `GET /api/proveedores/`: `nombre` (no guardan NIT) |
 | Fechas | Su API no filtra por fechas: RepuAuto filtra después de recibir los datos |
 
-## 6. Publicar nuestra API con ngrok (para que UD1 la consulte)
+## 7. Publicar nuestra API con ngrok (para que UD1 la consulte)
 
 El grupo UD1 consulta nuestras facturas desde su pantalla **Sedes** de PC Stock. Para que nos alcance desde internet se usa ngrok:
 
@@ -172,8 +216,9 @@ El grupo UD1 consulta nuestras facturas desde su pantalla **Sedes** de PC Stock.
 - a UD1 se le da la cuenta de integración, no la del administrador principal. Si una clave se compartió por error, se cambia con `flask cambiar-clave CORREO`;
 - se cierra ngrok (`Ctrl+C` en la terminal 2) cuando no se esté usando.
 
-## 7. Estado del acuerdo con el grupo UD1
+## 8. Estado del acuerdo con el grupo UD1
 
-- UD1 implementó **nuestro mismo formato** (`POST /api/login` con `correo` y `clave`, `GET /api/facturas`), así que en RepuAuto se usa `SEDE_REMOTA_TIPO=repuauto` con la dirección de su API. El tipo `ud1` (su API anterior de Django) queda como respaldo.
+- UD1 implementó **nuestro mismo formato** para las facturas (`POST /api/login` con `correo` y `clave`, `GET /api/facturas`), así que en RepuAuto se usa `SEDE_REMOTA_TIPO=repuauto` con la dirección de su API. El tipo `ud1` (su API anterior de Django) queda como respaldo.
 - Su dirección y la cuenta de administrador para consultarla nos las mandan por privado.
+- **Inventario:** propusimos `GET /api/inventario` (sección 3). Hasta que UD1 lo implemente, la pestaña Inventario del consolidado muestra solo RepuAuto con un aviso.
 - Falta confirmar el IVA (19 % incluido) y el nombre de cada sede.

@@ -65,16 +65,37 @@ def facturas_remotas(desde, hasta):
     raise SedeNoDisponible(f'SEDE_REMOTA_TIPO debe ser "ud1" o "repuauto", no "{tipo}".')
 
 
+def inventario_remoto():
+    """Inventario de la otra sede, en el formato común de GET /api/inventario.
+
+    Solo con SEDE_REMOTA_TIPO=repuauto: la API anterior de UD1 no tiene stock mínimo.
+    Lanza SedeNoDisponible igual que facturas_remotas, o si la otra sede todavía no
+    publica su inventario.
+    """
+    if not configurada():
+        raise SedeNoDisponible("La otra sede no está configurada (SEDE_REMOTA_URL en el .env).")
+    if current_app.config.get("SEDE_REMOTA_TIPO") != "repuauto":
+        raise SedeNoDisponible("El inventario de la otra sede solo se lee con SEDE_REMOTA_TIPO=repuauto.")
+    try:
+        datos = _pedir("GET", "/inventario", token=_token_repuauto())
+        return {"resumen": datos["resumen"], "productos": list(datos["productos"])}
+    except (KeyError, TypeError, ValueError) as dato_raro:
+        raise SedeNoDisponible(f"La otra sede respondió datos que no se entienden ({dato_raro}).")
+
+
 # ---------- API con nuestro formato ----------
 
 
 def _desde_repuauto(desde, hasta):
-    token = _pedir("POST", "/login", {
-        "correo": current_app.config["SEDE_REMOTA_USUARIO"],
-        "clave": current_app.config["SEDE_REMOTA_CLAVE"],
-    })["token"]
     consulta = parse.urlencode({"desde": desde.isoformat(), "hasta": hasta.isoformat()})
-    return _pedir("GET", f"/facturas?{consulta}", token=token)["facturas"]
+    return _pedir("GET", f"/facturas?{consulta}", token=_token_repuauto())["facturas"]
+
+
+def _token_repuauto():
+    """Token de una API con nuestro formato, guardado TOKEN_SEGUNDOS."""
+    return _token_guardado(lambda config: _pedir("POST", "/login", {
+        "correo": config["SEDE_REMOTA_USUARIO"], "clave": config["SEDE_REMOTA_CLAVE"],
+    })["token"])
 
 
 # ---------- API del grupo UD1 (Django REST) ----------
@@ -120,15 +141,21 @@ def _desde_ud1(desde, hasta):
 
 
 def _token_ud1():
-    """JWT de UD1, guardado TOKEN_SEGUNDOS para la misma URL y el mismo usuario."""
+    """JWT de la API anterior de UD1, guardado TOKEN_SEGUNDOS."""
+    return _token_guardado(lambda config: _pedir("POST", "/auth/login/", {
+        "username": config["SEDE_REMOTA_USUARIO"], "password": config["SEDE_REMOTA_CLAVE"],
+    })["access"])
+
+
+def _token_guardado(iniciar_sesion):
+    """Devuelve el token guardado para la misma URL, tipo y usuario, o inicia sesión con
+    iniciar_sesion(config) y lo guarda TOKEN_SEGUNDOS."""
     config = current_app.config
-    clave = (config["SEDE_REMOTA_URL"], config["SEDE_REMOTA_USUARIO"], config["SEDE_REMOTA_CLAVE"])
+    clave = (config["SEDE_REMOTA_URL"], config["SEDE_REMOTA_TIPO"], config["SEDE_REMOTA_USUARIO"], config["SEDE_REMOTA_CLAVE"])
     guardado = _tokens.get(clave)
     if guardado and guardado[1] > reloj.monotonic():
         return guardado[0]
-    token = _pedir("POST", "/auth/login/", {
-        "username": config["SEDE_REMOTA_USUARIO"], "password": config["SEDE_REMOTA_CLAVE"],
-    })["access"]
+    token = iniciar_sesion(config)
     _tokens[clave] = (token, reloj.monotonic() + TOKEN_SEGUNDOS)
     return token
 
@@ -212,8 +239,14 @@ def _pedir(metodo, ruta, cuerpo=None, token=None):
             )
         if http.code == 429:
             raise SedeNoDisponible("La otra sede bloqueó los intentos por un momento (demasiados inicios de sesión). Espera un minuto.")
-        if http.code == 404 and "ngrok" in base:
-            raise SedeNoDisponible(f"El túnel de ngrok no responde en {base}. Revisa que la dirección sea la actual: cambia cada vez que reinician ngrok.")
+        if http.headers.get("ngrok-error-code"):
+            # El error lo da ngrok, no la otra sede: su túnel está apagado o la dirección cambió.
+            raise SedeNoDisponible(
+                f"El túnel de ngrok no responde en {base} ({http.headers['ngrok-error-code']}). "
+                "Revisa que la dirección sea la actual y que su ngrok esté encendido."
+            )
+        if http.code == 404:
+            raise SedeNoDisponible(f"La otra sede todavía no tiene {ruta.split('?')[0]} en su API.")
         raise SedeNoDisponible(f"La otra sede respondió con error {http.code} en {ruta}.")
     except (url_error.URLError, TimeoutError, OSError):
         raise SedeNoDisponible(f"No hay conexión con la otra sede en {base}. ¿Está encendido su servidor?")

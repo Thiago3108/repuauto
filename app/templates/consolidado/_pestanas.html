@@ -1,0 +1,14 @@
+{# Pestañas del consolidado de sedes. #}
+<div class="mb-3">
+  <h1 class="h3 mb-1">Consolidado de sedes</h1>
+  <p class="text-muted small mb-0">{{ descripcion }}</p>
+</div>
+<ul class="nav nav-tabs mb-3">
+  {% for endpoint, nombre in [("consolidado.index", "Facturas"), ("consolidado.inventario", "Inventario")] %}
+  <li class="nav-item">
+    <a class="nav-link {% if request.endpoint == endpoint %}active{% endif %}"
+       {% if request.endpoint == endpoint %}aria-current="page"{% endif %}
+       href="{{ url_for(endpoint) }}">{{ nombre }}</a>
+  </li>
+  {% endfor %}
+</ul>

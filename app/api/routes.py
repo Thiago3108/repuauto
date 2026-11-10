@@ -2,6 +2,7 @@
 
 POST /api/login       correo y clave -> token
 GET  /api/facturas    ?desde=AAAA-MM-DD&hasta=AAAA-MM-DD&tipo=venta|compra (con token)
+GET  /api/inventario  ?estado=en_stock|stock_bajo|agotado (con token)
 """
 from functools import wraps
 
@@ -81,6 +82,16 @@ def facturas():
     except RangoInvalido as rango:
         return error(rango.mensaje, 400)
     return jsonify(services.facturas(desde, hasta, tipo))
+
+
+@bp.get("/inventario")
+@token_requerido
+def inventario():
+    """Repuestos activos de esta sede con su stock de hoy."""
+    estado = request.args.get("estado", "").strip().lower() or None
+    if estado is not None and estado not in services.ESTADOS:
+        return error('El estado debe ser "en_stock", "stock_bajo" o "agotado", o no enviarlo para traer todos.', 400)
+    return jsonify(services.inventario(estado))
 
 
 @bp.app_errorhandler(HTTPException)

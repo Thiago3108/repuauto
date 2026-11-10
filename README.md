@@ -23,8 +23,8 @@ Sistema web de gestión para una **serviteca de repuestos para carro**. El catá
 7. **Reportes (US-07):** hay reportes de ventas, inventario y clientes.
 8. **Mis compras (US-08):** el cliente ve el estado y el historial de sus compras.
 9. **Compras a proveedores (US-09):** cada compra suma las cantidades al stock.
-10. **API REST:** entrega las facturas de venta y compra en JSON, con login por token, para integrarse con la otra sede ([documentación](docs/API.md)).
-11. **Consolidado de sedes:** junta las compras y ventas de RepuAuto con las de la sede del grupo UD1 en un solo informe, con IVA y filtros por fecha, tipo, sede y tercero ([cómo conectarlo](docs/API.md#5-consolidado-de-sedes-consolidado)).
+10. **API REST:** entrega las facturas de venta y compra y el inventario en JSON, con login por token, para integrarse con la otra sede ([documentación](docs/API.md)).
+11. **Consolidado de sedes:** junta las compras, las ventas y el inventario de RepuAuto con los de la sede del grupo UD1, con IVA y filtros por fecha, tipo, sede, estado del stock y tercero ([cómo conectarlo](docs/API.md#6-consolidado-de-sedes-consolidado)).
 
 ## Arquitectura
 
