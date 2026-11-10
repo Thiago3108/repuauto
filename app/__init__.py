@@ -40,17 +40,19 @@ def create_app(config_class=Config):
     from app.reportes import bp as reportes_bp
     from app.compras import bp as compras_bp
     from app.api import bp as api_bp
+    from app.consolidado import bp as consolidado_bp
 
     blueprints = (
         auth_bp, clientes_bp, vehiculos_bp, repuestos_bp,
-        catalogo_bp, ventas_bp, reportes_bp, compras_bp, api_bp,
+        catalogo_bp, ventas_bp, reportes_bp, compras_bp, api_bp, consolidado_bp,
     )
     for blueprint in blueprints:
         app.register_blueprint(blueprint)
 
-    from app.cli import seed_command
+    from app.cli import cambiar_clave_command, crear_admin_command, seed_command
 
-    app.cli.add_command(seed_command)
+    for comando in (seed_command, crear_admin_command, cambiar_clave_command):
+        app.cli.add_command(comando)
 
     @app.context_processor
     def menu_lateral():

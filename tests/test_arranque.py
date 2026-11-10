@@ -8,7 +8,7 @@ from sqlalchemy import text
 from app.extensions import db
 from app.menu import MENU
 
-MODULOS = ["auth", "clientes", "vehiculos", "repuestos", "catalogo", "ventas", "reportes", "compras"]
+MODULOS = ["auth", "clientes", "vehiculos", "repuestos", "catalogo", "ventas", "reportes", "compras", "consolidado"]
 
 
 def test_inicio_responde(client, crear_cuenta, iniciar_sesion):

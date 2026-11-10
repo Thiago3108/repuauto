@@ -108,6 +108,72 @@ Reglas de los datos:
 
 Los tokens se firman con la `SECRET_KEY`: si se cambia, los tokens que ya se entregaron dejan de servir.
 
-## 5. Pendiente de acordar con el grupo UD1
+## 5. Consolidado de sedes (`/consolidado/`)
 
-El formato es la propuesta que se les envió. Falta confirmar con ellos el IVA, la numeración de las facturas, el nombre de cada sede, quién hace el aplicativo consolidador y dónde se despliegan las API. Si se acuerda otro formato, se cambia en `app/api/services.py` y en `tests/test_api.py`.
+Es la página que junta las dos sedes. La ve solo el administrador, en el menú **Consolidado de sedes**. Muestra:
+
+- los totales de cada sede y del consolidado: ventas, compras, IVA y la diferencia;
+- todas las facturas de las dos sedes, de la más reciente a la más antigua;
+- filtros por rango de fechas, tipo (venta o compra), sede y tercero (nombre o documento, sin importar tildes).
+
+Las facturas de RepuAuto salen de la base de datos con el formato de la sección 2. Las de la otra sede se piden por HTTP a su API cada vez que se abre la página. Si la otra sede no responde, la página muestra un aviso y trae solo las de RepuAuto.
+
+### Configuración en el `.env` de RepuAuto
+
+UD1 implementó nuestro mismo formato y publica su API con ngrok en un dominio fijo. Con la dirección y la cuenta que nos mandan por privado:
+
+```
+SEDE_REMOTA_NOMBRE=Sede UD1
+SEDE_REMOTA_URL=https://SU-DOMINIO.ngrok-free.dev/api
+SEDE_REMOTA_TIPO=repuauto
+SEDE_REMOTA_USUARIO=correo-de-la-cuenta-que-nos-dan
+SEDE_REMOTA_CLAVE=su-clave
+```
+
+Después de cambiar el `.env`, se reinicia `flask run`. Las pruebas (`pytest`) nunca se conectan a la otra sede, aunque el `.env` la tenga.
+
+- RepuAuto manda el encabezado `ngrok-skip-browser-warning` para que ngrok no responda con su página de aviso en lugar del JSON.
+- Si la otra sede no responde, el aviso de la página dice por qué: servidor apagado, clave equivocada, dirección de ngrok vieja, etc.
+
+### Respaldo: la API anterior de UD1 (`SEDE_REMOTA_TIPO=ud1`)
+
+Antes de que UD1 implementara nuestro formato, RepuAuto ya sabía leer su API de Django REST y traducirla (`app/consolidado/sedes.py`). Se deja por si hace falta:
+
+| Dato | De dónde sale en UD1 |
+|---|---|
+| Login | `POST /api/auth/login/` con `username` y `password`; el token es `access` (dura 5 minutos; RepuAuto lo guarda 4 para no pasar su límite de 10 inicios de sesión por minuto) |
+| Ventas | `GET /api/ventas/`, solo las de estado `activa`. Número `V-` + `id_venta` |
+| Cliente de la venta | `GET /api/clientes/`: `documento`, `nombres` y `apellidos` |
+| Compras | `GET /api/lotes/`: cada lote es una factura de compra con total = `cantidad × costo_unitario`. Número `L-` + `id_lote` |
+| Proveedor de la compra | `GET /api/proveedores/`: `nombre` (no guardan NIT) |
+| Fechas | Su API no filtra por fechas: RepuAuto filtra después de recibir los datos |
+
+## 6. Publicar nuestra API con ngrok (para que UD1 la consulte)
+
+El grupo UD1 consulta nuestras facturas desde su pantalla **Sedes** de PC Stock. Para que nos alcance desde internet se usa ngrok:
+
+1. **Una sola vez:** crear la cuenta en [ngrok.com](https://ngrok.com), instalarlo (`sudo snap install ngrok` en Ubuntu, versión 3.28 o más nueva), correr `ngrok config add-authtoken SU_TOKEN` y copiar el **dominio fijo gratis** del panel (*Domains*), algo como `nombre-nombre-nombre.ngrok-free.dev`.
+2. **Una sola vez:** crear una cuenta de administrador solo para la integración y mandarles el correo y la clave **por mensaje privado**:
+   ```bash
+   flask crear-admin integracion@repuauto.com --nombre "Integración UD1"
+   ```
+   La contraseña se pide dos veces y no se muestra en pantalla.
+3. **Cada vez (prueba y sustentación),** con dos terminales abiertas:
+   ```bash
+   # Terminal 1: la app SIN modo de depuración, porque ngrok la publica en internet
+   flask --no-debug run
+   # Terminal 2: el túnel con el dominio fijo
+   ngrok http --url=SU-DOMINIO.ngrok-free.dev 5000
+   ```
+4. **Comprobar:** abrir `https://SU-DOMINIO.ngrok-free.dev/api/facturas` en el navegador. Después del aviso de ngrok debe salir `{"error": "Falta el token..."}`.
+
+**Ojo:** ngrok publica **toda la app**, no solo la API: cualquiera con la dirección ve la pantalla de iniciar sesión. Por eso:
+- nunca se arranca con el modo de depuración (`.flaskenv` lo activa; `--no-debug` lo apaga);
+- a UD1 se le da la cuenta de integración, no la del administrador principal. Si una clave se compartió por error, se cambia con `flask cambiar-clave CORREO`;
+- se cierra ngrok (`Ctrl+C` en la terminal 2) cuando no se esté usando.
+
+## 7. Estado del acuerdo con el grupo UD1
+
+- UD1 implementó **nuestro mismo formato** (`POST /api/login` con `correo` y `clave`, `GET /api/facturas`), así que en RepuAuto se usa `SEDE_REMOTA_TIPO=repuauto` con la dirección de su API. El tipo `ud1` (su API anterior de Django) queda como respaldo.
+- Su dirección y la cuenta de administrador para consultarla nos las mandan por privado.
+- Falta confirmar el IVA (19 % incluido) y el nombre de cada sede.

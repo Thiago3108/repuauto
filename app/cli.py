@@ -1,5 +1,9 @@
 """Comandos de consola del proyecto.
 
+flask crear-admin crea otra cuenta de administrador (por ejemplo, la de la integración
+con la otra sede) y flask cambiar-clave le pone una contraseña nueva a una cuenta. Las
+dos piden la contraseña sin mostrarla en pantalla.
+
 flask seed carga los datos iniciales: roles, estados de venta, categorías, marcas y el
 primer administrador. Cada dueño agrega aquí la función de sus datos cuando crea sus
 tablas, marcada con @semilla. Las funciones deben poder correr varias veces sin
@@ -8,6 +12,7 @@ duplicar nada: primero revisan si el dato ya existe.
 import os
 
 import click
+from werkzeug.security import generate_password_hash
 
 from app.auth import services as cuentas
 from app.extensions import db
@@ -118,3 +123,37 @@ def seed_command():
         click.echo(f"  listo: {funcion.__name__}")
     db.session.commit()
     click.echo("Datos iniciales cargados.")
+
+
+def _clave_segura(ctx, param, clave):
+    if not cuentas.contrasena_segura(clave):
+        raise click.BadParameter("debe tener más de 8 caracteres, al menos un número y un carácter especial.")
+    return clave
+
+
+@click.command("crear-admin")
+@click.argument("correo")
+@click.option("--nombre", default="Administrador", show_default=True, help="Nombre que se muestra en la app.")
+@click.password_option("--clave", prompt="Contraseña", confirmation_prompt="Repite la contraseña",
+                       callback=_clave_segura, help="Si no se escribe, se pide sin mostrarla.")
+def crear_admin_command(correo, nombre, clave):
+    """Crea una cuenta de administrador. Ejemplo: flask crear-admin integracion@repuauto.com"""
+    if cuentas.buscar_por_correo(correo) is not None:
+        raise click.ClickException(f"Ya existe una cuenta con el correo {correo}.")
+    cuentas.crear_usuario(correo, clave, nombre, "administrador")
+    db.session.commit()
+    click.echo(f"Listo: {cuentas.normalizar_correo(correo)} es administrador.")
+
+
+@click.command("cambiar-clave")
+@click.argument("correo")
+@click.password_option("--clave", prompt="Contraseña nueva", confirmation_prompt="Repite la contraseña",
+                       callback=_clave_segura, help="Si no se escribe, se pide sin mostrarla.")
+def cambiar_clave_command(correo, clave):
+    """Le pone una contraseña nueva a una cuenta. Ejemplo: flask cambiar-clave admin@repuauto.com"""
+    usuario = cuentas.buscar_por_correo(correo)
+    if usuario is None:
+        raise click.ClickException(f"No existe una cuenta con el correo {correo}.")
+    usuario.contrasena_hash = generate_password_hash(clave)
+    db.session.commit()
+    click.echo(f"Listo: {usuario.correo} tiene contraseña nueva.")
