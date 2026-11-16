@@ -1,0 +1,297 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1592" height="1182" viewBox="0 0 1592 1182" font-family="Arial, Helvetica, sans-serif">
+  <!-- RepuAuto - Modelo de base de datos. Lo genera generar_bd.py desde repuauto_bd.dbml: no se edita a mano. -->
+  <defs>
+    <style>
+      .titulo { font-size: 24px; font-weight: bold; fill: #000; }
+      .subtitulo { font-size: 14px; fill: #44546A; }
+      .tabla { fill: #FFFFFF; stroke: #8FA3BA; stroke-width: 1.2; }
+      .tabla-titulo { font-size: 14px; font-weight: bold; fill: #FFFFFF; }
+      .columna { font-size: 12.5px; fill: #1F2D3D; }
+      .llave { font-weight: bold; }
+      .tipo { font-size: 11px; fill: #6B7785; }
+      .marca { font-size: 9.5px; font-weight: bold; }
+      .pk { fill: #B7791F; }
+      .fk { fill: #2F5D8A; }
+      .relacion { fill: none; stroke: #3C4A5C; stroke-width: 1.3; }
+      .card { font-size: 12px; font-weight: bold; fill: #3C4A5C; }
+      .leyenda-titulo { font-size: 14px; font-weight: bold; fill: #000; }
+      .leyenda { font-size: 12.5px; fill: #1F2D3D; }
+    </style>
+  </defs>
+  <rect width="1592" height="1182" fill="#FFFFFF"/>
+  <text x="796.0" y="46" text-anchor="middle" class="titulo">Modelo de base de datos - RepuAuto</text>
+  <text x="796.0" y="74" text-anchor="middle" class="subtitulo">Modelo relacional en PostgreSQL: 15 tablas y 16 relaciones. Fuente: repuauto_bd.dbml</text>
+  <polyline points="922,180 970,180" class="relacion"/>
+  <text x="934" y="174" text-anchor="middle" class="card">N</text>
+  <text x="958" y="174" text-anchor="middle" class="card">1</text>
+  <polyline points="612,220 660,220" class="relacion"/>
+  <text x="624" y="214" text-anchor="middle" class="card">0..1</text>
+  <text x="648" y="214" text-anchor="middle" class="card">1</text>
+  <polyline points="1420,908 1420,980" class="relacion"/>
+  <text x="1430" y="924" class="card">N</text>
+  <text x="1430" y="972" class="card">1</text>
+  <polyline points="700,898 700,990" class="relacion"/>
+  <text x="710" y="914" class="card">N</text>
+  <text x="710" y="982" class="card">1</text>
+  <polyline points="875,898 875,990" class="relacion"/>
+  <text x="885" y="914" class="card">N</text>
+  <text x="885" y="982" class="card">1</text>
+  <polyline points="440,410 440,312" class="relacion"/>
+  <text x="450" y="402" class="card">N</text>
+  <text x="450" y="328" class="card">1</text>
+  <polyline points="612,470 720,470 720,312" class="relacion"/>
+  <text x="624" y="464" text-anchor="middle" class="card">N</text>
+  <text x="730" y="328" class="card">1</text>
+  <polyline points="350,470 170,470 170,202" class="relacion"/>
+  <text x="338" y="464" text-anchor="middle" class="card">N</text>
+  <text x="180" y="218" class="card">1</text>
+  <polyline points="480,690 480,602" class="relacion"/>
+  <text x="490" y="682" class="card">N</text>
+  <text x="490" y="618" class="card">1</text>
+  <polyline points="612,770 660,770" class="relacion"/>
+  <text x="624" y="764" text-anchor="middle" class="card">N</text>
+  <text x="648" y="764" text-anchor="middle" class="card">1</text>
+  <polyline points="1232,470 1420,470 1420,268" class="relacion"/>
+  <text x="1244" y="464" text-anchor="middle" class="card">N</text>
+  <text x="1430" y="284" class="card">1</text>
+  <polyline points="970,470 860,470 860,312" class="relacion"/>
+  <text x="958" y="464" text-anchor="middle" class="card">N</text>
+  <text x="870" y="328" class="card">1</text>
+  <polyline points="1100,720 1100,558" class="relacion"/>
+  <text x="1110" y="712" class="card">N</text>
+  <text x="1110" y="574" class="card">1</text>
+  <polyline points="970,800 922,800" class="relacion"/>
+  <text x="958" y="794" text-anchor="middle" class="card">N</text>
+  <text x="934" y="794" text-anchor="middle" class="card">1</text>
+  <polyline points="1290,620 1262,620 1262,680 922,680" class="relacion"/>
+  <text x="1278" y="614" text-anchor="middle" class="card">N</text>
+  <text x="934" y="674" text-anchor="middle" class="card">1</text>
+  <polyline points="1420,682 1420,760" class="relacion"/>
+  <text x="1430" y="698" class="card">N</text>
+  <text x="1430" y="752" class="card">1</text>
+  <rect x="970" y="120" width="262" height="82" rx="7" class="tabla"/>
+  <path d="M970,150 v-23 a7,7 0 0 1 7,-7 h248 a7,7 0 0 1 7,7 v23 z" fill="#2F5D8A"/>
+  <text x="1101.0" y="140" text-anchor="middle" class="tabla-titulo">rol</text>
+  <text x="978" y="167" class="marca pk">PK</text>
+  <text x="1002" y="167" class="columna llave">id_rol</text>
+  <text x="1224" y="167" text-anchor="end" class="tipo">integer</text>
+  <text x="1002" y="189" class="columna">nombre</text>
+  <text x="1224" y="189" text-anchor="end" class="tipo">varchar(30) · U</text>
+  <rect x="660" y="120" width="262" height="192" rx="7" class="tabla"/>
+  <path d="M660,150 v-23 a7,7 0 0 1 7,-7 h248 a7,7 0 0 1 7,7 v23 z" fill="#2F5D8A"/>
+  <text x="791.0" y="140" text-anchor="middle" class="tabla-titulo">usuario</text>
+  <text x="668" y="167" class="marca pk">PK</text>
+  <text x="692" y="167" class="columna llave">id_usuario</text>
+  <text x="914" y="167" text-anchor="end" class="tipo">integer</text>
+  <text x="692" y="189" class="columna">correo</text>
+  <text x="914" y="189" text-anchor="end" class="tipo">varchar(120) · U</text>
+  <text x="692" y="211" class="columna">contrasena_hash</text>
+  <text x="914" y="211" text-anchor="end" class="tipo">varchar(255)</text>
+  <text x="692" y="233" class="columna">nombre</text>
+  <text x="914" y="233" text-anchor="end" class="tipo">varchar(100)</text>
+  <text x="668" y="255" class="marca fk">FK</text>
+  <text x="692" y="255" class="columna">id_rol</text>
+  <text x="914" y="255" text-anchor="end" class="tipo">integer</text>
+  <text x="692" y="277" class="columna">activo</text>
+  <text x="914" y="277" text-anchor="end" class="tipo">boolean</text>
+  <text x="692" y="299" class="columna">creado_en</text>
+  <text x="914" y="299" text-anchor="end" class="tipo">timestamp</text>
+  <rect x="350" y="120" width="262" height="192" rx="7" class="tabla"/>
+  <path d="M350,150 v-23 a7,7 0 0 1 7,-7 h248 a7,7 0 0 1 7,7 v23 z" fill="#3F7F6B"/>
+  <text x="481.0" y="140" text-anchor="middle" class="tabla-titulo">cliente</text>
+  <text x="358" y="167" class="marca pk">PK</text>
+  <text x="382" y="167" class="columna llave">id_cliente</text>
+  <text x="604" y="167" text-anchor="end" class="tipo">integer</text>
+  <text x="382" y="189" class="columna">cedula</text>
+  <text x="604" y="189" text-anchor="end" class="tipo">varchar(20) · U</text>
+  <text x="382" y="211" class="columna">nombres</text>
+  <text x="604" y="211" text-anchor="end" class="tipo">varchar(60)</text>
+  <text x="382" y="233" class="columna">apellidos</text>
+  <text x="604" y="233" text-anchor="end" class="tipo">varchar(60)</text>
+  <text x="382" y="255" class="columna">telefono ?</text>
+  <text x="604" y="255" text-anchor="end" class="tipo">varchar(20)</text>
+  <text x="358" y="277" class="marca fk">FK</text>
+  <text x="382" y="277" class="columna">id_usuario ?</text>
+  <text x="604" y="277" text-anchor="end" class="tipo">integer · U</text>
+  <text x="382" y="299" class="columna">creado_en</text>
+  <text x="604" y="299" text-anchor="end" class="tipo">timestamp</text>
+  <rect x="1290" y="980" width="262" height="82" rx="7" class="tabla"/>
+  <path d="M1290,1010 v-23 a7,7 0 0 1 7,-7 h248 a7,7 0 0 1 7,7 v23 z" fill="#7A5C99"/>
+  <text x="1421.0" y="1000" text-anchor="middle" class="tabla-titulo">marca_vehiculo</text>
+  <text x="1298" y="1027" class="marca pk">PK</text>
+  <text x="1322" y="1027" class="columna llave">id_marca_vehiculo</text>
+  <text x="1544" y="1027" text-anchor="end" class="tipo">integer</text>
+  <text x="1322" y="1049" class="columna">nombre</text>
+  <text x="1544" y="1049" text-anchor="end" class="tipo">varchar(60) · U</text>
+  <rect x="1290" y="760" width="262" height="148" rx="7" class="tabla"/>
+  <path d="M1290,790 v-23 a7,7 0 0 1 7,-7 h248 a7,7 0 0 1 7,7 v23 z" fill="#7A5C99"/>
+  <text x="1421.0" y="780" text-anchor="middle" class="tabla-titulo">vehiculo</text>
+  <text x="1298" y="807" class="marca pk">PK</text>
+  <text x="1322" y="807" class="columna llave">id_vehiculo</text>
+  <text x="1544" y="807" text-anchor="end" class="tipo">integer</text>
+  <text x="1298" y="829" class="marca fk">FK</text>
+  <text x="1322" y="829" class="columna">id_marca_vehiculo</text>
+  <text x="1544" y="829" text-anchor="end" class="tipo">integer</text>
+  <text x="1322" y="851" class="columna">linea</text>
+  <text x="1544" y="851" text-anchor="end" class="tipo">varchar(60)</text>
+  <text x="1322" y="873" class="columna">referencia ?</text>
+  <text x="1544" y="873" text-anchor="end" class="tipo">varchar(60)</text>
+  <text x="1322" y="895" class="columna">anio</text>
+  <text x="1544" y="895" text-anchor="end" class="tipo">integer</text>
+  <rect x="1290" y="600" width="262" height="82" rx="7" class="tabla"/>
+  <path d="M1290,630 v-23 a7,7 0 0 1 7,-7 h248 a7,7 0 0 1 7,7 v23 z" fill="#7A5C99"/>
+  <text x="1421.0" y="620" text-anchor="middle" class="tabla-titulo">repuesto_vehiculo</text>
+  <text x="1298" y="647" class="marca pk">PK FK</text>
+  <text x="1336" y="647" class="columna llave">id_repuesto</text>
+  <text x="1544" y="647" text-anchor="end" class="tipo">integer</text>
+  <text x="1298" y="669" class="marca pk">PK FK</text>
+  <text x="1336" y="669" class="columna llave">id_vehiculo</text>
+  <text x="1544" y="669" text-anchor="end" class="tipo">integer</text>
+  <rect x="520" y="990" width="262" height="82" rx="7" class="tabla"/>
+  <path d="M520,1020 v-23 a7,7 0 0 1 7,-7 h248 a7,7 0 0 1 7,7 v23 z" fill="#B7791F"/>
+  <text x="651.0" y="1010" text-anchor="middle" class="tabla-titulo">categoria</text>
+  <text x="528" y="1037" class="marca pk">PK</text>
+  <text x="552" y="1037" class="columna llave">id_categoria</text>
+  <text x="774" y="1037" text-anchor="end" class="tipo">integer</text>
+  <text x="552" y="1059" class="columna">nombre</text>
+  <text x="774" y="1059" text-anchor="end" class="tipo">varchar(60) · U</text>
+  <rect x="810" y="990" width="262" height="82" rx="7" class="tabla"/>
+  <path d="M810,1020 v-23 a7,7 0 0 1 7,-7 h248 a7,7 0 0 1 7,7 v23 z" fill="#B7791F"/>
+  <text x="941.0" y="1010" text-anchor="middle" class="tabla-titulo">marca_repuesto</text>
+  <text x="818" y="1037" class="marca pk">PK</text>
+  <text x="842" y="1037" class="columna llave">id_marca_repuesto</text>
+  <text x="1064" y="1037" text-anchor="end" class="tipo">integer</text>
+  <text x="842" y="1059" class="columna">nombre</text>
+  <text x="1064" y="1059" text-anchor="end" class="tipo">varchar(60) · U</text>
+  <rect x="660" y="640" width="262" height="258" rx="7" class="tabla"/>
+  <path d="M660,670 v-23 a7,7 0 0 1 7,-7 h248 a7,7 0 0 1 7,7 v23 z" fill="#B7791F"/>
+  <text x="791.0" y="660" text-anchor="middle" class="tabla-titulo">repuesto</text>
+  <text x="668" y="687" class="marca pk">PK</text>
+  <text x="692" y="687" class="columna llave">id_repuesto</text>
+  <text x="914" y="687" text-anchor="end" class="tipo">integer</text>
+  <text x="692" y="709" class="columna">codigo</text>
+  <text x="914" y="709" text-anchor="end" class="tipo">varchar(30) · U</text>
+  <text x="692" y="731" class="columna">nombre</text>
+  <text x="914" y="731" text-anchor="end" class="tipo">varchar(100)</text>
+  <text x="692" y="753" class="columna">descripcion ?</text>
+  <text x="914" y="753" text-anchor="end" class="tipo">text</text>
+  <text x="692" y="775" class="columna">precio_venta</text>
+  <text x="914" y="775" text-anchor="end" class="tipo">numeric(12,2)</text>
+  <text x="692" y="797" class="columna">stock_actual</text>
+  <text x="914" y="797" text-anchor="end" class="tipo">integer</text>
+  <text x="692" y="819" class="columna">stock_minimo</text>
+  <text x="914" y="819" text-anchor="end" class="tipo">integer</text>
+  <text x="668" y="841" class="marca fk">FK</text>
+  <text x="692" y="841" class="columna">id_categoria</text>
+  <text x="914" y="841" text-anchor="end" class="tipo">integer</text>
+  <text x="668" y="863" class="marca fk">FK</text>
+  <text x="692" y="863" class="columna">id_marca_repuesto</text>
+  <text x="914" y="863" text-anchor="end" class="tipo">integer</text>
+  <text x="692" y="885" class="columna">activo</text>
+  <text x="914" y="885" text-anchor="end" class="tipo">boolean</text>
+  <rect x="40" y="120" width="262" height="82" rx="7" class="tabla"/>
+  <path d="M40,150 v-23 a7,7 0 0 1 7,-7 h248 a7,7 0 0 1 7,7 v23 z" fill="#B4533C"/>
+  <text x="171.0" y="140" text-anchor="middle" class="tabla-titulo">estado_venta</text>
+  <text x="48" y="167" class="marca pk">PK</text>
+  <text x="72" y="167" class="columna llave">id_estado_venta</text>
+  <text x="294" y="167" text-anchor="end" class="tipo">integer</text>
+  <text x="72" y="189" class="columna">nombre</text>
+  <text x="294" y="189" text-anchor="end" class="tipo">varchar(30) · U</text>
+  <rect x="350" y="410" width="262" height="192" rx="7" class="tabla"/>
+  <path d="M350,440 v-23 a7,7 0 0 1 7,-7 h248 a7,7 0 0 1 7,7 v23 z" fill="#B4533C"/>
+  <text x="481.0" y="430" text-anchor="middle" class="tabla-titulo">venta</text>
+  <text x="358" y="457" class="marca pk">PK</text>
+  <text x="382" y="457" class="columna llave">id_venta</text>
+  <text x="604" y="457" text-anchor="end" class="tipo">integer</text>
+  <text x="382" y="479" class="columna">fecha</text>
+  <text x="604" y="479" text-anchor="end" class="tipo">timestamp</text>
+  <text x="358" y="501" class="marca fk">FK</text>
+  <text x="382" y="501" class="columna">id_cliente</text>
+  <text x="604" y="501" text-anchor="end" class="tipo">integer</text>
+  <text x="358" y="523" class="marca fk">FK</text>
+  <text x="382" y="523" class="columna">id_vendedor</text>
+  <text x="604" y="523" text-anchor="end" class="tipo">integer</text>
+  <text x="358" y="545" class="marca fk">FK</text>
+  <text x="382" y="545" class="columna">id_estado_venta</text>
+  <text x="604" y="545" text-anchor="end" class="tipo">integer</text>
+  <text x="382" y="567" class="columna">metodo_pago</text>
+  <text x="604" y="567" text-anchor="end" class="tipo">varchar(30)</text>
+  <text x="382" y="589" class="columna">total</text>
+  <text x="604" y="589" text-anchor="end" class="tipo">numeric(12,2)</text>
+  <rect x="350" y="690" width="262" height="148" rx="7" class="tabla"/>
+  <path d="M350,720 v-23 a7,7 0 0 1 7,-7 h248 a7,7 0 0 1 7,7 v23 z" fill="#B4533C"/>
+  <text x="481.0" y="710" text-anchor="middle" class="tabla-titulo">detalle_venta</text>
+  <text x="358" y="737" class="marca pk">PK</text>
+  <text x="382" y="737" class="columna llave">id_detalle_venta</text>
+  <text x="604" y="737" text-anchor="end" class="tipo">integer</text>
+  <text x="358" y="759" class="marca fk">FK</text>
+  <text x="382" y="759" class="columna">id_venta</text>
+  <text x="604" y="759" text-anchor="end" class="tipo">integer</text>
+  <text x="358" y="781" class="marca fk">FK</text>
+  <text x="382" y="781" class="columna">id_repuesto</text>
+  <text x="604" y="781" text-anchor="end" class="tipo">integer</text>
+  <text x="382" y="803" class="columna">cantidad</text>
+  <text x="604" y="803" text-anchor="end" class="tipo">integer</text>
+  <text x="382" y="825" class="columna">precio_unitario</text>
+  <text x="604" y="825" text-anchor="end" class="tipo">numeric(12,2)</text>
+  <rect x="1290" y="120" width="262" height="148" rx="7" class="tabla"/>
+  <path d="M1290,150 v-23 a7,7 0 0 1 7,-7 h248 a7,7 0 0 1 7,7 v23 z" fill="#4A6FA5"/>
+  <text x="1421.0" y="140" text-anchor="middle" class="tabla-titulo">proveedor</text>
+  <text x="1298" y="167" class="marca pk">PK</text>
+  <text x="1322" y="167" class="columna llave">id_proveedor</text>
+  <text x="1544" y="167" text-anchor="end" class="tipo">integer</text>
+  <text x="1322" y="189" class="columna">nit</text>
+  <text x="1544" y="189" text-anchor="end" class="tipo">varchar(20) · U</text>
+  <text x="1322" y="211" class="columna">nombre</text>
+  <text x="1544" y="211" text-anchor="end" class="tipo">varchar(100)</text>
+  <text x="1322" y="233" class="columna">telefono ?</text>
+  <text x="1544" y="233" text-anchor="end" class="tipo">varchar(20)</text>
+  <text x="1322" y="255" class="columna">correo ?</text>
+  <text x="1544" y="255" text-anchor="end" class="tipo">varchar(120)</text>
+  <rect x="970" y="410" width="262" height="148" rx="7" class="tabla"/>
+  <path d="M970,440 v-23 a7,7 0 0 1 7,-7 h248 a7,7 0 0 1 7,7 v23 z" fill="#4A6FA5"/>
+  <text x="1101.0" y="430" text-anchor="middle" class="tabla-titulo">compra</text>
+  <text x="978" y="457" class="marca pk">PK</text>
+  <text x="1002" y="457" class="columna llave">id_compra</text>
+  <text x="1224" y="457" text-anchor="end" class="tipo">integer</text>
+  <text x="1002" y="479" class="columna">fecha</text>
+  <text x="1224" y="479" text-anchor="end" class="tipo">timestamp</text>
+  <text x="978" y="501" class="marca fk">FK</text>
+  <text x="1002" y="501" class="columna">id_proveedor</text>
+  <text x="1224" y="501" text-anchor="end" class="tipo">integer</text>
+  <text x="978" y="523" class="marca fk">FK</text>
+  <text x="1002" y="523" class="columna">id_usuario</text>
+  <text x="1224" y="523" text-anchor="end" class="tipo">integer</text>
+  <text x="1002" y="545" class="columna">total</text>
+  <text x="1224" y="545" text-anchor="end" class="tipo">numeric(12,2)</text>
+  <rect x="970" y="720" width="262" height="148" rx="7" class="tabla"/>
+  <path d="M970,750 v-23 a7,7 0 0 1 7,-7 h248 a7,7 0 0 1 7,7 v23 z" fill="#4A6FA5"/>
+  <text x="1101.0" y="740" text-anchor="middle" class="tabla-titulo">detalle_compra</text>
+  <text x="978" y="767" class="marca pk">PK</text>
+  <text x="1002" y="767" class="columna llave">id_detalle_compra</text>
+  <text x="1224" y="767" text-anchor="end" class="tipo">integer</text>
+  <text x="978" y="789" class="marca fk">FK</text>
+  <text x="1002" y="789" class="columna">id_compra</text>
+  <text x="1224" y="789" text-anchor="end" class="tipo">integer</text>
+  <text x="978" y="811" class="marca fk">FK</text>
+  <text x="1002" y="811" class="columna">id_repuesto</text>
+  <text x="1224" y="811" text-anchor="end" class="tipo">integer</text>
+  <text x="1002" y="833" class="columna">cantidad</text>
+  <text x="1224" y="833" text-anchor="end" class="tipo">integer</text>
+  <text x="1002" y="855" class="columna">costo_unitario</text>
+  <text x="1224" y="855" text-anchor="end" class="tipo">numeric(12,2)</text>
+  <text x="40" y="1120" class="leyenda-titulo">Convenciones</text>
+  <text x="40" y="1142" class="leyenda"><tspan class="pk">PK</tspan> llave primaria · <tspan class="fk">FK</tspan> llave foránea · U valor único · ? puede quedar vacío (NULL) · N y 1: muchas filas de una tabla apuntan a una fila de la otra · 0..1: a lo sumo una</text>
+  <rect x="40" y="1154" width="14" height="14" rx="3" fill="#2F5D8A"/>
+  <text x="60" y="1166" class="leyenda">Cuentas (US-01)</text>
+  <rect x="185.0" y="1154" width="14" height="14" rx="3" fill="#3F7F6B"/>
+  <text x="205.0" y="1166" class="leyenda">Clientes (US-02)</text>
+  <rect x="337.4" y="1154" width="14" height="14" rx="3" fill="#7A5C99"/>
+  <text x="357.4" y="1166" class="leyenda">Vehículos (US-03)</text>
+  <rect x="497.2" y="1154" width="14" height="14" rx="3" fill="#B7791F"/>
+  <text x="517.2" y="1166" class="leyenda">Repuestos (US-04 y US-05)</text>
+  <rect x="716.2" y="1154" width="14" height="14" rx="3" fill="#B4533C"/>
+  <text x="736.2" y="1166" class="leyenda">Ventas (US-06 a US-08)</text>
+  <rect x="913.0" y="1154" width="14" height="14" rx="3" fill="#4A6FA5"/>
+  <text x="933.0" y="1166" class="leyenda">Compras (US-09)</text>
+</svg>

@@ -1,0 +1,54 @@
+@startuml actividades_consolidado
+' RepuAuto - Actividades: Consultar el consolidado de sedes (integración).
+' Lo genera generar_actividades_consolidado.py junto con actividades_consolidado.svg.
+
+title Diagrama de actividades: Consultar el consolidado de sedes (integración)
+
+|Administrador|
+start
+:Abrir Consolidado de sedes
+y elegir fechas y filtros;
+|RepuAuto · sede Bucaramanga|
+:Leer las facturas de esta sede
+en la base de datos;
+if (¿Hay un token vigente
+de la otra sede?) then (no)
+  :Pedir un token:
+  POST /api/login con correo y clave;
+  |PC Stock · sede UD1|
+  :Validar correo, clave y rol
+  y entregar el token;
+  note right: El token se guarda 4 minutos
+  |RepuAuto · sede Bucaramanga|
+else (sí)
+endif
+:Pedir las facturas del rango:
+GET /api/facturas con el token;
+|PC Stock · sede UD1|
+:Validar el token y responder
+sus ventas y compras en JSON;
+|RepuAuto · sede Bucaramanga|
+if (¿La otra sede
+respondió bien?) then (sí)
+  :Juntar las facturas de las dos sedes,
+  aplicar los filtros y sumar por sede;
+  |Administrador|
+  :Ver los totales por sede,
+  el consolidado y las facturas;
+  stop
+else (no)
+  |RepuAuto · sede Bucaramanga|
+  :Preparar el aviso con la causa
+  y dejar solo las facturas de esta sede;
+  note right
+    Causas que el aviso distingue:
+    * el servidor o el túnel de ngrok está apagado;
+    * la otra sede rechazó el usuario o la clave;
+    * respondió datos que no se entienden.
+  end note
+  |Administrador|
+  :Ver el aviso y las facturas
+  de Bucaramanga;
+  stop
+endif
+@enduml

@@ -56,12 +56,13 @@ Las tablas se crean y se cambian **solo con migraciones** (Flask-Migrate).
 | [Guía de git](GUIA-GIT.md) | Ramas, commits, pull requests, revisión, conflictos (incluidos los de migraciones) y protección de `main` |
 | [Guía de Trello](docs/guias/TRELLO.md) | Listas del tablero, cómo cargar las tarjetas, etiquetas y cómo mover cada tarjeta |
 | [Evidencias](EVIDENCIAS.md) | Participación de cada integrante y trazabilidad de cada historia hasta su código y sus pruebas |
-| [Diagrama de la base de datos](docs/diagramas/repuauto_bd.dbml) | Todas las tablas, columnas, restricciones y relaciones. Se ve en [dbdiagram.io](https://dbdiagram.io) |
+| [Modelo de base de datos](docs/diagramas/repuauto_bd.png) | Modelo relacional: las 15 tablas con sus columnas, llaves y relaciones. La fuente es [`repuauto_bd.dbml`](docs/diagramas/repuauto_bd.dbml) (también se puede ver en [dbdiagram.io](https://dbdiagram.io)); la imagen sale de [`generar_bd.py`](docs/diagramas/generar_bd.py) |
 | [API REST y consolidado](docs/API.md) | Cómo pedir el token y las facturas en JSON, y cómo conectar el consolidado de sedes con la API del grupo UD1 |
-| [Arquitectura](docs/diagramas/arquitectura.png) | Capas, módulos (incluida la API), base de datos, proceso de desarrollo e integración con la otra sede ([fuente .svg](docs/diagramas/arquitectura.svg)) |
+| [Arquitectura](docs/diagramas/arquitectura.png) | Capas, módulos (incluidos la API y el consolidado), base de datos, proceso de desarrollo y conexión entre las dos sedes ([fuente .svg](docs/diagramas/arquitectura.svg)) |
 | [Casos de uso](docs/diagramas/casos_de_uso.png) | Diagrama de casos de uso por módulo: 5 actores, 63 casos de uso y sus relaciones «include» y «extend» ([dibujo .svg](docs/diagramas/casos_de_uso.svg) · [fuente .puml](docs/diagramas/casos_de_uso.puml) · los dos salen de [`generar_casos_de_uso.py`](docs/diagramas/generar_casos_de_uso.py)) |
-| [Vistas por usuario](docs/diagramas/vistas_usuario.png) | Qué vistas (UI-01 a UI-14) ve cada rol ([fuente .puml](docs/diagramas/vistas_usuario.puml)) |
+| [Vistas por usuario](docs/diagramas/vistas_usuario.png) | Qué vistas (UI-01 a UI-15) ve cada rol y qué pantallas tiene cada una ([dibujo .svg](docs/diagramas/vistas_usuario.svg) · [fuente .puml](docs/diagramas/vistas_usuario.puml) · salen de [`generar_vistas.py`](docs/diagramas/generar_vistas.py)) |
 | [Actividades: registrar venta](docs/diagramas/actividades_registrar_venta.png) | Flujo de una venta con verificación de stock ([fuente .puml](docs/diagramas/actividades_registrar_venta.puml)) |
+| [Actividades: consolidado de sedes](docs/diagramas/actividades_consolidado.png) | Cómo RepuAuto pide el token y las facturas a la otra sede, las junta y qué muestra si no responde ([dibujo .svg](docs/diagramas/actividades_consolidado.svg) · [fuente .puml](docs/diagramas/actividades_consolidado.puml) · salen de [`generar_actividades_consolidado.py`](docs/diagramas/generar_actividades_consolidado.py)) |
 | [Actas](docs/actas/) | Actas de las reuniones del equipo |
 
 El backlog, las historias con sus criterios de aceptación, la matriz de trazabilidad y el burndown están en el Excel **Scrum_Trace_RepuAuto** que tiene el equipo. El tablero de Trello se comparte por invitación.
@@ -88,7 +89,7 @@ app/
 migrations/              historial de la base de datos (Flask-Migrate)
 tests/                   pruebas (pytest)
 docs/
-├── diagramas/           .puml, .png y el .dbml de la base de datos
+├── diagramas/           .png, sus fuentes (.svg, .puml, .dbml) y los generar_*.py que los dibujan
 ├── actas/               actas de reunión
 └── guias/               guía de Trello
 .github/                 CI y plantilla de pull request
