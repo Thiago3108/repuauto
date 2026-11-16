@@ -59,7 +59,7 @@ Las tablas se crean y se cambian **solo con migraciones** (Flask-Migrate).
 | [Diagrama de la base de datos](docs/diagramas/repuauto_bd.dbml) | Todas las tablas, columnas, restricciones y relaciones. Se ve en [dbdiagram.io](https://dbdiagram.io) |
 | [API REST y consolidado](docs/API.md) | Cómo pedir el token y las facturas en JSON, y cómo conectar el consolidado de sedes con la API del grupo UD1 |
 | [Arquitectura](docs/diagramas/arquitectura.png) | Capas, módulos (incluida la API), base de datos, proceso de desarrollo e integración con la otra sede ([fuente .svg](docs/diagramas/arquitectura.svg)) |
-| [Casos de uso](docs/diagramas/casos_de_uso.png) | Diagrama de casos de uso: los cuatro roles, los tres informes y la API para la otra sede ([dibujo .svg](docs/diagramas/casos_de_uso.svg) · [fuente .puml](docs/diagramas/casos_de_uso.puml)) |
+| [Casos de uso](docs/diagramas/casos_de_uso.png) | Diagrama de casos de uso por módulo: 5 actores, 63 casos de uso y sus relaciones «include» y «extend» ([dibujo .svg](docs/diagramas/casos_de_uso.svg) · [fuente .puml](docs/diagramas/casos_de_uso.puml) · los dos salen de [`generar_casos_de_uso.py`](docs/diagramas/generar_casos_de_uso.py)) |
 | [Vistas por usuario](docs/diagramas/vistas_usuario.png) | Qué vistas (UI-01 a UI-14) ve cada rol ([fuente .puml](docs/diagramas/vistas_usuario.puml)) |
 | [Actividades: registrar venta](docs/diagramas/actividades_registrar_venta.png) | Flujo de una venta con verificación de stock ([fuente .puml](docs/diagramas/actividades_registrar_venta.puml)) |
 | [Actas](docs/actas/) | Actas de las reuniones del equipo |

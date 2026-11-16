@@ -1,106 +1,201 @@
 @startuml casos_de_uso
-' RepuAuto - Diagrama de casos de uso general (versión 3, noviembre 2026)
-' La imagen casos_de_uso.png se dibuja desde casos_de_uso.svg; este archivo es la fuente en PlantUML.
-' Actores según la matriz de roles aprobada (D3).
-' Los códigos US-xx enlazan cada caso de uso con su historia del backlog.
+' RepuAuto - Diagrama de casos de uso (versión 4).
+' Lo genera generar_casos_de_uso.py junto con casos_de_uso.svg: no se edita a mano.
 
-skinparam dpi 150
+left to right direction
 skinparam shadowing false
 skinparam defaultFontName Arial
-skinparam defaultFontSize 12
-skinparam ArrowColor #3C4A5C
-skinparam actor {
-  BorderColor #2F5D8A
-  BackgroundColor #FFFFFF
-}
 skinparam usecase {
   BackgroundColor #F2F6FB
   BorderColor #2F5D8A
 }
-skinparam rectangle {
+skinparam actor {
   BorderColor #2F5D8A
-  FontStyle bold
-}
-skinparam note {
-  BackgroundColor #FFF8E1
-  BorderColor #C9A227
+  BackgroundColor #FFFFFF
 }
 
-left to right direction
+title Diagrama de casos de uso - RepuAuto
 
-title Diagrama de casos de uso general - RepuAuto
+actor "Cliente" as cliente
+actor "//Usuario//" as usuario
+actor "Vendedor" as vendedor
+actor "Sistema PC Stock\n<<sistema>>" as pcstock
+actor "Administrador" as admin
 
-actor "//Usuario//" as Usuario
-actor Cliente
-actor Vendedor
-actor Administrador
-actor "Aplicativo consolidador\n<<sistema>>" as Consolidador
-
-Usuario <|-- Cliente
-Usuario <|-- Vendedor
-Vendedor <|-- Administrador
+usuario <|-- cliente
+usuario <|-- vendedor
+vendedor <|-- admin
 
 rectangle "Sistema RepuAuto" {
-  usecase "Iniciar sesión\n<size:10>US-01</size>" as UC_Login
-  usecase "Consultar catálogo\n<size:10>US-05</size>" as UC_Catalogo
-  usecase "Filtrar por vehículo\n<size:10>US-05</size>" as UC_Filtro
-
-  usecase "Registrarse\n<size:10>US-01</size>" as UC_Registro
-  usecase "Consultar estado e\nhistorial de compras\n<size:10>US-08</size>" as UC_Historial
-
-  usecase "Gestionar clientes\n<size:10>US-02</size>" as UC_Clientes
-  usecase "Registrar venta\n<size:10>US-06</size>" as UC_Venta
-  usecase "Verificar stock\n<size:10>US-06</size>" as UC_VerificarStock
-  usecase "Completar o\ncancelar venta\n<size:10>US-06</size>" as UC_EstadoVenta
-  usecase "Consultar stock\ny alertas\n<size:10>US-04</size>" as UC_Stock
-
-  usecase "Gestionar repuestos\ny ajustar stock\n<size:10>US-04</size>" as UC_Repuestos
-  usecase "Gestionar vehículos\ny compatibilidades\n<size:10>US-03</size>" as UC_Vehiculos
-  usecase "Generar reportes\n<size:10>US-07</size>" as UC_Reportes
-  usecase "Informe consolidado\n<size:10>US-07</size>" as UC_Consolidado
-  usecase "Informe tabular\n<size:10>US-07</size>" as UC_Tabular
-  usecase "Informe gráfico\n<size:10>US-07</size>" as UC_Grafico
-  usecase "Gestionar proveedores\n<size:10>US-09</size>" as UC_Proveedores
-  usecase "Crear cuentas\nde vendedor\n<size:10>US-01</size>" as UC_Cuentas
-  usecase "Registrar compras\na proveedores\n<size:10>US-09</size>" as UC_Compras
-
-  usecase "Iniciar sesión\nen la API\n<size:10>API REST</size>" as UC_ApiLogin
-  usecase "Consultar facturas\nen JSON\n<size:10>API REST</size>" as UC_Facturas
-  usecase "Validar token\n<size:10>API REST</size>" as UC_Token
+  package "Mis compras" {
+    usecase "Consultar historial\nde compras\n<size:10>US-08</size>" as c1
+    usecase "Ver detalle y estado\nde una compra\n<size:10>US-08</size>" as c2
+    usecase "Filtrar por estado" as c3
+  }
+  package "Cuentas y acceso" {
+    usecase "Registrarse\n<size:10>US-01</size>" as a1
+    usecase "Iniciar sesión\n<size:10>US-01</size>" as a2
+    usecase "Cerrar sesión\n<size:10>US-01</size>" as a3
+    usecase "Validar datos y\ncontraseña segura" as a4
+    usecase "Validar credenciales\ny cuenta activa" as a5
+  }
+  package "Catálogo" {
+    usecase "Consultar catálogo\nde repuestos\n<size:10>US-05</size>" as b1
+    usecase "Buscar por nombre\no código" as b2
+    usecase "Filtrar por categoría" as b3
+    usecase "Filtrar por vehículo\n(marca, línea y año)" as b4
+  }
+  package "Clientes" {
+    usecase "Registrar cliente\n<size:10>US-02</size>" as d1
+    usecase "Buscar y consultar\ncliente\n<size:10>US-02</size>" as d2
+    usecase "Actualizar cliente\n<size:10>US-02</size>" as d3
+    usecase "Enlazar cuenta\ndel cliente\n<size:10>US-02</size>" as d4
+    usecase "Quitar enlace\nde la cuenta\n<size:10>US-02</size>" as d5
+    usecase "Validar cédula\nno repetida" as d6
+    usecase "Verificar la cédula\ndel cliente" as d7
+  }
+  package "Ventas" {
+    usecase "Registrar venta\n<size:10>US-06</size>" as e1
+    usecase "Consultar ventas\ny su detalle\n<size:10>US-06</size>" as e2
+    usecase "Completar venta\npendiente\n<size:10>US-06</size>" as e3
+    usecase "Cancelar venta\n<size:10>US-06</size>" as e4
+    usecase "Buscar cliente\npor cédula" as e5
+    usecase "Verificar y\ndescontar stock" as e6
+    usecase "Filtrar por estado" as e7
+    usecase "Devolver el stock" as e8
+  }
+  package "Stock" {
+    usecase "Consultar stock\ny alertas\n<size:10>US-04</size>" as f1
+    usecase "Buscar repuesto" as f2
+  }
+  package "Repuestos e inventario" {
+    usecase "Registrar repuesto\n<size:10>US-04</size>" as g1
+    usecase "Editar repuesto\n<size:10>US-04</size>" as g2
+    usecase "Desactivar repuesto\n<size:10>US-04</size>" as g3
+    usecase "Ajustar stock\n<size:10>US-04</size>" as g4
+    usecase "Validar código\nno repetido" as g5
+    usecase "Validar que el stock\nno quede negativo" as g6
+  }
+  package "Vehículos y compatibilidades" {
+    usecase "Registrar vehículo\n<size:10>US-03</size>" as h1
+    usecase "Editar vehículo\n<size:10>US-03</size>" as h2
+    usecase "Eliminar vehículo\n<size:10>US-03</size>" as h3
+    usecase "Asociar repuesto\ncompatible\n<size:10>US-03</size>" as h4
+    usecase "Quitar repuesto\ncompatible\n<size:10>US-03</size>" as h5
+    usecase "Validar que no\nesté repetido" as h6
+    usecase "Borrar sus\ncompatibilidades" as h7
+    usecase "Validar que no esté\nya asociado" as h8
+  }
+  package "Proveedores y compras" {
+    usecase "Registrar proveedor\n<size:10>US-09</size>" as i1
+    usecase "Editar proveedor\n<size:10>US-09</size>" as i2
+    usecase "Registrar compra\n<size:10>US-09</size>" as i3
+    usecase "Consultar compras\ny su detalle\n<size:10>US-09</size>" as i4
+    usecase "Validar NIT\nno repetido" as i5
+    usecase "Sumar las cantidades\nal stock" as i6
+  }
+  package "Cuentas de vendedor" {
+    usecase "Crear cuenta\nde vendedor\n<size:10>US-01</size>" as j1
+    usecase "Activar o desactivar\ncuenta de vendedor\n<size:10>US-01</size>" as j2
+    usecase "Validar correo\nno repetido" as j3
+  }
+  package "Reportes" {
+    usecase "Generar reportes\npor rango de fechas\n<size:10>US-07</size>" as k1
+    usecase "Informe consolidado" as k2
+    usecase "Informe tabular" as k3
+    usecase "Informe gráfico" as k4
+  }
+  package "Integración entre sedes (API REST)" {
+    usecase "Obtener token\nde la API\n<size:10>API</size>" as l1
+    usecase "Consultar facturas\nen JSON\n<size:10>API</size>" as l2
+    usecase "Consultar inventario\nen JSON\n<size:10>API</size>" as l3
+    usecase "Validar token" as l4
+    usecase "Consultar consolidado\nde facturas\n<size:10>Integración</size>" as l5
+    usecase "Consultar inventario\nde las sedes\n<size:10>Integración</size>" as l6
+    usecase "Consultar la API\nde la otra sede" as l7
+  }
 }
 
-' Asociaciones (líneas simples, sin flecha)
-Usuario -- UC_Login
-Usuario -- UC_Catalogo
-UC_Catalogo <.. UC_Filtro : <<extend>>
+' El actor participa en el caso de uso
+cliente -- c1
+cliente -- c2
+cliente -- a1
+usuario -- a2
+usuario -- a3
+usuario -- b1
+vendedor -- d1
+vendedor -- d2
+vendedor -- d3
+vendedor -- d4
+vendedor -- d5
+vendedor -- e1
+vendedor -- e2
+vendedor -- e3
+vendedor -- e4
+vendedor -- f1
+pcstock -- l1
+pcstock -- l2
+pcstock -- l3
+admin -- g1
+admin -- g2
+admin -- g3
+admin -- g4
+admin -- h1
+admin -- h2
+admin -- h3
+admin -- h4
+admin -- h5
+admin -- i1
+admin -- i2
+admin -- i3
+admin -- i4
+admin -- j1
+admin -- j2
+admin -- k1
+admin -- l5
+admin -- l6
 
-Cliente -- UC_Registro
-Cliente -- UC_Historial
+' El sistema de la otra sede responde cuando RepuAuto lo consulta (actor secundario)
+l7 -- pcstock
 
-Vendedor -- UC_Clientes
-Vendedor -- UC_Venta
-Vendedor -- UC_EstadoVenta
-Vendedor -- UC_Stock
-UC_Venta ..> UC_VerificarStock : <<include>>
+' Relaciones entre casos de uso
+c3 ..> c1 : <<extend>>
+a1 ..> a4 : <<include>>
+a2 ..> a5 : <<include>>
+b2 ..> b1 : <<extend>>
+b3 ..> b1 : <<extend>>
+b4 ..> b1 : <<extend>>
+d1 ..> d6 : <<include>>
+d3 ..> d6 : <<include>>
+d4 ..> d7 : <<include>>
+e1 ..> e5 : <<include>>
+e1 ..> e6 : <<include>>
+e7 ..> e2 : <<extend>>
+e4 ..> e8 : <<include>>
+f2 ..> f1 : <<extend>>
+g1 ..> g5 : <<include>>
+g2 ..> g5 : <<include>>
+g4 ..> g6 : <<include>>
+h1 ..> h6 : <<include>>
+h2 ..> h6 : <<include>>
+h3 ..> h7 : <<include>>
+h4 ..> h8 : <<include>>
+i1 ..> i5 : <<include>>
+i2 ..> i5 : <<include>>
+i3 ..> i6 : <<include>>
+j1 ..> j3 : <<include>>
+k2 ..> k1 : <<extend>>
+k3 ..> k1 : <<extend>>
+k4 ..> k1 : <<extend>>
+l2 ..> l4 : <<include>>
+l3 ..> l4 : <<include>>
+l5 ..> l7 : <<include>>
+l6 ..> l7 : <<include>>
 
-Administrador -- UC_Repuestos
-Administrador -- UC_Vehiculos
-Administrador -- UC_Reportes
-Administrador -- UC_Cuentas
-Administrador -- UC_Proveedores
-Administrador -- UC_Compras
-UC_Reportes <.. UC_Consolidado : <<extend>>
-UC_Reportes <.. UC_Tabular : <<extend>>
-UC_Reportes <.. UC_Grafico : <<extend>>
-
-UC_ApiLogin -- Consolidador
-UC_Facturas -- Consolidador
-UC_Facturas ..> UC_Token : <<include>>
-
-note bottom of Administrador
-  Hereda todos los casos
-  de uso del vendedor.
+note right of admin
+  Hereda del vendedor: también atiende clientes,
+  registra ventas y consulta el stock.
 end note
 
-footer Los códigos US-xx corresponden a las historias de usuario del backlog.
+footer Los códigos US-xx son las historias de usuario del backlog. API e Integración: conexión con la sede del grupo UD1.
 @enduml
