@@ -1,73 +1,70 @@
 @startwbs vistas_usuario
-' RepuAuto - Vistas de usuario (versión 2)
-' Agrupadas según la matriz de roles aprobada (D3). Los códigos UI-xx se usan en la
-' columna Dependencia de las historias de usuario para trazar qué historia usa qué pantalla.
+' RepuAuto - Vistas por usuario (versión 3).
+' Lo genera generar_vistas.py junto con vistas_usuario.svg: no se edita a mano.
 
-skinparam dpi 150
-<style>
-wbsDiagram {
-  FontName Arial
-  FontSize 12
-  LineColor #3C4A5C
-  node {
-    BackgroundColor #F2F6FB
-    LineColor #2F5D8A
-    Padding 8
-    RoundCorner 12
-  }
-  :depth(0) {
-    BackgroundColor #2F5D8A
-    FontColor #FFFFFF
-    FontStyle bold
-  }
-  :depth(1) {
-    BackgroundColor #DCE6F2
-    FontStyle bold
-  }
-}
-</style>
-
-title Vistas de usuario - RepuAuto
+title Vistas por usuario - RepuAuto
 
 * RepuAuto
-** Sin sesión
+** Sin iniciar sesión
 ***:UI-01 Iniciar sesión
 <size:10>US-01</size>;
 ***:UI-02 Registro de cliente
 <size:10>US-01</size>;
 ** Todos los roles
-***:UI-03 Inicio con accesos
-según el rol
+***:UI-03 Inicio
 <size:10>US-01</size>;
-***:UI-04 Catálogo con filtro
-por vehículo
+**** Cifras del día según el rol
+**** Accesos a sus módulos
+***:UI-04 Catálogo
 <size:10>US-05</size>;
+**** Búsqueda por nombre o código
+**** Filtro por categoría
+**** Filtro por marca, línea y año
 ** Cliente
-***:UI-05 Mis compras:
-estado e historial
+***:UI-05 Mis compras
 <size:10>US-08</size>;
+**** Historial, con filtro por estado
+**** Detalle y estado de una compra
 ** Vendedor y administrador
 ***:UI-06 Registro de venta
 <size:10>US-06</size>;
-***:UI-07 Ventas registradas:
-completar o cancelar
+***:UI-07 Ventas registradas
 <size:10>US-06</size>;
-***:UI-08 Gestión de clientes
+**** Lista, con filtro por estado
+**** Detalle de la venta
+**** Completar o cancelar
+***:UI-08 Clientes
 <size:10>US-02</size>;
+**** Lista y búsqueda
+**** Detalle del cliente
+**** Registrar y editar
+**** Enlazar su cuenta
 ***:UI-09 Stock y alertas
 <size:10>US-04</size>;
 ** Solo administrador
-***:UI-10 Gestión de repuestos
-y ajuste de stock
+***:UI-10 Repuestos
 <size:10>US-04</size>;
-***:UI-11 Gestión de vehículos
-y compatibilidades
+**** Lista y búsqueda
+**** Registrar y editar
+**** Ajustar stock
+***:UI-11 Vehículos
 <size:10>US-03</size>;
-***:UI-12 Reportes: ventas,
-inventario y clientes
+**** Lista, registro y edición
+**** Repuestos compatibles
+***:UI-12 Reportes
 <size:10>US-07</size>;
+**** Informe consolidado
+**** Informe tabular
+**** Informe gráfico
 ***:UI-13 Cuentas de vendedor
 <size:10>US-01</size>;
 ***:UI-14 Proveedores y compras
 <size:10>US-09</size>;
+**** Compras y su detalle
+**** Registrar compra
+**** Proveedores: lista y formulario
+***:UI-15 Consolidado de sedes
+<size:10>Integración</size>;
+**** Facturas de las dos sedes
+**** Inventario de las dos sedes
 @endwbs

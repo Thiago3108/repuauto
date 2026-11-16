@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1500" height="980" viewBox="0 0 1500 980" font-family="Arial, Helvetica, sans-serif">
+<svg xmlns="http://www.w3.org/2000/svg" width="1500" height="1020" viewBox="0 0 1500 1020" font-family="Arial, Helvetica, sans-serif">
   <!-- RepuAuto - Diagrama de arquitectura. Se edita a mano; el PNG se genera desde este archivo. -->
   <defs>
     <marker id="flecha" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
@@ -18,7 +18,7 @@
     </style>
   </defs>
 
-  <rect width="1500" height="980" fill="#FFFFFF"/>
+  <rect width="1500" height="1020" fill="#FFFFFF"/>
   <text x="750" y="40" text-anchor="middle" font-size="20" font-weight="bold" fill="#1F2D3D">Diagrama de arquitectura - RepuAuto</text>
   <text x="750" y="62" text-anchor="middle" class="peq">Aplicación web Flask en tres capas con el patrón MVC</text>
 
@@ -41,11 +41,11 @@
   <rect x="250" y="170" width="200" height="250" rx="10" class="caja"/>
   <text x="350" y="200" text-anchor="middle" class="titulo">Navegador web</text>
   <text x="268" y="232" class="texto">• Páginas HTML (Jinja2)</text>
-  <text x="268" y="256" class="texto">• Bootstrap 5.3</text>
+  <text x="268" y="256" class="texto">• Bootstrap 5.3 y app.css</text>
   <text x="268" y="280" class="texto">• Formularios con token</text>
   <text x="280" y="298" class="texto">CSRF</text>
-  <text x="268" y="322" class="texto">• JavaScript para sumar</text>
-  <text x="280" y="340" class="texto">el total de venta y compra</text>
+  <text x="268" y="322" class="texto">• JavaScript: totales de venta</text>
+  <text x="280" y="340" class="texto">y compra; gráficos Chart.js</text>
   <text x="350" y="400" text-anchor="middle" class="peq">Menú según el rol</text>
 
   <!-- Flechas navegador - servidor -->
@@ -62,7 +62,7 @@
   <text x="535" y="157" class="texto"><tspan font-weight="bold">Páginas:</tspan> Flask-Login (sesión) · @rol_requerido · Flask-WTF (validación y CSRF)</text>
   <text x="535" y="177" class="texto"><tspan font-weight="bold">API:</tspan> token Bearer firmado, solo administrador · contraseñas con hash</text>
 
-  <text x="520" y="212" class="texto" font-weight="bold">Módulos (blueprints): uno por historia de usuario, más la API</text>
+  <text x="520" y="212" class="texto" font-weight="bold">Módulos (blueprints): uno por historia de usuario, más la API y el consolidado</text>
   <g class="texto" text-anchor="middle">
     <rect x="520" y="222" width="106" height="40" rx="6" class="caja"/><text x="573" y="240">auth</text><text x="573" y="255" class="peq" font-size="10">US-01</text>
     <rect x="636" y="222" width="106" height="40" rx="6" class="caja"/><text x="689" y="240">clientes</text><text x="689" y="255" class="peq" font-size="10">US-02</text>
@@ -72,7 +72,8 @@
     <rect x="520" y="270" width="106" height="40" rx="6" class="caja"/><text x="573" y="288">ventas</text><text x="573" y="303" class="peq" font-size="10">US-06 y US-08</text>
     <rect x="636" y="270" width="106" height="40" rx="6" class="caja"/><text x="689" y="288">reportes</text><text x="689" y="303" class="peq" font-size="10">US-07: 3 informes</text>
     <rect x="752" y="270" width="106" height="40" rx="6" class="caja"/><text x="805" y="288">compras</text><text x="805" y="303" class="peq" font-size="10">US-09</text>
-    <rect x="868" y="270" width="106" height="40" rx="6" class="nota"/><text x="921" y="288">api</text><text x="921" y="303" class="peq" font-size="10">API REST</text>
+    <rect x="868" y="270" width="106" height="40" rx="6" class="nota"/><text x="921" y="288">api</text><text x="921" y="303" class="peq" font-size="10">facturas e inventario</text>
+    <rect x="984" y="270" width="106" height="40" rx="6" class="nota"/><text x="1037" y="288">consolidado</text><text x="1037" y="303" class="peq" font-size="10">las dos sedes</text>
   </g>
 
   <text x="520" y="335" class="peq">Cada módulo tiene las mismas capas:</text>
@@ -129,20 +130,29 @@
   <text x="1290" y="742" text-anchor="middle" class="titulo">Rama main protegida</text>
   <text x="1290" y="764" text-anchor="middle" class="peq">solo entra con CI en verde · etiqueta por sprint</text>
 
-  <!-- Integración (próximo paso) -->
-  <rect x="30" y="830" width="1440" height="130" rx="12" fill="#FFFDF5" stroke="#C9A227" stroke-width="1.4" stroke-dasharray="8 6"/>
-  <text x="50" y="855" class="titulo">Integración con la otra sede: la API de RepuAuto ya funciona; falta el aplicativo consolidador</text>
-  <rect x="60" y="870" width="330" height="72" rx="8" class="caja"/>
-  <text x="225" y="897" text-anchor="middle" class="titulo">Sede RepuAuto · API REST</text>
-  <text x="225" y="919" text-anchor="middle" class="peq">POST /api/login · GET /api/facturas (token)</text>
-  <path d="M390,906 L578,906" class="punteada"/>
-  <text x="484" y="896" text-anchor="middle" class="etq">JSON</text>
-  <rect x="580" y="870" width="340" height="72" rx="8" class="nota"/>
-  <text x="750" y="897" text-anchor="middle" class="titulo">Aplicativo consolidador</text>
-  <text x="750" y="919" text-anchor="middle" class="peq">informes de compras y ventas de las dos sedes</text>
-  <path d="M1110,906 L922,906" class="punteada"/>
-  <text x="1016" y="896" text-anchor="middle" class="etq">JSON</text>
-  <rect x="1110" y="870" width="330" height="72" rx="8" class="nota"/>
-  <text x="1275" y="897" text-anchor="middle" class="titulo">Sede UD1 · API REST</text>
-  <text x="1275" y="919" text-anchor="middle" class="peq">la del otro grupo (Django)</text>
+  <!-- Integración entre sedes -->
+  <rect x="30" y="830" width="1440" height="170" rx="12" fill="#FFFDF5" stroke="#C9A227" stroke-width="1.4"/>
+  <text x="50" y="855" class="titulo">Integración entre sedes: las dos API tienen el mismo formato y se conectan por internet</text>
+
+  <rect x="60" y="872" width="420" height="108" rx="8" class="caja"/>
+  <text x="270" y="897" text-anchor="middle" class="titulo">Sede Bucaramanga · RepuAuto (Flask)</text>
+  <text x="78" y="922" class="texto"><tspan font-weight="bold">api:</tspan> POST /api/login · GET /api/facturas · GET /api/inventario</text>
+  <text x="78" y="944" class="texto"><tspan font-weight="bold">consolidado:</tspan> pide los datos de la otra sede y los junta</text>
+  <text x="78" y="964" class="peq">Si la otra sede no responde, avisa y muestra solo esta sede</text>
+
+  <path d="M480,926 L598,926" class="doble"/>
+  <text x="539" y="916" text-anchor="middle" class="etq">JSON + token</text>
+
+  <rect x="600" y="884" width="300" height="84" rx="42" class="nota"/>
+  <text x="750" y="916" text-anchor="middle" class="titulo">Internet · ngrok (HTTPS)</text>
+  <text x="750" y="938" text-anchor="middle" class="peq">cada sede publica su API con un dominio fijo</text>
+
+  <path d="M900,926 L1018,926" class="doble"/>
+  <text x="959" y="916" text-anchor="middle" class="etq">JSON + token</text>
+
+  <rect x="1020" y="872" width="420" height="108" rx="8" class="caja"/>
+  <text x="1230" y="897" text-anchor="middle" class="titulo">Sede UD1 · PC Stock (Django REST)</text>
+  <text x="1038" y="922" class="texto"><tspan font-weight="bold">API:</tspan> el mismo formato de login, facturas e inventario</text>
+  <text x="1038" y="944" class="texto"><tspan font-weight="bold">Sedes:</tspan> su pantalla que consulta nuestra API</text>
+  <text x="1038" y="964" class="peq">Entra con una cuenta de administrador creada solo para esto</text>
 </svg>

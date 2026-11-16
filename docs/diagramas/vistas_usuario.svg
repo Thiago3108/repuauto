@@ -1,0 +1,169 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1478" height="958" viewBox="0 0 1478 958" font-family="Arial, Helvetica, sans-serif">
+  <!-- RepuAuto - Vistas por usuario (versión 3). Lo genera generar_vistas.py: no se edita a mano. -->
+  <defs>
+    <style>
+      .titulo { font-size: 24px; font-weight: bold; fill: #000; }
+      .subtitulo { font-size: 14px; fill: #44546A; }
+      .raiz { fill: #2F5D8A; }
+      .raiz-texto { font-size: 15px; font-weight: bold; fill: #FFFFFF; }
+      .grupo { fill: #F6F9FC; stroke: #B7C6DA; stroke-width: 1.2; }
+      .grupo-titulo { font-size: 15px; font-weight: bold; fill: #2F5D8A; }
+      .vista { fill: #FFFFFF; stroke: #2F5D8A; stroke-width: 1.2; }
+      .vista-titulo { font-size: 15px; font-weight: bold; fill: #000; }
+      .codigo-caja { fill: #DCE6F2; }
+      .codigo { font-size: 12px; font-weight: bold; fill: #1F3D5C; }
+      .detalle { font-size: 12px; fill: #44546A; }
+      .ruta { font-family: "DejaVu Sans Mono", Consolas, monospace; font-size: 11.5px; }
+      .pantalla { font-size: 13px; fill: #1F2D3D; }
+      .punto { fill: #2F5D8A; }
+      .pie { font-size: 12px; fill: #6B7785; }
+    </style>
+  </defs>
+  <rect width="1478" height="958" fill="#FFFFFF"/>
+  <text x="739.0" y="46" text-anchor="middle" class="titulo">Vistas por usuario - RepuAuto</text>
+  <text x="739.0" y="74" text-anchor="middle" class="subtitulo">Qué pantallas ve cada rol. El administrador ve además todo lo del vendedor.</text>
+  <rect x="40" y="96" width="1398" height="36" rx="10" class="raiz"/>
+  <text x="739.0" y="120" text-anchor="middle" class="raiz-texto">RepuAuto · 15 vistas</text>
+  <rect x="40" y="150" width="330" height="198" rx="12" class="grupo"/>
+  <text x="56" y="178" class="grupo-titulo">Sin iniciar sesión</text>
+  <rect x="52" y="196" width="306" height="62" rx="9" class="vista"/>
+  <rect x="64" y="208" width="50" height="22" rx="6" class="codigo-caja"/>
+  <text x="89" y="223" text-anchor="middle" class="codigo">UI-01</text>
+  <text x="124" y="224" class="vista-titulo">Iniciar sesión</text>
+  <text x="64" y="246" class="detalle">US-01 · <tspan class="ruta">/auth/login</tspan></text>
+  <rect x="52" y="270" width="306" height="62" rx="9" class="vista"/>
+  <rect x="64" y="282" width="50" height="22" rx="6" class="codigo-caja"/>
+  <text x="89" y="297" text-anchor="middle" class="codigo">UI-02</text>
+  <text x="124" y="298" class="vista-titulo">Registro de cliente</text>
+  <text x="64" y="320" class="detalle">US-01 · <tspan class="ruta">/auth/registro</tspan></text>
+  <rect x="40" y="366" width="330" height="328" rx="12" class="grupo"/>
+  <text x="56" y="394" class="grupo-titulo">Todos los roles</text>
+  <rect x="52" y="412" width="306" height="116" rx="9" class="vista"/>
+  <rect x="64" y="424" width="50" height="22" rx="6" class="codigo-caja"/>
+  <text x="89" y="439" text-anchor="middle" class="codigo">UI-03</text>
+  <text x="124" y="440" class="vista-titulo">Inicio</text>
+  <text x="64" y="462" class="detalle">US-01 · <tspan class="ruta">/</tspan></text>
+  <circle cx="72" cy="478" r="2.6" class="punto"/>
+  <text x="84" y="482" class="pantalla">Cifras del día según el rol</text>
+  <circle cx="72" cy="500" r="2.6" class="punto"/>
+  <text x="84" y="504" class="pantalla">Accesos a sus módulos</text>
+  <rect x="52" y="540" width="306" height="138" rx="9" class="vista"/>
+  <rect x="64" y="552" width="50" height="22" rx="6" class="codigo-caja"/>
+  <text x="89" y="567" text-anchor="middle" class="codigo">UI-04</text>
+  <text x="124" y="568" class="vista-titulo">Catálogo</text>
+  <text x="64" y="590" class="detalle">US-05 · <tspan class="ruta">/catalogo/</tspan></text>
+  <circle cx="72" cy="606" r="2.6" class="punto"/>
+  <text x="84" y="610" class="pantalla">Búsqueda por nombre o código</text>
+  <circle cx="72" cy="628" r="2.6" class="punto"/>
+  <text x="84" y="632" class="pantalla">Filtro por categoría</text>
+  <circle cx="72" cy="650" r="2.6" class="punto"/>
+  <text x="84" y="654" class="pantalla">Filtro por marca, línea y año</text>
+  <rect x="40" y="712" width="330" height="178" rx="12" class="grupo"/>
+  <text x="56" y="740" class="grupo-titulo">Cliente</text>
+  <rect x="52" y="758" width="306" height="116" rx="9" class="vista"/>
+  <rect x="64" y="770" width="50" height="22" rx="6" class="codigo-caja"/>
+  <text x="89" y="785" text-anchor="middle" class="codigo">UI-05</text>
+  <text x="124" y="786" class="vista-titulo">Mis compras</text>
+  <text x="64" y="808" class="detalle">US-08 · <tspan class="ruta">/ventas/mis-compras</tspan></text>
+  <circle cx="72" cy="824" r="2.6" class="punto"/>
+  <text x="84" y="828" class="pantalla">Historial, con filtro por estado</text>
+  <circle cx="72" cy="846" r="2.6" class="punto"/>
+  <text x="84" y="850" class="pantalla">Detalle y estado de una compra</text>
+  <rect x="396" y="150" width="330" height="520" rx="12" class="grupo"/>
+  <text x="412" y="178" class="grupo-titulo">Vendedor y administrador</text>
+  <rect x="408" y="196" width="306" height="62" rx="9" class="vista"/>
+  <rect x="420" y="208" width="50" height="22" rx="6" class="codigo-caja"/>
+  <text x="445" y="223" text-anchor="middle" class="codigo">UI-06</text>
+  <text x="480" y="224" class="vista-titulo">Registro de venta</text>
+  <text x="420" y="246" class="detalle">US-06 · <tspan class="ruta">/ventas/nueva</tspan></text>
+  <rect x="408" y="270" width="306" height="138" rx="9" class="vista"/>
+  <rect x="420" y="282" width="50" height="22" rx="6" class="codigo-caja"/>
+  <text x="445" y="297" text-anchor="middle" class="codigo">UI-07</text>
+  <text x="480" y="298" class="vista-titulo">Ventas registradas</text>
+  <text x="420" y="320" class="detalle">US-06 · <tspan class="ruta">/ventas/</tspan></text>
+  <circle cx="428" cy="336" r="2.6" class="punto"/>
+  <text x="440" y="340" class="pantalla">Lista, con filtro por estado</text>
+  <circle cx="428" cy="358" r="2.6" class="punto"/>
+  <text x="440" y="362" class="pantalla">Detalle de la venta</text>
+  <circle cx="428" cy="380" r="2.6" class="punto"/>
+  <text x="440" y="384" class="pantalla">Completar o cancelar</text>
+  <rect x="408" y="420" width="306" height="160" rx="9" class="vista"/>
+  <rect x="420" y="432" width="50" height="22" rx="6" class="codigo-caja"/>
+  <text x="445" y="447" text-anchor="middle" class="codigo">UI-08</text>
+  <text x="480" y="448" class="vista-titulo">Clientes</text>
+  <text x="420" y="470" class="detalle">US-02 · <tspan class="ruta">/clientes/</tspan></text>
+  <circle cx="428" cy="486" r="2.6" class="punto"/>
+  <text x="440" y="490" class="pantalla">Lista y búsqueda</text>
+  <circle cx="428" cy="508" r="2.6" class="punto"/>
+  <text x="440" y="512" class="pantalla">Detalle del cliente</text>
+  <circle cx="428" cy="530" r="2.6" class="punto"/>
+  <text x="440" y="534" class="pantalla">Registrar y editar</text>
+  <circle cx="428" cy="552" r="2.6" class="punto"/>
+  <text x="440" y="556" class="pantalla">Enlazar su cuenta</text>
+  <rect x="408" y="592" width="306" height="62" rx="9" class="vista"/>
+  <rect x="420" y="604" width="50" height="22" rx="6" class="codigo-caja"/>
+  <text x="445" y="619" text-anchor="middle" class="codigo">UI-09</text>
+  <text x="480" y="620" class="vista-titulo">Stock y alertas</text>
+  <text x="420" y="642" class="detalle">US-04 · <tspan class="ruta">/repuestos/stock</tspan></text>
+  <rect x="752" y="150" width="330" height="478" rx="12" class="grupo"/>
+  <text x="768" y="178" class="grupo-titulo">Solo administrador</text>
+  <rect x="764" y="196" width="306" height="138" rx="9" class="vista"/>
+  <rect x="776" y="208" width="50" height="22" rx="6" class="codigo-caja"/>
+  <text x="801" y="223" text-anchor="middle" class="codigo">UI-10</text>
+  <text x="836" y="224" class="vista-titulo">Repuestos</text>
+  <text x="776" y="246" class="detalle">US-04 · <tspan class="ruta">/repuestos/</tspan></text>
+  <circle cx="784" cy="262" r="2.6" class="punto"/>
+  <text x="796" y="266" class="pantalla">Lista y búsqueda</text>
+  <circle cx="784" cy="284" r="2.6" class="punto"/>
+  <text x="796" y="288" class="pantalla">Registrar y editar</text>
+  <circle cx="784" cy="306" r="2.6" class="punto"/>
+  <text x="796" y="310" class="pantalla">Ajustar stock</text>
+  <rect x="764" y="346" width="306" height="116" rx="9" class="vista"/>
+  <rect x="776" y="358" width="50" height="22" rx="6" class="codigo-caja"/>
+  <text x="801" y="373" text-anchor="middle" class="codigo">UI-11</text>
+  <text x="836" y="374" class="vista-titulo">Vehículos</text>
+  <text x="776" y="396" class="detalle">US-03 · <tspan class="ruta">/vehiculos/</tspan></text>
+  <circle cx="784" cy="412" r="2.6" class="punto"/>
+  <text x="796" y="416" class="pantalla">Lista, registro y edición</text>
+  <circle cx="784" cy="434" r="2.6" class="punto"/>
+  <text x="796" y="438" class="pantalla">Repuestos compatibles</text>
+  <rect x="764" y="474" width="306" height="138" rx="9" class="vista"/>
+  <rect x="776" y="486" width="50" height="22" rx="6" class="codigo-caja"/>
+  <text x="801" y="501" text-anchor="middle" class="codigo">UI-12</text>
+  <text x="836" y="502" class="vista-titulo">Reportes</text>
+  <text x="776" y="524" class="detalle">US-07 · <tspan class="ruta">/reportes/</tspan></text>
+  <circle cx="784" cy="540" r="2.6" class="punto"/>
+  <text x="796" y="544" class="pantalla">Informe consolidado</text>
+  <circle cx="784" cy="562" r="2.6" class="punto"/>
+  <text x="796" y="566" class="pantalla">Informe tabular</text>
+  <circle cx="784" cy="584" r="2.6" class="punto"/>
+  <text x="796" y="588" class="pantalla">Informe gráfico</text>
+  <rect x="1108" y="150" width="330" height="402" rx="12" class="grupo"/>
+  <text x="1124" y="178" class="grupo-titulo">Solo administrador (continuación)</text>
+  <rect x="1120" y="196" width="306" height="62" rx="9" class="vista"/>
+  <rect x="1132" y="208" width="50" height="22" rx="6" class="codigo-caja"/>
+  <text x="1157" y="223" text-anchor="middle" class="codigo">UI-13</text>
+  <text x="1192" y="224" class="vista-titulo">Cuentas de vendedor</text>
+  <text x="1132" y="246" class="detalle">US-01 · <tspan class="ruta">/auth/</tspan></text>
+  <rect x="1120" y="270" width="306" height="138" rx="9" class="vista"/>
+  <rect x="1132" y="282" width="50" height="22" rx="6" class="codigo-caja"/>
+  <text x="1157" y="297" text-anchor="middle" class="codigo">UI-14</text>
+  <text x="1192" y="298" class="vista-titulo">Proveedores y compras</text>
+  <text x="1132" y="320" class="detalle">US-09 · <tspan class="ruta">/compras/</tspan></text>
+  <circle cx="1140" cy="336" r="2.6" class="punto"/>
+  <text x="1152" y="340" class="pantalla">Compras y su detalle</text>
+  <circle cx="1140" cy="358" r="2.6" class="punto"/>
+  <text x="1152" y="362" class="pantalla">Registrar compra</text>
+  <circle cx="1140" cy="380" r="2.6" class="punto"/>
+  <text x="1152" y="384" class="pantalla">Proveedores: lista y formulario</text>
+  <rect x="1120" y="420" width="306" height="116" rx="9" class="vista"/>
+  <rect x="1132" y="432" width="50" height="22" rx="6" class="codigo-caja"/>
+  <text x="1157" y="447" text-anchor="middle" class="codigo">UI-15</text>
+  <text x="1192" y="448" class="vista-titulo">Consolidado de sedes</text>
+  <text x="1132" y="470" class="detalle">Integración · <tspan class="ruta">/consolidado/</tspan></text>
+  <circle cx="1140" cy="486" r="2.6" class="punto"/>
+  <text x="1152" y="490" class="pantalla">Facturas de las dos sedes</text>
+  <circle cx="1140" cy="508" r="2.6" class="punto"/>
+  <text x="1152" y="512" class="pantalla">Inventario de las dos sedes</text>
+  <text x="40" y="940" class="pie">Los códigos UI-xx son los del plan de trabajo y las historias US-xx, las del backlog. Debajo de cada vista están las pantallas que la componen.</text>
+</svg>

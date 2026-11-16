@@ -1,0 +1,106 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1350" height="1120" viewBox="0 0 1350 1120" font-family="Arial, Helvetica, sans-serif">
+  <!-- RepuAuto - Actividades del consolidado de sedes. Lo genera generar_actividades_consolidado.py. -->
+  <defs>
+    <marker id="punta" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#3C4A5C"/>
+    </marker>
+    <style>
+      .titulo { font-size: 21px; font-weight: bold; fill: #000; }
+      .subtitulo { font-size: 13.5px; fill: #44546A; }
+      .carril { fill: #FFFFFF; stroke: #2F5D8A; stroke-width: 1.4; }
+      .carril-titulo-caja { fill: #DCE6F2; stroke: #2F5D8A; stroke-width: 1.4; }
+      .carril-titulo { font-size: 14.5px; font-weight: bold; fill: #1F3D5C; }
+      .actividad { fill: #F2F6FB; stroke: #2F5D8A; stroke-width: 1.3; }
+      .decision { fill: #FFFFFF; stroke: #2F5D8A; stroke-width: 1.3; }
+      .texto { font-size: 13px; fill: #000; }
+      .flecha { fill: none; stroke: #3C4A5C; stroke-width: 1.4; marker-end: url(#punta); }
+      .etiqueta { font-size: 12px; font-weight: bold; fill: #3C4A5C; }
+      .inicio { fill: #1F2D3D; }
+      .fin-borde { fill: #FFFFFF; stroke: #1F2D3D; stroke-width: 1.6; }
+      .nota { fill: #FFF8E1; stroke: #C9A227; stroke-width: 1.2; }
+      .nota-linea { stroke: #C9A227; stroke-width: 1.2; stroke-dasharray: 4 4; }
+      .nota-texto { font-size: 12.5px; fill: #000; }
+      .pie { font-size: 12px; fill: #6B7785; }
+    </style>
+  </defs>
+  <rect width="1350" height="1120" fill="#FFFFFF"/>
+  <text x="675.0" y="44" text-anchor="middle" class="titulo">Diagrama de actividades: Consultar el consolidado de sedes (integración)</text>
+  <text x="675.0" y="70" text-anchor="middle" class="subtitulo">Cómo RepuAuto junta sus facturas con las de la sede del grupo UD1 a través de la API REST</text>
+  <rect x="40" y="96" width="330" height="994" class="carril"/>
+  <rect x="40" y="96" width="330" height="34" class="carril-titulo-caja"/>
+  <text x="205.0" y="119" text-anchor="middle" class="carril-titulo">Administrador</text>
+  <rect x="370" y="96" width="520" height="994" class="carril"/>
+  <rect x="370" y="96" width="520" height="34" class="carril-titulo-caja"/>
+  <text x="630.0" y="119" text-anchor="middle" class="carril-titulo">RepuAuto · sede Bucaramanga</text>
+  <rect x="890" y="96" width="420" height="994" class="carril"/>
+  <rect x="890" y="96" width="420" height="34" class="carril-titulo-caja"/>
+  <text x="1100.0" y="119" text-anchor="middle" class="carril-titulo">PC Stock · sede UD1</text>
+  <polyline points="205,157 205,172" class="flecha"/>
+  <polyline points="340,200 470,200" class="flecha"/>
+  <polyline points="630,228 630,271" class="flecha"/>
+  <polyline points="630,349 630,402" class="flecha"/>
+  <text x="644" y="366" text-anchor="start" class="etiqueta">no</text>
+  <polyline points="780,430 940,430" class="flecha"/>
+  <polyline points="1100,458 1100,495 720,495 720,532" class="flecha"/>
+  <text x="865" y="487" text-anchor="end" class="etiqueta">token (se guarda 4 minutos)</text>
+  <polyline points="505,310 410,310 410,560 470,560" class="flecha"/>
+  <text x="424" y="302" text-anchor="start" class="etiqueta">sí</text>
+  <polyline points="790,560 940,560" class="flecha"/>
+  <polyline points="1100,588 1100,630 630,630 630,661" class="flecha"/>
+  <text x="865" y="622" text-anchor="end" class="etiqueta">JSON, o un error si no responde</text>
+  <polyline points="630,739 630,802" class="flecha"/>
+  <text x="644" y="757" text-anchor="start" class="etiqueta">sí</text>
+  <polyline points="465,830 340,830" class="flecha"/>
+  <polyline points="205,858 205,905" class="flecha"/>
+  <polyline points="755,700 850,700 850,980 795,980" class="flecha"/>
+  <text x="790" y="692" text-anchor="start" class="etiqueta">no</text>
+  <polyline points="465,980 340,980" class="flecha"/>
+  <polyline points="205,1008 205,1055" class="flecha"/>
+  <rect x="70.0" y="172.0" width="270" height="56" rx="18" class="actividad"/>
+  <text x="205" y="196" text-anchor="middle" class="texto">Abrir Consolidado de sedes</text>
+  <text x="205" y="214" text-anchor="middle" class="texto">y elegir fechas y filtros</text>
+  <rect x="470.0" y="172.0" width="320" height="56" rx="18" class="actividad"/>
+  <text x="630" y="196" text-anchor="middle" class="texto">Leer las facturas de esta sede</text>
+  <text x="630" y="214" text-anchor="middle" class="texto">en la base de datos</text>
+  <polygon points="630,271.0 755.0,310 630,349.0 505.0,310" class="decision"/>
+  <text x="630" y="306" text-anchor="middle" class="texto">¿Hay un token vigente</text>
+  <text x="630" y="324" text-anchor="middle" class="texto">de la otra sede?</text>
+  <rect x="480.0" y="402.0" width="300" height="56" rx="18" class="actividad"/>
+  <text x="630" y="426" text-anchor="middle" class="texto">Pedir un token:</text>
+  <text x="630" y="444" text-anchor="middle" class="texto">POST /api/login con correo y clave</text>
+  <rect x="940.0" y="402.0" width="320" height="56" rx="18" class="actividad"/>
+  <text x="1100" y="426" text-anchor="middle" class="texto">Validar correo, clave y rol</text>
+  <text x="1100" y="444" text-anchor="middle" class="texto">y entregar el token</text>
+  <rect x="470.0" y="532.0" width="320" height="56" rx="18" class="actividad"/>
+  <text x="630" y="556" text-anchor="middle" class="texto">Pedir las facturas del rango:</text>
+  <text x="630" y="574" text-anchor="middle" class="texto">GET /api/facturas con el token</text>
+  <rect x="940.0" y="532.0" width="320" height="56" rx="18" class="actividad"/>
+  <text x="1100" y="556" text-anchor="middle" class="texto">Validar el token y responder</text>
+  <text x="1100" y="574" text-anchor="middle" class="texto">sus ventas y compras en JSON</text>
+  <polygon points="630,661.0 755.0,700 630,739.0 505.0,700" class="decision"/>
+  <text x="630" y="696" text-anchor="middle" class="texto">¿La otra sede</text>
+  <text x="630" y="714" text-anchor="middle" class="texto">respondió bien?</text>
+  <rect x="465.0" y="802.0" width="330" height="56" rx="18" class="actividad"/>
+  <text x="630" y="826" text-anchor="middle" class="texto">Juntar las facturas de las dos sedes,</text>
+  <text x="630" y="844" text-anchor="middle" class="texto">aplicar los filtros y sumar por sede</text>
+  <rect x="70.0" y="802.0" width="270" height="56" rx="18" class="actividad"/>
+  <text x="205" y="826" text-anchor="middle" class="texto">Ver los totales por sede,</text>
+  <text x="205" y="844" text-anchor="middle" class="texto">el consolidado y las facturas</text>
+  <rect x="465.0" y="952.0" width="330" height="56" rx="18" class="actividad"/>
+  <text x="630" y="976" text-anchor="middle" class="texto">Preparar el aviso con la causa</text>
+  <text x="630" y="994" text-anchor="middle" class="texto">y dejar solo las facturas de esta sede</text>
+  <rect x="70.0" y="952.0" width="270" height="56" rx="18" class="actividad"/>
+  <text x="205" y="976" text-anchor="middle" class="texto">Ver el aviso y las facturas</text>
+  <text x="205" y="994" text-anchor="middle" class="texto">de Bucaramanga</text>
+  <circle cx="205" cy="148" r="9" class="inicio"/>
+  <circle cx="205" cy="916" r="12" class="fin-borde"/><circle cx="205" cy="916" r="7" class="inicio"/>
+  <circle cx="205" cy="1066" r="12" class="fin-borde"/><circle cx="205" cy="1066" r="7" class="inicio"/>
+  <path d="M912,660 h362 l14,14 v103 h-376 z" class="nota"/>
+  <line x1="912" y1="777" x2="789.0" y2="960" class="nota-linea"/>
+  <text x="924" y="682" class="nota-texto" font-weight="bold">Causas que el aviso distingue:</text>
+  <text x="924" y="701" class="nota-texto">• el servidor o el túnel de ngrok está apagado;</text>
+  <text x="924" y="720" class="nota-texto">• la otra sede rechazó el usuario o la clave;</text>
+  <text x="924" y="739" class="nota-texto">• respondió datos que no se entienden.</text>
+  <text x="924" y="758" class="nota-texto">La página nunca se cae: muestra lo que sí tiene.</text>
+  <text x="40" y="1110" class="pie">El inventario de las dos sedes sigue el mismo flujo con GET /api/inventario. PC Stock consulta a RepuAuto igual, en el otro sentido.</text>
+</svg>
